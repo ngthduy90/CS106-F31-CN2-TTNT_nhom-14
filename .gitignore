@@ -1,0 +1,37 @@
+# Data payloads never enter git: raw listings may still carry seller traces,
+# and the processed sets are reproducible from the scripts.
+data/**
+!data/**/
+!data/**/.gitkeep
+*.jsonl
+*.parquet
+*.csv
+!reports/tables/*.csv
+
+# Model artefacts
+models/*.joblib
+models/*.pkl
+artifacts/
+
+# Geocoding cache
+.cache/
+*.sqlite
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secrets and local config
+.env
+config/local.yaml
+
+# OS
+.DS_Store
+
+# Bản build của báo cáo (sinh lại bằng scripts/build-docx.sh); bản cuối nằm trong submission/
+reports/bao-cao-khoa-hoc.docx
+reports/bao-cao-khoa-hoc.pdf

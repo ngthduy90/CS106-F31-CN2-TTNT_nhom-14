@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1280px" height="720px" viewBox="0 0 1280 720" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>01-pipeline-tong-the</title>
+    <g id="01-pipeline-tong-the" stroke="none" fill="none" fill-rule="evenodd" stroke-width="1">
+        <g id="Group">
+            <rect id="Rectangle" fill="#FAFAF9" x="0" y="0" width="1280" height="720"></rect>
+            <text id="Pipeline-dự-báo-giá-nhà-từ-tin-rao-vặt" fill="#0F172A" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="23" font-weight="bold">
+                <tspan x="434.5" y="40">Pipeline dự báo giá nhà từ tin rao vặt</tspan>
+            </text>
+            <text id="Đồ-án-CS106-—-Đề-tài-5-·-7-khối-công-việc,-2-nguồn-dữ-liệu,-vòng-lặp-cải-thiện-đặc-trưng" fill="#64748B" fill-rule="nonzero" font-family="Helvetica" font-size="13.5" font-weight="normal">
+                <tspan x="373.5" y="64">Đồ án CS106 — Đề tài 5 · 7 khối công việc, 2 nguồn dữ liệu, vòng lặp cải thiện đặc trưng</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#F59E0B" fill="#FFFBEB" x="152" y="80" width="14" height="14"></rect>
+            <text id="Nguồn-dữ-liệu" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="172" y="91">Nguồn dữ liệu</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#94A3B8" fill="#F1F5F9" x="292" y="80" width="14" height="14"></rect>
+            <text id="Bước-cơ-học" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="312" y="91">Bước cơ học</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#7C3AED" fill="#F5F3FF" x="422" y="80" width="14" height="14"></rect>
+            <text id="Kho-dữ-liệu" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="442" y="91">Kho dữ liệu</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#0891B2" fill="#ECFEFF" x="552" y="80" width="14" height="14"></rect>
+            <text id="Xử-lý-dữ-liệu" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="572" y="91">Xử lý dữ liệu</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#0D9488" fill="#F0FDFA" x="682" y="80" width="14" height="14"></rect>
+            <text id="Đặc-trưng" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="702" y="91">Đặc trưng</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#059669" fill="#ECFDF5" x="812" y="80" width="14" height="14"></rect>
+            <text id="Mô-hình" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="832" y="91">Mô hình</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#1E293B" fill="#0F172A" x="932" y="80" width="14" height="14"></rect>
+            <text id="Bàn-giao" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="952" y="91">Bàn giao</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#F59E0B" stroke-width="1.5" fill="#FFFBEB" x="40" y="110" width="280" height="150" rx="12"></rect>
+            <path d="M40,140 L40,122 C40,114 44,110 52,110 L308,110 C316,110 320,114 320,122 L320,140 L40,140 Z" id="Path" fill="#D97706"></path>
+            <text id="1-·-NGUỒN-TIN-RAO-VẶT" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="14" font-weight="bold">
+                <tspan x="54" y="130">1 · NGUỒN TIN RAO VẶT</tspan>
+            </text>
+            <text id="Các-trang-rao-vặt-BĐS-TP.HCM" fill="#92400E" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12.5" font-weight="bold">
+                <tspan x="56" y="164">Các trang rao vặt BĐS TP.HCM</tspan>
+            </text>
+            <text id="Batdongsan-·-Chợ-Tốt-·-Mogi-…" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="184">Batdongsan · Chợ Tốt · Mogi …</tspan>
+            </text>
+            <text id="Mục-tiêu-≥-5.000-tin-có-mô-tả" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="204">Mục tiêu ≥ 5.000 tin có mô tả</tspan>
+            </text>
+            <text id="Kiểm-tra-robots.txt-/-điều-khoản" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="224">Kiểm tra robots.txt / điều khoản</tspan>
+            </text>
+            <text id="Chi-tiết-nguồn:-runbook-01" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="244">Chi tiết nguồn: runbook 01</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#94A3B8" stroke-width="1.5" fill="#F1F5F9" x="390" y="110" width="280" height="150" rx="12"></rect>
+            <path d="M390,140 L390,122 C390,114 394,110 402,110 L658,110 C666,110 670,114 670,122 L670,140 L390,140 Z" id="Path" fill="#475569"></path>
+            <text id="2-·-SCRIPT-CRAWL" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="14" font-weight="bold">
+                <tspan x="404" y="130">2 · SCRIPT CRAWL</tspan>
+            </text>
+            <text id="Agent-máy-cá-nhân-viết-code" fill="#0F172A" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12.5" font-weight="bold">
+                <tspan x="406" y="164">Agent máy cá nhân viết code</tspan>
+            </text>
+            <text id="Thu-danh-sách-+-trang-chi-tiết-tin" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="406" y="184">Thu danh sách + trang chi tiết tin</tspan>
+            </text>
+            <text id="Rate-limit,-retry,-chạy-lại-từ-chỗ-dừng" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="406" y="204">Rate-limit, retry, chạy lại từ chỗ dừng</tspan>
+            </text>
+            <text id="Không-thu-SĐT-người-đăng" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="406" y="224">Không thu SĐT người đăng</tspan>
+            </text>
+            <text id="Spec-chi-tiết:-runbook-01" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="406" y="244">Spec chi tiết: runbook 01</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#7C3AED" stroke-width="1.5" fill="#F5F3FF" x="740" y="110" width="280" height="150" rx="12"></rect>
+            <path d="M740,140 L740,122 C740,114 744,110 752,110 L1008,110 C1016,110 1020,114 1020,122 L1020,140 L740,140 Z" id="Path" fill="#7C3AED"></path>
+            <text id="3-·-KHO-DỮ-LIỆU-THÔ" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="14" font-weight="bold">
+                <tspan x="754" y="130">3 · KHO DỮ LIỆU THÔ</tspan>
+            </text>
+            <text id="Bất-biến,-ghi-kèm-ngày-crawl" fill="#4C1D95" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12.5" font-weight="bold">
+                <tspan x="756" y="164">Bất biến, ghi kèm ngày crawl</tspan>
+            </text>
+            <text id="Trường:-giá,-diện-tích,-địa-chỉ," fill="#6D28D9" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="756" y="184">Trường: giá, diện tích, địa chỉ,</tspan>
+            </text>
+            <text id="phòng-ngủ,-tầng,-mặt-tiền,-mô-tả,-URL" fill="#6D28D9" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="756" y="204">phòng ngủ, tầng, mặt tiền, mô tả, URL</tspan>
+            </text>
+            <text id="Đích-thô:-~7.000+-tin" fill="#6D28D9" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="756" y="224">Đích thô: ~7.000+ tin</tspan>
+            </text>
+            <text id="(dự-phòng-hao-hụt-khi-làm-sạch)" fill="#6D28D9" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="756" y="244">(dự phòng hao hụt khi làm sạch)</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#F59E0B" stroke-width="1.5" fill="#FFFBEB" x="40" y="310" width="280" height="112" rx="12"></rect>
+            <path d="M40,340 L40,322 C40,314 44,310 52,310 L308,310 C316,310 320,314 320,322 L320,340 L40,340 Z" id="Path" fill="#D97706"></path>
+            <text id="0-·-BỘ-DỮ-LIỆU-THÀNH-VIÊN" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="14" font-weight="bold">
+                <tspan x="54" y="330">0 · BỘ DỮ LIỆU THÀNH VIÊN</tspan>
+            </text>
+            <text id="5.171-tin-sạch,-02/2022-–-12/2025" fill="#92400E" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12.5" font-weight="bold">
+                <tspan x="56" y="364">5.171 tin sạch, 02/2022 – 12/2025</tspan>
+            </text>
+            <text id="Tân-Bình-·-Tân-Phú-·-Quận-12" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="384">Tân Bình · Tân Phú · Quận 12</tspan>
+            </text>
+            <text id="Cần-xác-minh:-cột-mô-tả,-nguồn-gốc" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="404">Cần xác minh: cột mô tả, nguồn gốc</tspan>
+            </text>
+            <line x1="322" y1="185" x2="382" y2="185" id="Path" stroke="#64748B" stroke-width="2.5" fill="#000000"></line>
+            <polygon id="Path" fill="#64748B" points="390 185 378 179 378 191"></polygon>
+            <line x1="672" y1="185" x2="732" y2="185" id="Path" stroke="#64748B" stroke-width="2.5" fill="#000000"></line>
+            <polygon id="Path" fill="#64748B" points="740 185 728 179 728 191"></polygon>
+            <polyline id="Path" stroke="#94A3B8" stroke-width="2.5" points="880 262 880 445 230 445"></polyline>
+            <line x1="230" y1="445" x2="230" y2="462" id="Path" stroke="#94A3B8" stroke-width="2.5" fill="#000000"></line>
+            <polygon id="Path" fill="#94A3B8" points="230 470 224 458 236 458"></polygon>
+            <line x1="150" y1="424" x2="150" y2="462" id="Path" stroke="#D97706" stroke-width="2.5" fill="#000000"></line>
+            <polygon id="Path" fill="#D97706" points="150 470 144 458 156 458"></polygon>
+            <rect id="Rectangle" stroke="#0891B2" stroke-width="1.5" fill="#ECFEFF" x="40" y="470" width="270" height="170" rx="12"></rect>
+            <path d="M40,500 L40,482 C40,474 44,470 52,470 L298,470 C306,470 310,474 310,482 L310,500 L40,500 Z" id="Path" fill="#0891B2"></path>
+            <text id="4-·-TIỀN-XỬ-LÝ-&amp;-LÀM-SẠCH" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="14" font-weight="bold">
+                <tspan x="54" y="490">4 · TIỀN XỬ LÝ &amp; LÀM SẠCH</tspan>
+            </text>
+            <text id="Khử-trùng-lặp-tin-đăng-lại" fill="#0E7490" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="524">Khử trùng lặp tin đăng lại</tspan>
+            </text>
+            <text id="Chuẩn-hoá-giá-(tỷ-/-triệu-/-giá-m²)" fill="#0E7490" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="544">Chuẩn hoá giá (tỷ / triệu / giá m²)</tspan>
+            </text>
+            <text id="Outlier-+-giá-trị-thiếu" fill="#0E7490" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="564">Outlier + giá trị thiếu</tspan>
+            </text>
+            <text id="Địa-chỉ:-hành-chính-cũ-↔-mới-(07/2025)" fill="#0E7490" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="584">Địa chỉ: hành chính cũ </tspan>
+                <tspan x="178.742188" y="584" font-family="HiraginoSans-W3, Hiragino Sans" font-weight="300">↔</tspan>
+                <tspan x="189.734187" y="584"> mới (07/2025)</tspan>
+            </text>
+            <text id="Gộp-2-nguồn-+-cờ-nguồn" fill="#0E7490" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="604">Gộp 2 nguồn + cờ nguồn</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#0D9488" stroke-width="1.5" fill="#F0FDFA" x="350" y="470" width="270" height="170" rx="12"></rect>
+            <path d="M350,500 L350,482 C350,474 354,470 362,470 L608,470 C616,470 620,474 620,482 L620,500 L350,500 Z" id="Path" fill="#0D9488"></path>
+            <text id="5-·-TRÍCH-ĐẶC-TRƯNG" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="14" font-weight="bold">
+                <tspan x="364" y="490">5 · TRÍCH ĐẶC TRƯNG</tspan>
+            </text>
+            <text id="Định-lượng-từ-văn-bản:-diện-tích," fill="#0F766E" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="366" y="524">Định lượng từ văn bản: diện tích,</tspan>
+            </text>
+            <text id="phòng-ngủ,-số-tầng,-mặt-tiền" fill="#0F766E" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="366" y="544">phòng ngủ, số tầng, mặt tiền</tspan>
+            </text>
+            <text id="Mô-tả:-TF-IDF-/-word-embedding" fill="#0F766E" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="366" y="564">Mô tả: TF-IDF / word embedding</tspan>
+            </text>
+            <text id="Vị-trí:-phường/quận-hoặc-toạ-độ" fill="#0F766E" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="366" y="584">Vị trí: phường/quận hoặc toạ độ</tspan>
+            </text>
+            <text id="Chống-leakage:-loại-giá/m²-khỏi-X" fill="#0F766E" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="366" y="604">Chống leakage: loại giá/m² khỏi X</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#059669" stroke-width="1.5" fill="#ECFDF5" x="660" y="470" width="270" height="170" rx="12"></rect>
+            <path d="M660,500 L660,482 C660,474 664,470 672,470 L918,470 C926,470 930,474 930,482 L930,500 L660,500 Z" id="Path" fill="#059669"></path>
+            <text id="6-·-MÔ-HÌNH-HOÁ-(≥-3)" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="14" font-weight="bold">
+                <tspan x="674" y="490">6 · MÔ HÌNH HOÁ (≥ 3)</tspan>
+            </text>
+            <text id="Baseline:-Linear-/-Ridge" fill="#047857" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="676" y="524">Baseline: Linear / Ridge</tspan>
+            </text>
+            <text id="Random-Forest" fill="#047857" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="676" y="544">Random Forest</tspan>
+            </text>
+            <text id="XGBoost-/-LightGBM" fill="#047857" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="676" y="564">XGBoost / LightGBM</tspan>
+            </text>
+            <text id="K-fold-CV-+-tinh-chỉnh-tham-số" fill="#047857" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="676" y="584">K-fold CV + tinh chỉnh tham số</tspan>
+            </text>
+            <text id="Biến-mục-tiêu:-log(giá)" fill="#047857" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="676" y="604">Biến mục tiêu: log(giá)</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#1E293B" stroke-width="1.5" fill="#0F172A" x="970" y="470" width="270" height="170" rx="12"></rect>
+            <path d="M970,500 L970,482 C970,474 974,470 982,470 L1228,470 C1236,470 1240,474 1240,482 L1240,500 L970,500 Z" id="Path" fill="#1E293B"></path>
+            <text id="7-·-ĐÁNH-GIÁ-&amp;-BÀN-GIAO" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="14" font-weight="bold">
+                <tspan x="984" y="490">7 · ĐÁNH GIÁ &amp; BÀN GIAO</tspan>
+            </text>
+            <text id="RMSE-·-MAE-·-R²-(bảng-so-sánh)" fill="#E2E8F0" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="986" y="524">RMSE · MAE · R² (bảng so sánh)</tspan>
+            </text>
+            <text id="Phân-tích-lỗi-theo-khu-vực-/-giá" fill="#CBD5E1" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="986" y="544">Phân tích lỗi theo khu vực / giá</tspan>
+            </text>
+            <text id="Ablation:-±-đặc-trưng-văn-bản" fill="#CBD5E1" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="986" y="564">Ablation: ± đặc trưng văn bản</tspan>
+            </text>
+            <text id="Báo-cáo-+-slide-+-GitHub" fill="#CBD5E1" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="986" y="584">Báo cáo + slide + GitHub</tspan>
+            </text>
+            <text id="Hạn:-buổi-10-(đối-chiếu-lịch-lớp)" fill="#94A3B8" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="986" y="604">Hạn: buổi 10 (đối chiếu lịch lớp)</tspan>
+            </text>
+            <line x1="312" y1="555" x2="342" y2="555" id="Path" stroke="#64748B" stroke-width="2.5" fill="#000000"></line>
+            <polygon id="Path" fill="#64748B" points="350 555 338 549 338 561"></polygon>
+            <line x1="622" y1="555" x2="652" y2="555" id="Path" stroke="#64748B" stroke-width="2.5" fill="#000000"></line>
+            <polygon id="Path" fill="#64748B" points="660 555 648 549 648 561"></polygon>
+            <line x1="932" y1="555" x2="962" y2="555" id="Path" stroke="#64748B" stroke-width="2.5" fill="#000000"></line>
+            <polygon id="Path" fill="#64748B" points="970 555 958 549 958 561"></polygon>
+            <path id="Path" d="M500,652 L510.463477,663.641119 L515.590981,650.61389 L500,652 Z M1104.53425,643.115082 C1102.5985,644.133898 1100.51677,645.136719 1098.29116,646.123101 L1099.10153,647.95157 C1101.36706,646.947493 1103.4891,645.925257 1105.46575,644.884918 L1104.53425,643.115082 Z M1093.71789,648.046197 C1091.65197,648.87177 1089.48238,649.684802 1087.2106,650.485066 L1087.87511,652.371448 C1090.17244,651.562183 1092.36788,650.739462 1094.46005,649.903397 L1093.71789,648.046197 Z M1082.47863,652.085604 C1080.34016,652.780669 1078.12244,653.465383 1075.82661,654.139598 L1076.39015,656.058562 C1078.70399,655.379058 1080.93992,654.688722 1083.09685,653.987656 L1082.47863,652.085604 Z M1071.03482,655.500469 C1068.84631,656.1018 1066.59399,656.694214 1064.2788,657.277601 L1064.76749,659.216978 C1067.09627,658.630167 1069.36232,658.034143 1071.56471,657.428994 L1071.03482,655.500469 Z M1059.44532,658.460766 C1057.2258,658.988682 1054.95345,659.508731 1052.62909,660.020826 L1053.0594,661.973985 C1055.39449,661.459528 1057.67765,660.937002 1059.90811,660.406486 L1059.44532,658.460766 Z M1047.74505,661.069183 C1045.50419,661.537873 1043.21864,661.999483 1040.88914,662.453943 L1041.27209,664.416936 C1043.61036,663.960769 1045.90473,663.497375 1048.1545,663.026821 L1047.74505,661.069183 Z M1035.98598,663.387884 C1033.73169,663.807153 1031.43904,664.21996 1029.10869,664.626244 L1029.4522,666.596524 C1031.78989,666.18896 1034.08993,665.774821 1036.35168,665.354165 L1035.98598,663.387884 Z M1024.19268,665.464346 C1021.92616,665.842198 1019.62623,666.214061 1017.2935,666.57988 L1017.60335,668.555732 C1019.94238,668.188925 1022.24866,667.816037 1024.52156,667.437119 L1024.19268,665.464346 Z M1012.34658,667.339226 C1010.07351,667.680739 1007.77115,668.016659 1005.44006,668.346937 L1005.72063,670.32716 C1008.05721,669.996103 1010.3651,669.659377 1012.64373,669.317028 L1012.34658,667.339226 Z M1000.5034,669.032126 C998.217369,669.342932 995.905276,669.648427 993.567677,669.948571 L993.822383,671.932286 C996.164865,671.631515 998.481868,671.325371 1000.77284,671.013894 L1000.5034,669.032126 Z M988.591591,670.57467 C986.3025,670.856881 983.990291,671.134054 981.655502,671.406153 L981.887017,673.392708 C984.226184,673.120099 986.542793,672.842398 988.836308,672.559642 L988.591591,670.57467 Z M976.707601,671.971412 C974.414734,672.228158 972.101254,672.480086 969.767679,672.727164 L969.978261,674.716047 C972.31581,674.468549 974.633283,674.216185 976.930161,673.958991 L976.707601,671.971412 Z M964.788245,673.243928 C962.489787,673.477696 960.172875,673.706822 957.838019,673.931277 L958.029401,675.9221 C960.367904,675.697294 962.688477,675.467805 964.990614,675.233664 L964.788245,673.243928 Z M952.835514,674.402504 C950.528989,674.615363 948.205897,674.823718 945.866737,675.027542 L946.04035,677.019992 C948.382889,676.815874 950.709374,676.607215 953.019305,676.394041 L952.835514,674.402504 Z M940.886016,675.452665 C938.57775,675.645613 936.254696,675.834195 933.917346,676.018383 L934.074463,678.012202 C936.414963,677.827765 938.741178,677.638928 941.052616,677.445714 L940.886016,675.452665 Z M928.9317,676.40297 C926.618417,676.5776 924.291924,676.747967 921.952708,676.914046 L922.094348,678.909024 C924.436525,678.742735 926.765988,678.572151 929.082252,678.397295 L928.9317,676.40297 Z M916.959395,677.260743 C914.646838,677.417717 912.322586,677.570534 909.98712,677.719173 L910.114152,679.715135 C912.452415,679.566317 914.779472,679.413316 917.094841,679.256151 L916.959395,677.260743 Z M904.994653,678.029519 C902.679323,678.170041 900.353665,678.306484 898.01816,678.43883 L898.131313,680.435627 C900.469481,680.303129 902.797807,680.16653 905.115813,680.025846 L904.994653,678.029519 Z M893.017936,678.715112 C890.696586,678.840115 888.366169,678.961094 886.027167,679.078033 L886.127032,681.075538 C888.468588,680.958472 890.801564,680.83736 893.125479,680.712218 L893.017936,678.715112 Z M881.050393,679.320139 C878.728641,679.429974 876.39906,679.535846 874.062128,679.637742 L874.14925,681.635843 C876.488639,681.53384 878.820682,681.427856 881.144901,681.317905 L881.050393,679.320139 Z M869.067817,679.848995 C866.742846,679.944322 864.411211,680.035728 862.073391,680.123202 L862.148172,682.121804 C864.488372,682.034241 866.822392,681.942741 869.149751,681.847316 L869.067817,679.848995 Z M857.088271,680.303444 C854.765927,680.384494 852.438071,680.461675 850.10518,680.534978 L850.167992,682.533992 C852.503195,682.460616 854.833366,682.383358 857.158028,682.302227 L857.088271,680.303444 Z M845.084368,680.686528 C842.754512,680.75398 840.420218,680.817573 838.08197,680.8773 L838.13304,682.876648 C840.473555,682.816863 842.810118,682.753208 845.142246,682.685691 L845.084368,680.686528 Z M833.117148,680.998169 C830.786248,681.05213 828.451988,681.102255 826.114853,681.148538 L826.154452,683.148146 C828.493814,683.101819 830.830304,683.051646 833.163436,682.997633 L833.117148,680.998169 Z M821.112715,681.241654 C818.780057,681.282311 816.445103,681.319145 814.108341,681.352151 L814.136589,683.351952 C816.475551,683.318914 818.812707,683.282045 821.147568,683.24135 L821.112715,681.241654 Z M809.131251,681.416634 C806.796527,681.444155 804.460563,681.467859 802.123851,681.487741 L802.140868,683.487669 C804.479765,683.467768 806.817915,683.444042 809.154825,683.416495 L809.131251,681.416634 Z M797.142803,681.52433 C794.813798,681.53873 792.484611,681.549334 790.155735,681.556142 L790.161582,683.556133 C792.492631,683.549319 794.82399,683.538705 797.155168,683.524291 L797.142803,681.52433 Z M785.117311,681.564949 C782.781478,681.566286 780.44653,681.563801 778.112969,681.557497 L778.107566,683.55749 C780.44331,683.5638 782.78044,683.566287 785.118456,683.564949 L785.117311,681.564949 Z M773.114959,681.538145 C770.781606,681.526376 768.450217,681.510783 766.121293,681.491371 L766.104623,683.491301 C768.435742,683.510732 770.769325,683.526339 773.104871,683.538119 L773.114959,681.538145 Z M761.150861,681.444101 C758.816565,681.419155 756.485331,681.390364 754.157669,681.357735 L754.129636,683.357539 C756.45952,683.390199 758.792973,683.419017 761.129488,683.443987 L761.150861,681.444101 Z M749.151155,681.281545 C746.814845,681.243179 744.482737,681.200936 742.155346,681.154826 L742.11573,683.154434 C744.445382,683.200589 746.779749,683.242872 749.118317,683.281275 L749.151155,681.281545 Z M737.176883,681.050133 C734.838793,680.998109 732.506089,680.942169 730.179289,680.882325 L730.127867,682.881664 C732.45698,682.941568 734.791995,682.997563 737.132393,683.049638 L737.176883,681.050133 Z M725.156842,680.746824 C722.819773,680.680817 720.489313,680.610855 718.16599,680.536952 L718.102403,682.53594 C720.428104,682.60992 722.760938,682.679953 725.100378,682.746027 L725.156842,680.746824 Z M713.153792,680.371019 C710.816658,680.290602 708.487428,680.206178 706.166637,680.117762 L706.090497,682.116312 C708.413748,682.204821 710.745433,682.289335 713.085016,682.369836 L713.153792,680.371019 Z M701.186735,679.921385 C698.846131,679.825941 696.514826,679.726413 694.193367,679.622823 L694.10421,681.620835 C696.428231,681.72454 698.762092,681.824176 701.105247,681.919725 L701.186735,679.921385 Z M689.190593,679.392569 C686.852285,679.281647 684.52473,679.166576 682.208481,679.047378 L682.105693,681.044734 C684.424622,681.164071 686.754851,681.279274 689.095826,681.390323 L689.190593,679.392569 Z M677.231354,678.783943 C674.890321,678.656574 672.561655,678.524957 670.245924,678.389118 L670.128807,680.385686 C672.447367,680.521691 674.778854,680.653468 677.1227,680.78099 L677.231354,678.783943 Z M665.250557,678.0883 C662.908328,677.943567 660.580221,677.794476 658.266815,677.641057 L658.13447,679.636673 C660.450884,679.790292 662.781989,679.939575 665.127207,680.084493 L665.250557,678.0883 Z M653.27779,677.301895 C650.937648,677.138875 648.613521,676.971382 646.306002,676.799447 L646.157393,678.793918 C648.468131,678.966093 650.795465,679.133817 653.138803,679.29706 L653.27779,677.301895 Z M641.305389,676.417858 C638.964116,676.234944 636.641021,676.047403 634.336715,675.855274 L634.170535,677.848358 C636.478323,678.040778 638.804886,678.228598 641.149612,678.411782 L641.305389,676.417858 Z M629.370318,675.431534 C627.028509,675.227118 624.707312,675.0179 622.407362,674.80392 L622.222088,676.79532 C624.525842,677.009654 626.850824,677.219213 629.196401,677.423957 L629.370318,675.431534 Z M617.437559,674.33091 C615.095335,674.102899 612.776522,673.869873 610.481781,673.631879 L610.275462,675.621209 C612.574405,675.859638 614.897397,676.093085 617.243779,676.3215 L617.437559,674.33091 Z M605.520758,673.10554 C603.178345,672.851351 600.86261,672.591891 598.574247,672.327214 L598.344455,674.313969 C600.637521,674.57919 602.957931,674.839174 605.304992,675.093867 L605.520758,673.10554 Z M593.608231,671.739431 C591.26492,671.45563 588.952207,671.166242 586.670826,670.871328 L586.414419,672.854824 C588.70115,673.150429 591.019177,673.440483 593.367767,673.724922 L593.608231,671.739431 Z M581.705249,670.213982 C579.361556,669.896274 577.053235,669.572585 574.781074,669.242987 L574.493961,671.222271 C576.77232,671.552768 579.086791,671.87732 581.43659,672.195855 L581.705249,670.213982 Z M569.869342,668.512692 C567.526145,668.155592 565.224262,667.792015 562.964552,667.422048 L562.641408,669.39577 C564.908458,669.766939 567.217614,670.131664 569.568024,670.489863 L569.869342,668.512692 Z M558.0242,666.591395 C555.683213,666.187151 553.391219,665.775791 551.149174,665.357418 L550.7823,667.323481 C553.033286,667.743522 555.334125,668.15647 557.683875,668.562227 L558.0242,666.591395 Z M546.266097,664.419488 C543.926906,663.956923 541.647132,663.486368 539.427866,663.007954 L539.006402,664.963042 C541.236963,665.443891 543.527892,665.916748 545.878118,666.381496 L546.266097,664.419488 Z M534.549553,661.921186 C532.214067,661.383333 529.95296,660.836252 527.767537,660.280117 L527.274307,662.218344 C529.474736,662.778298 531.750624,663.328955 534.100709,663.870171 L534.549553,661.921186 Z M522.950569,659.005894 C520.623283,658.365531 518.393537,657.714077 516.262989,657.051789 L515.669304,658.961642 C517.821241,659.630579 520.071988,660.288168 522.419979,660.934229 L522.950569,659.005894 Z" fill="#059669" fill-rule="nonzero"></path>
+            <text id="vòng-lặp:-phân-tích-lỗi-→-bổ-sung-/-sửa-đặc-trưng,-thử-lại-mô-hình" fill="#047857" fill-rule="nonzero" font-family="Helvetica-Oblique, Helvetica" font-size="12" font-style="italic" font-weight="normal">
+                <tspan x="624" y="702">vòng lặp: phân tích lỗi </tspan>
+                <tspan x="744.082031" y="702" font-family="LucidaGrande, Lucida Grande">→</tspan>
+                <tspan x="756.082031" y="702"> bổ sung / sửa đặc trưng, thử lại mô hình</tspan>
+            </text>
+            <text id="CS106-·-Đề-tài-5-—-sơ-đồ-dùng-chung-cho-báo-cáo,-slide-và-tài-liệu-kỹ-thuật" fill="#78716C" fill-rule="nonzero" font-family="Helvetica-Oblique, Helvetica" font-size="11.5" font-style="italic" font-weight="normal">
+                <tspan x="136.5" y="702">CS106 · Đề tài 5 — sơ đồ dùng chung cho báo cáo, slide và tài liệu kỹ thuật</tspan>
+            </text>
+        </g>
+    </g>
+</svg>
