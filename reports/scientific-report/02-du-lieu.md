@@ -94,12 +94,19 @@ sẵn.
 
 ## Chuẩn hoá địa chỉ qua đợt sáp nhập 2025
 
-Từ 01/07/2025, TP.HCM bỏ cấp quận và còn 168 phường/xã. Dữ liệu của đồ án nằm ở cả hai
-hệ: tin crawl 2026 ghi theo phường mới, bộ lịch sử và mogi ghi theo phường cũ. Không quy
-về một hệ thì cùng một khu phố bị tách thành nhiều nhóm.
+Nghị quyết 202/2025/QH15 (Quốc hội, 12/06/2025) sắp xếp lại đơn vị hành chính cấp tỉnh,
+cả nước còn 34 đơn vị gồm 28 tỉnh và 6 thành phố. Nghị quyết 1685/NQ-UBTVQH15 (Uỷ ban
+Thường vụ Quốc hội, 16/06/2025) sắp xếp đơn vị hành chính cấp xã của TP.HCM: sau sắp
+xếp thành phố có **168 đơn vị**, gồm 113 phường, 54 xã và 1 đặc khu. Mô hình chính quyền
+hai cấp bắt đầu vận hành từ 01/07/2025, và đó là mốc đồ án dùng để phân định dữ liệu
+trước và sau sáp nhập.
+
+Dữ liệu của đồ án nằm ở cả hai hệ: tin crawl 2026 ghi theo phường mới, bộ lịch sử và
+mogi ghi theo phường cũ. Không quy về một hệ thì cùng một khu phố bị tách thành nhiều
+nhóm.
 
 Nhóm chọn **hệ quy chiếu cũ** (quận + phường trước sáp nhập): phần lớn dữ liệu đã ở hệ
-này, quận cũ là mức phân giải mà thị trường bất động sản quen dùng, và 168 phường mới
+này, quận cũ là mức phân giải mà thị trường bất động sản quen dùng, và 168 đơn vị cấp xã mới
 quá mịn cho vài chục nghìn tin.
 
 Bảng ánh xạ phường mới sang phường cũ được dựng **từ chính dữ liệu crawl** thay vì tải
@@ -165,7 +172,11 @@ Bốn ranh giới nhóm tự đặt và tuân thủ:
 2. **Không vượt anti-bot chủ động.** Các trang dựng Cloudflare bị loại khỏi danh sách
    nguồn ngay từ đầu chứ không tìm cách đi vòng. Đồ án học thuật không cần và không nên.
 3. **Không thu thập, không lưu thông tin người bán.** Các trường tài khoản bị loại thẳng
-   tại nguồn; số điện thoại trong mô tả bị xoá lúc ghi file.
+   tại nguồn; số điện thoại trong mô tả bị xoá lúc ghi file. Căn cứ pháp lý hiện hành là
+   Luật Bảo vệ dữ liệu cá nhân 2025 (hiệu lực 01/01/2026) cùng Nghị định 356/2025/NĐ-CP
+   hướng dẫn thi hành. Tài liệu khảo sát ban đầu của nhóm dẫn Nghị định 13/2023/NĐ-CP;
+   văn bản đó đã hết hiệu lực từ 01/01/2026, trước thời điểm crawl, nên phần tham khảo
+   đã được sửa lại cho đúng.
 4. **Không tái phân phối dữ liệu thô.** Thư mục `data/` bị chặn khỏi git. Repo chỉ chứa
    mã nguồn, bảng kết quả và tài liệu.
 
