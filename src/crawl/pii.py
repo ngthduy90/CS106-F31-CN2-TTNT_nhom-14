@@ -90,9 +90,13 @@ _SEP = r"[\s.,\-–—_*+()\[\]{}/\\|·•~#:;'\"]"
 _DIGIT_RUN = re.compile(rf"\d(?:{_SEP}{{0,3}}\d){{7,14}}")
 
 # Từ khoá báo hiệu "đoạn sau là số liên hệ". Có nó thì hạ ngưỡng nghi ngờ.
+#
+# CỐ Ý không có "dt" không dấu: trong tin bất động sản "DT" gần như luôn là DIỆN TÍCH.
+# Để nó trong danh sách thì mọi dãy số dài đứng sau "dt 5x17-id22735346" đều bị coi là
+# số điện thoại, và mã tin trong URL bị xoá oan. Dạng có dấu "đt" thì vẫn giữ.
 _CONTACT_HINT = re.compile(
     r"(?:liên\s*hệ|lien\s*he|số\s*điện\s*thoại|so\s*dien\s*thoai|chính\s*chủ|"
-    r"\bl\.?h\b|\bsđt\b|\bsdt\b|\bđt\b|\bdt\b|\bzalo\b|\bviber\b|\bwhatsapp\b|"
+    r"\bl\.?h\b|\bsđt\b|\bsdt\b|\bđt\b|\bzalo\b|\bviber\b|\bwhatsapp\b|"
     r"\bcall\b|\bhotline\b|\bphone\b|\btel\b|\balo\b|\bib\b|\bms\b|\bmr\b|\bmrs\b|"
     r"\bgọi\b|\bgoi\b|\bmobile\b|\bmob\b)"
     rf"(?:{_SEP}|\w){{0,12}}$",
