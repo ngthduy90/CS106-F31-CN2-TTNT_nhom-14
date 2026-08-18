@@ -89,3 +89,22 @@ def test_nhan_ra_tin_cho_thue():
     assert looks_like_rental("Giá 15 triệu/tháng", None)
     assert looks_like_rental("Bán nhà", 20_000_000)  # dưới cận dưới giá bán
     assert not looks_like_rental("Bán nhà Tân Bình 60m2", 5_200_000_000)
+
+
+def test_quy_ten_loai_bat_dong_san_ve_mot_bo_tu_vung():
+    """Ba nguồn gọi cùng một loại bằng ba bộ từ vựng; sau chuẩn hoá phải còn một."""
+    from src.preprocess.load import canonical_property_type
+
+    nha_pho = ["Nhà", "House", "Nhà mặt phố", "Nhà ngõ/hẻm", "Nhà phố liền kề"]
+    assert {canonical_property_type(v) for v in nha_pho} == {"Nhà phố"}
+
+    chung_cu = ["Apartment", "Căn hộ chung cư", "Căn hộ/Chung cư"]
+    assert {canonical_property_type(v) for v in chung_cu} == {"Căn hộ chung cư"}
+
+    assert canonical_property_type("Biệt thự/Nhà liền kề") == "Biệt thự"
+    assert canonical_property_type("Land") == canonical_property_type("Đất") == "Đất"
+    assert canonical_property_type("Shophouse") == "Mặt bằng kinh doanh"
+
+    # Giá trị lạ không được âm thầm thành một loại có thật.
+    assert canonical_property_type("Chuồng bồ câu") == "không rõ"
+    assert canonical_property_type(None) == "không rõ"

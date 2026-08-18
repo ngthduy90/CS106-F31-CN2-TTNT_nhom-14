@@ -72,6 +72,50 @@ CHOTOT_DIRECTION = {
 }
 CHOTOT_HOUSE_TYPE = {1: "Nhà mặt phố", 2: "Nhà ngõ/hẻm", 3: "Nhà phố liền kề", 4: "Biệt thự"}
 
+# Ba nguồn gọi cùng một loại bất động sản bằng ba bộ từ vựng khác nhau, và mogi thì trả
+# thẳng tên kiểu schema.org bằng tiếng Anh. Để nguyên thì one-hot sinh ra 16 cột cho
+# khoảng 5 khái niệm, mô hình không chia sẻ được thông tin giữa các nguồn, và giao diện
+# demo hiện "Apartment" giữa một màn hình tiếng Việt.
+#
+# Bảng dưới quy tất cả về 5 loại. Việc gộp "Nhà mặt phố" với "Nhà ngõ/hẻm" không mất
+# thông tin: vị trí mặt tiền hay trong hẻm đã có cột `position` riêng.
+PROPERTY_TYPE_CANON = {
+    # nhà riêng lẻ
+    "nha": "Nhà phố",
+    "nha mat pho": "Nhà phố",
+    "nha ngo/hem": "Nhà phố",
+    "nha pho lien ke": "Nhà phố",
+    "nha rieng": "Nhà phố",
+    "house": "Nhà phố",
+    "singlefamilyresidence": "Nhà phố",
+    # chung cư
+    "can ho/chung cu": "Căn hộ chung cư",
+    "can ho chung cu": "Căn hộ chung cư",
+    "can ho": "Căn hộ chung cư",
+    "apartment": "Căn hộ chung cư",
+    # biệt thự
+    "biet thu": "Biệt thự",
+    "biet thu/nha lien ke": "Biệt thự",
+    # đất
+    "dat": "Đất",
+    "land": "Đất",
+    # mặt bằng kinh doanh
+    "shophouse": "Mặt bằng kinh doanh",
+    "shop": "Mặt bằng kinh doanh",
+    "van phong, mat bang kinh doanh": "Mặt bằng kinh doanh",
+    "office": "Mặt bằng kinh doanh",
+    "store": "Mặt bằng kinh doanh",
+}
+
+
+def canonical_property_type(value: str | None) -> str:
+    """Quy tên loại bất động sản của ba nguồn về một bộ từ vựng tiếng Việt duy nhất."""
+    if not value:
+        return UNKNOWN
+    from src.preprocess.address import deaccent
+
+    return PROPERTY_TYPE_CANON.get(deaccent(str(value)), UNKNOWN)
+
 
 def _pick(structured, from_text, low=None, high=None):
     """Trường có cấu trúc trước, văn bản sau. Trả về (giá trị, có phải từ văn bản không)."""
@@ -134,8 +178,9 @@ def _load_chotot(resolver: WardResolver) -> pd.DataFrame:
                     record.get("property_legal_document"), found.legal_status
                 ),
                 "direction": CHOTOT_DIRECTION.get(record.get("direction"), found.direction),
-                "property_type": CHOTOT_HOUSE_TYPE.get(
-                    record.get("house_type"), record.get("category_name") or UNKNOWN
+                "property_type": canonical_property_type(
+                    CHOTOT_HOUSE_TYPE.get(record.get("house_type"))
+                    or record.get("category_name")
                 ),
                 "street": record.get("street_name") or UNKNOWN,
                 "ward": ward,
@@ -195,7 +240,7 @@ def _load_mogi(resolver: WardResolver) -> pd.DataFrame:
                 "position": found.position,
                 "legal_status": record.get("legal_status") or found.legal_status,
                 "direction": record.get("direction") or found.direction,
-                "property_type": record.get("property_type_ld") or UNKNOWN,
+                "property_type": canonical_property_type(record.get("property_type_ld")),
                 "street": address.street,
                 "ward": ward,
                 "district": district,
@@ -244,7 +289,7 @@ def _load_hf(path=None, limit: int | None = None) -> pd.DataFrame:
             "position": [item.position for item in found],
             "legal_status": [item.legal_status for item in found],
             "direction": frame["house_direction"].fillna(UNKNOWN),
-            "property_type": frame["property_type_name"].fillna(UNKNOWN),
+            "property_type": [canonical_property_type(v) for v in frame["property_type_name"]],
             "street": frame["street_name"].fillna(UNKNOWN),
             "ward": [normalise_ward(w) for w in frame["ward_name"]],
             "district": [normalise_district(d) for d in frame["district_name"]],
