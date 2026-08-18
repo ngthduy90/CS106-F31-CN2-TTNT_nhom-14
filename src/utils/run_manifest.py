@@ -31,7 +31,10 @@ def _git_sha() -> str:
             timeout=5,
         )
         return out.stdout.strip() or "unknown"
-    except Exception:
+    except Exception:  # noqa: BLE001
+        # Bắt rộng có chủ ý: không tìm thấy git, không phải repo, hết thời gian chờ, hay
+        # bất kỳ lý do nào khác đều dẫn tới cùng một kết luận là "không biết commit nào".
+        # Một lần chạy pipeline dài không được chết chỉ vì không đọc được mã commit.
         return "unknown"
 
 
