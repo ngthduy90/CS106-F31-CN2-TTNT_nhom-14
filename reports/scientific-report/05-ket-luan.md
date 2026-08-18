@@ -24,7 +24,8 @@ phép tương ứng một-một, và tỷ lệ đa số được lưu lại cho 
 **Chống rò rỉ nhãn.** Đây là phần nhóm đầu tư nhiều nhất, và cũng là phần trả lại nhiều
 nhất. Danh sách kiểm chạy trước mỗi lần huấn luyện đã bắt được hai lỗi thật mà đọc code
 bằng mắt không thấy: bước tách từ tái tạo cụm tiền sau khi đã lọc, và một dạng đơn giá
-lọt qua bộ lọc. Cả hai đều đủ để làm kết quả đẹp một cách vô nghĩa.
+lọt qua bộ lọc. Cả hai đều đủ để làm kết quả đẹp một cách vô nghĩa. Không có phép kiểm
+tự động thì cả hai đã đi thẳng vào báo cáo.
 
 ## Ba con số đáng nhớ
 
@@ -32,18 +33,18 @@ lọt qua bộ lọc. Cả hai đều đủ để làm kết quả đẹp một 
 
 Ba kết luận rút ra từ bảng kết quả, mỗi kết luận kèm con số:
 
-1. **Nhóm boosting dẫn đầu và cách biệt giữa chúng nằm trong sai số giữa các fold.**
-   Bảng E1 chỉ cho phép nói cả nhóm cùng ở mức tốt nhất, không cho phép chọn ra một mô
-   hình thắng tuyệt đối. Điều đáng nói hơn là khoảng cách so với **baseline môi giới**
-   (trung vị giá mỗi m² theo nhóm nhân diện tích), vì đó mới là phần giá trị mà học máy
-   thực sự tạo ra so với cách định giá thủ công.
-2. **Đặc trưng văn bản đóng góp đo được bằng bảng ablation.** Bốn cấu hình chạy trên
-   cùng bộ fold với khác biệt duy nhất là nhánh văn bản, nên chênh lệch MdAPE giữa chúng
-   đọc thẳng ra được là giá trị của mô tả rao vặt.
-3. **Chuyển giao theo thời gian làm sai số tăng lên.** Mô hình huấn luyện trên tin tới
+1. **Nhóm boosting dẫn đầu.** Cách biệt giữa ba mô hình boosting nhỏ hơn độ lệch chuẩn
+   giữa các fold, nên bảng E1 chỉ cho phép nói cả nhóm cùng ở mức tốt nhất, không cho
+   phép chọn ra một mô hình thắng tuyệt đối. Điều đáng nói hơn là khoảng cách so với
+   baseline môi giới, tức trung vị giá mỗi m² theo nhóm nhân diện tích. Đó mới là phần
+   giá trị mà học máy thực sự tạo ra so với cách định giá thủ công.
+2. **Mô tả rao vặt có đóng góp đo được.** Bốn cấu hình chạy trên cùng bộ fold, khác
+   biệt duy nhất là nhánh văn bản. Chênh lệch MdAPE giữa chúng vì thế đọc thẳng ra được
+   là giá trị của phần mô tả.
+3. **Chuyển giao theo thời gian có giá của nó.** Mô hình huấn luyện trên tin tới
    06/2025 rồi đem dự báo tin tháng 08/2026 kém hơn hẳn mô hình huấn luyện trên chính dữ
-   liệu 2026. Vì cả hai phía đều là giá rao, con số chênh lệch đó là trôi giá theo thời
-   gian thuần tuý.
+   liệu 2026. Cả hai phía đều là giá rao, nên chênh lệch đó không lẫn khoảng cách giữa
+   giá rao và giá giao dịch.
 
 ## Hạn chế, nói thẳng
 
@@ -59,8 +60,8 @@ E1 là một phát hiện chứ không phải một thất bại: nó cho biết
 mức nào.
 
 **Tin rao tự mâu thuẫn.** Cùng một tin có thể ghi một bộ số ở form và một bộ số khác
-trong mô tả. Bảng chất lượng trích xuất đo đúng mức chênh này. Không có bước tiền xử lý
-nào sửa được chuyện người bán khai sai.
+trong mô tả. Bảng chất lượng trích xuất đo đúng mức chênh này. Không bước tiền xử lý nào
+sửa được chuyện người bán khai sai.
 
 **Số tầng chưa đạt chỉ tiêu F1 0,9.** Nhóm dừng sau hai vòng sửa luật theo đúng kịch bản
 đã định trước, thay vì tiếp tục chỉnh luật cho khớp một tập nhãn tự nó đã nhiễu. Đây là
