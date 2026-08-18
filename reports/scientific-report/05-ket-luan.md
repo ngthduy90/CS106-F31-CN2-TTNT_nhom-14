@@ -12,7 +12,7 @@ bài.
 
 **Trích đặc trưng từ văn bản.** Bộ luật regex rút bảy trường định lượng từ mô tả tự do,
 và chất lượng của nó được đo trên bộ nhãn vàng lấy từ chính các trường có cấu trúc mà
-sàn thu riêng — nghĩa là bộ luật bị chấm bởi một nguồn nó không hề nhìn thấy. Diện tích
+sàn thu riêng, nghĩa là bộ luật bị chấm bởi một nguồn nó không hề nhìn thấy. Diện tích
 đạt F1 0,939, đạt chỉ tiêu; số tầng dừng ở 0,802 và phần lớn lỗi còn lại là do tin rao
 tự mâu thuẫn chứ không phải bộ luật đọc sai.
 
@@ -34,8 +34,8 @@ Ba kết luận rút ra từ bảng kết quả, mỗi kết luận kèm con s�
 
 1. **Nhóm boosting dẫn đầu và cách biệt giữa chúng nằm trong sai số giữa các fold.**
    Bảng E1 chỉ cho phép nói cả nhóm cùng ở mức tốt nhất, không cho phép chọn ra một mô
-   hình thắng tuyệt đối. Điều đáng nói hơn là khoảng cách so với **baseline môi giới** —
-   trung vị giá mỗi m² theo nhóm nhân diện tích — vì đó mới là phần giá trị mà học máy
+   hình thắng tuyệt đối. Điều đáng nói hơn là khoảng cách so với **baseline môi giới**
+   (trung vị giá mỗi m² theo nhóm nhân diện tích), vì đó mới là phần giá trị mà học máy
    thực sự tạo ra so với cách định giá thủ công.
 2. **Đặc trưng văn bản đóng góp đo được bằng bảng ablation.** Bốn cấu hình chạy trên
    cùng bộ fold với khác biệt duy nhất là nhánh văn bản, nên chênh lệch MdAPE giữa chúng
@@ -45,7 +45,7 @@ Ba kết luận rút ra từ bảng kết quả, mỗi kết luận kèm con s�
    liệu 2026. Vì cả hai phía đều là giá rao, con số chênh lệch đó là trôi giá theo thời
    gian thuần tuý.
 
-## Hạn chế — nói thẳng
+## Hạn chế, nói thẳng
 
 **Giá rao, không phải giá giao dịch.** Đây là hạn chế lớn nhất và không khắc phục được
 bằng kỹ thuật. Giá giao dịch thực tế thường thấp hơn giá rao, nhưng nhóm không có dữ
@@ -71,7 +71,7 @@ lựa chọn có chủ ý và được ghi lại, không phải một thiếu s�
 
 ## Hướng phát triển
 
-**Bổ sung dữ liệu — đường cong học nói là còn đáng.** Các script crawl đã resume được và
+**Bổ sung dữ liệu: đường cong học nói là còn đáng.** Các script crawl đã resume được và
 khử trùng theo mã tin, nên chạy tiếp chỉ bổ sung phần còn thiếu. Quan trọng hơn, câu hỏi
 "crawl thêm có đáng không" đã được trả lời bằng phép đo chứ không bằng cảm tính: đường
 cong học vẫn còn dốc ở mốc 100% dữ liệu hiện có, nghĩa là sai số còn giảm tiếp nếu thu

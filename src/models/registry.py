@@ -97,33 +97,33 @@ def build_registry(fast: bool = False) -> list[ModelSpec]:
     specs = [
         ModelSpec(
             "Dummy (trung vị)",
-            "0 — mốc",
+            "0 · mốc",
             DummyRegressor(strategy="median"),
             notes="neo R² = 0",
         ),
         ModelSpec(
             "Trung vị giá/m² theo nhóm",
-            "0 — mốc",
+            "0 · mốc",
             GroupMedianRegressor(),
             needs_raw_frame=True,
             notes="baseline môi giới",
         ),
-        ModelSpec("Hồi quy tuyến tính", "1 — tuyến tính", LinearRegression()),
+        ModelSpec("Hồi quy tuyến tính", "1 · tuyến tính", LinearRegression()),
         ModelSpec(
             "Ridge",
-            "1 — tuyến tính",
+            "1 · tuyến tính",
             Ridge(random_state=seed),
             {"model__regressor__alpha": np.logspace(-3, 3, 25)},
         ),
         ModelSpec(
             "Lasso",
-            "1 — tuyến tính",
+            "1 · tuyến tính",
             Lasso(random_state=seed, max_iter=5_000),
             {"model__regressor__alpha": np.logspace(-4, 1, 25)},
         ),
         ModelSpec(
             "Random Forest",
-            "2 — chủ lực",
+            "2 · chủ lực",
             RandomForestRegressor(random_state=seed, n_jobs=n_jobs),
             {
                 "model__regressor__n_estimators": [200, 300, 400, 500],
@@ -134,7 +134,7 @@ def build_registry(fast: bool = False) -> list[ModelSpec]:
         ),
         ModelSpec(
             "K láng giềng",
-            "3 — mở rộng",
+            "3 · mở rộng",
             KNeighborsRegressor(n_jobs=n_jobs),
             {
                 "model__regressor__n_neighbors": [3, 5, 8, 12, 20],
@@ -144,7 +144,7 @@ def build_registry(fast: bool = False) -> list[ModelSpec]:
         ),
         ModelSpec(
             "Cây quyết định",
-            "3 — mở rộng",
+            "3 · mở rộng",
             DecisionTreeRegressor(random_state=seed),
             {"model__regressor__max_depth": [4, 6, 8, 12, None],
              "model__regressor__min_samples_leaf": [1, 5, 20, 50]},
@@ -158,7 +158,7 @@ def build_registry(fast: bool = False) -> list[ModelSpec]:
         specs.append(
             ModelSpec(
                 "LightGBM",
-                "2 — chủ lực",
+                "2 · chủ lực",
                 LGBMRegressor(random_state=seed, n_jobs=n_jobs, verbose=-1),
                 {
                     "model__regressor__n_estimators": [300, 500, 800],
@@ -178,7 +178,7 @@ def build_registry(fast: bool = False) -> list[ModelSpec]:
         specs.append(
             ModelSpec(
                 "CatBoost",
-                "2 — chủ lực",
+                "2 · chủ lực",
                 CatBoostRegressor(random_state=seed, verbose=0, allow_writing_files=False),
                 {
                     "model__regressor__iterations": [300, 600, 900],
@@ -196,7 +196,7 @@ def build_registry(fast: bool = False) -> list[ModelSpec]:
         specs.append(
             ModelSpec(
                 "XGBoost",
-                "2 — chủ lực",
+                "2 · chủ lực",
                 XGBRegressor(random_state=seed, n_jobs=n_jobs, tree_method="hist"),
                 {
                     "model__regressor__n_estimators": [300, 500, 800],
@@ -212,7 +212,7 @@ def build_registry(fast: bool = False) -> list[ModelSpec]:
     specs.append(
         ModelSpec(
             "MLP",
-            "3 — mở rộng",
+            "3 · mở rộng",
             MLPRegressor(random_state=seed, max_iter=400, early_stopping=True),
             {
                 "model__regressor__hidden_layer_sizes": [(128,), (256, 64), (128, 64, 32)],
@@ -229,4 +229,4 @@ def build_registry(fast: bool = False) -> list[ModelSpec]:
     return specs
 
 
-TIER_ORDER = ["0 — mốc", "1 — tuyến tính", "2 — chủ lực", "3 — mở rộng"]
+TIER_ORDER = ["0 · mốc", "1 · tuyến tính", "2 · chủ lực", "3 · mở rộng"]

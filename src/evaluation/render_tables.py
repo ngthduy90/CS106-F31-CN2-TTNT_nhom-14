@@ -20,6 +20,16 @@ RESULTS_DIR = config.REPORTS / "results"
 TABLES_DIR = config.TABLES
 
 
+def _tier(label: str) -> str:
+    """Chuẩn hoá nhãn tầng đọc từ file kết quả cũ.
+
+    Nhãn tầng từng dùng dấu gạch dài; văn bản của dự án thống nhất không dùng ký tự đó.
+    File kết quả sinh trước khi đổi vẫn còn nhãn cũ, nên bước sinh bảng quy đổi tại chỗ
+    thay vì bắt chạy lại toàn bộ thí nghiệm chỉ để đổi một ký tự.
+    """
+    return label.replace(" — ", " · ")
+
+
 def _vi(value: float, digits: int = 3) -> str:
     """Số theo cách viết Việt Nam: dấu phẩy thập phân."""
     return f"{value:.{digits}f}".replace(".", ",")
@@ -39,10 +49,13 @@ def _best_index(values: list[float], metric: str) -> int:
 def render_e1(payload: dict) -> str:
     models = sorted(
         payload["models"],
-        key=lambda m: (TIER_ORDER.index(m["tier"]) if m["tier"] in TIER_ORDER else 99, m["name"]),
+        key=lambda m: (
+            TIER_ORDER.index(_tier(m["tier"])) if _tier(m["tier"]) in TIER_ORDER else 99,
+            m["name"],
+        ),
     )
     lines = [
-        f"# E1 — {payload['label']}",
+        f"# E1: {payload['label']}",
         "",
         f"{payload['n_rows']:,} dòng".replace(",", ".")
         + f", chia hold-out {int((1 - config.HOLDOUT_TEST_SIZE) * 100)}/"
@@ -70,7 +83,7 @@ def render_e1(payload: dict) -> str:
                 _cell(model["cv_mean"][metric], model["cv_std"][metric], digits,
                       bold=(position == best[metric]))
             )
-        lines.append(f"| {model['tier']} | {model['name']} | " + " | ".join(cells) + " |")
+        lines.append(f"| {_tier(model['tier'])} | {model['name']} | " + " | ".join(cells) + " |")
 
     lines += [
         "",
@@ -99,7 +112,7 @@ def render_e1(payload: dict) -> str:
             "so với chính trung bình của nó. Nguyên nhân là mô hình huấn luyện trên log(giá)",
             "và phép `exp` khuếch đại một vài dự báo ngoại suy xa thành sai số khổng lồ trên",
             "thang VND. Trung vị không bị ảnh hưởng nên MdAPE của các mô hình này vẫn ở mức",
-            "khá — đó chính là lý do bảng báo cả bốn chỉ số thay vì chỉ một.",
+            "khá, và đó chính là lý do bảng báo cả bốn chỉ số thay vì chỉ một.",
         ]
 
     lines += [
@@ -114,7 +127,7 @@ def render_e1(payload: dict) -> str:
 
 def render_e2(payload: dict) -> str:
     lines = [
-        "# E2 — chuyển giao theo thời gian",
+        "# E2: chuyển giao theo thời gian",
         "",
         f"Huấn luyện trên {payload['train_rows']:,} tin đăng tới {payload['cutoff']}, ".replace(",", ".")
         + f"kiểm trên {payload['test_rows']:,} tin crawl tháng 08/2026.".replace(",", "."),
@@ -145,7 +158,7 @@ def render_ablation(payload: dict) -> str:
     rows = payload["rows"]
     baseline = rows[0]["cv_mean"]["MdAPE (%)"]
     lines = [
-        "# Ablation — đặc trưng văn bản đáng bao nhiêu?",
+        "# Ablation: đặc trưng văn bản đáng bao nhiêu?",
         "",
         f"Mô hình: {payload['model']}. Cả bốn cấu hình chạy trên CÙNG một bộ fold và cùng",
         "một ngân sách tinh chỉnh, nên khác biệt duy nhất giữa các dòng là nhánh văn bản.",
@@ -172,7 +185,7 @@ def render_ablation(payload: dict) -> str:
 def render_e3(payload: dict) -> str:
     rows = payload["rows"]
     lines = [
-        "# E3 — giữ lại từng phường làm tập kiểm (leave-one-ward-out)",
+        "# E3: giữ lại từng phường làm tập kiểm (leave-one-ward-out)",
         "",
         f"Mô hình: {payload['model']}. Mỗi dòng: bỏ toàn bộ tin của một phường ra khỏi",
         "tập huấn luyện, rồi dự báo đúng phường đó. Đây là phép đo khả năng tổng quát",
@@ -234,7 +247,7 @@ def render_error_analysis(payload: dict) -> str:
             f"Sai số thấp nhất ở khoảng {best['bin']} ({_vi(best['MdAPE (%)'], 1)}%) và cao nhất",
             f"ở khoảng {worst['bin']} ({_vi(worst['MdAPE (%)'], 1)}%). Đây là hình chữ U quen",
             "thuộc của bài toán định giá: phân khúc giữa vừa nhiều mẫu vừa đồng nhất, còn hai",
-            "đầu vừa ít mẫu vừa đa dạng — nhà rẻ thường là nhà có vấn đề pháp lý hoặc vị trí",
+            "đầu vừa ít mẫu vừa đa dạng: nhà rẻ thường là nhà có vấn đề pháp lý hoặc vị trí",
             "đặc thù, nhà đắt thường là bất động sản dị biệt mà vài chục mẫu không đủ để học.",
         ]
     return "\n".join(lines) + "\n"

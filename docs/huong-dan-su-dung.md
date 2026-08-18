@@ -1,6 +1,6 @@
 # Hướng dẫn sử dụng
 
-Đồ án môn Trí tuệ nhân tạo (CS106.F31.CN2) — Nhóm 14
+Đồ án môn Trí tuệ nhân tạo (CS106.F31.CN2), Nhóm 14
 Đề tài 5: dự báo giá nhà từ dữ liệu rao vặt bất động sản TP.HCM
 
 ## 1. Cài đặt

@@ -108,7 +108,7 @@ def write_schema_doc(frame: pd.DataFrame) -> None:
         series = frame[column]
         filled = series.notna().mean()
         sample = series.dropna()
-        example = str(sample.iloc[0])[:40].replace("|", "/").replace("\n", " ") if len(sample) else "—"
+        example = str(sample.iloc[0])[:40].replace("|", "/").replace("\n", " ") if len(sample) else "(trống)"
         lines.append(f"| `{column}` | {series.dtype} | {filled:.1%} | {example} |")
 
     lines += [

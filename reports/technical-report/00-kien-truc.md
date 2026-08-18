@@ -1,6 +1,6 @@
-# Technical report — kiến trúc mã nguồn và luồng chạy
+# Technical report: kiến trúc mã nguồn và luồng chạy
 
-Đồ án CS106.F31.CN2 — Nhóm 14 — Đề tài 5: dự báo giá nhà từ dữ liệu rao vặt
+Đồ án CS106.F31.CN2 · Nhóm 14 · Đề tài 5: dự báo giá nhà từ dữ liệu rao vặt
 
 Tài liệu này mô tả *mã nguồn*: các module ghép với nhau ra sao, dữ liệu đi qua đâu, và
 vì sao ranh giới giữa chúng được đặt ở chỗ đó. Bảng liệt kê từng hàm nằm ở
@@ -29,15 +29,15 @@ lắp từ chính các file này.
 src/
 ├── config.py          hằng số dùng chung
 ├── utils/             nhật ký + run manifest
-├── crawl/             tầng 1 — thu thập
-├── preprocess/        tầng 2 — làm sạch và chuẩn hoá
-├── features/          tầng 3 — biểu diễn
+├── crawl/             tầng 1: thu thập
+├── preprocess/        tầng 2: làm sạch và chuẩn hoá
+├── features/          tầng 3: biểu diễn
 ├── models/            danh mục mô hình
-├── evaluation/        tầng 4 — thí nghiệm và báo cáo kết quả
+├── evaluation/        tầng 4: thí nghiệm và báo cáo kết quả
 └── demo/              web app
 ```
 
-### Tầng 1 — thu thập (`src/crawl/`)
+### Tầng 1: thu thập (`src/crawl/`)
 
 `http.py` giữ một `PoliteSession` duy nhất: 1 request mỗi 1,5 giây, lùi luỹ tiến khi
 gặp 429/403, User-Agent khai báo rõ. Đặt ràng buộc ở một chỗ thay vì để mỗi crawler tự
@@ -57,7 +57,7 @@ theo từng shard rồi xoá shard sau khi lọc, giữ đỉnh dung lượng đ
 1,67 GB. `qa_gate.py` chấm kho thô theo sáu ngưỡng và buộc ghi lại một quyết định khi
 chưa đạt.
 
-### Tầng 2 — làm sạch (`src/preprocess/`)
+### Tầng 2: làm sạch (`src/preprocess/`)
 
 Thứ tự các bước không tuỳ tiện:
 
@@ -75,20 +75,20 @@ Thứ tự các bước không tuỳ tiện:
 
 `run_pipeline.py` xâu chuỗi cả sáu và ghi bảng data funnel.
 
-### Tầng 3 — biểu diễn (`src/features/`)
+### Tầng 3: biểu diễn (`src/features/`)
 
 `text.py` tách từ tiếng Việt (underthesea, lùi về pyvi rồi khoảng trắng), giữ danh sách
 dừng riêng cho tin rao, và định nghĩa 24 cờ nhị phân thủ công.
 
 Việc tách từ nằm ở bước tiền xử lý chứ không nằm trong analyzer của TF-IDF. Đây là
 quyết định về hiệu năng có hệ quả lớn: để trong analyzer thì bộ tách từ chạy lại toàn
-bộ tập dữ liệu ở mỗi lần fit — tức là mỗi fold nhân mỗi cấu hình tìm kiếm, hàng trăm
+bộ tập dữ liệu ở mỗi lần fit, tức là mỗi fold nhân mỗi cấu hình tìm kiếm, hàng trăm
 lần cho cùng một kết quả.
 
 `build.py` lắp `ColumnTransformer` ba nhánh (số / phân loại / văn bản). **Mọi bước fit
 nằm trong pipeline**, không có bước nào chạy trước khi chia tập.
 
-### Tầng 4 — thí nghiệm (`src/evaluation/`)
+### Tầng 4: thí nghiệm (`src/evaluation/`)
 
 `splits.py` tính phép chia một lần, phân tầng theo (quận × nhóm giá), lưu ra đĩa kèm mã
 băm của bộ id. Mọi mô hình đo trên cùng bộ fold; dữ liệu đổi thì mã băm đổi và phép

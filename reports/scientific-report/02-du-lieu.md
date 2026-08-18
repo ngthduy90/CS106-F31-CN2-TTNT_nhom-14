@@ -138,7 +138,7 @@ Bảng đầy đủ nằm ở `docs/dataset-card.md`. Các trường chính:
 | Chỉ báo | `*_missing`, `*_from_text` | Giá trị gốc thiếu / giá trị đến từ regex trên mô tả |
 
 Hai nhóm cột chỉ báo là có chủ ý. `*_missing` giữ lại thông tin "người bán không ghi
-trường này" — bản thân việc không ghi đã là một tín hiệu. `*_from_text` cho biết giá trị
+trường này": bản thân việc không ghi đã là một tín hiệu. `*_from_text` cho biết giá trị
 đến từ form của sàn hay từ bộ luật đọc mô tả, để đo được phần đóng góp của bước trích
 xuất.
 

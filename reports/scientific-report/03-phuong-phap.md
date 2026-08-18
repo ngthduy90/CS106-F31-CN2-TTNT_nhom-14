@@ -173,7 +173,7 @@ Cả hai lỗi đều đủ để làm kết quả đẹp lên một cách vô n
 nhận không còn dòng nào mang cụm tiền vào bước vector hoá.
 
 Bản thân phép kiểm cũng phải sửa một lần: ban đầu nó coi mọi con số đứng trước chữ
-"đồng" là tiền, nên gắn cờ "74 Đồng Đen" — một địa chỉ ở Tân Bình — và "đường 10 đồng
+"đồng" là tiền, nên gắn cờ "74 Đồng Đen" (một địa chỉ ở Tân Bình) và "đường 10 đồng
 bộ". Một phép kiểm hay kêu nhầm sẽ sớm bị người ta bỏ qua, tức là mất hẳn tác dụng, nên
 điều kiện được siết lại: tên đơn vị tiền tệ trần chỉ tính là tiền khi đi sau một số từ
 bốn chữ số trở lên.

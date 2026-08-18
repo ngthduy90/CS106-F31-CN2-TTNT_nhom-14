@@ -209,7 +209,7 @@ def export_champion(spec, frame: pd.DataFrame, best_params: dict, metrics: dict,
     )
 
     card = [
-        f"# Model card — {spec.name}",
+        f"# Model card: {spec.name}",
         "",
         "## Dùng để làm gì",
         "",
@@ -245,7 +245,7 @@ def export_champion(spec, frame: pd.DataFrame, best_params: dict, metrics: dict,
         "- Tin rao có nhiễu: cùng một căn có thể được mô tả bằng hai bộ số khác nhau",
         "  (xem bảng chất lượng trích xuất).",
         "- Không dùng được cho bất động sản đặc thù: đất nền diện tích lớn, nhà xưởng,",
-        "  khách sạn — chúng đã bị loại ở bước làm sạch.",
+        "  khách sạn. Chúng đã bị loại ở bước làm sạch.",
         "",
         f"Seed: {config.SEED}. Tham số tốt nhất: `{best_params or 'mặc định'}`.",
     ]

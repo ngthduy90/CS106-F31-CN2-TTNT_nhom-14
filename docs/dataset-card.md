@@ -1,4 +1,4 @@
-# Dataset card — dữ liệu giá nhà TP.HCM
+# Dataset card: dữ liệu giá nhà TP.HCM
 
 Bộ dữ liệu do Nhóm 14 dựng cho đồ án CS106.F31.CN2, đề tài 5.
 
@@ -10,7 +10,7 @@ lược đồ. Mỗi dòng là một tin rao, không phải một giao dịch.
 | | |
 |---|---|
 | Đơn vị một dòng | Một tin rao bán |
-| Biến mục tiêu | `total_price_vnd` — tổng giá rao, đơn vị VND |
+| Biến mục tiêu | `total_price_vnd`, tổng giá rao, đơn vị VND |
 | Phạm vi địa lý | TP.HCM, dày nhất ở Tân Bình, Tân Phú, Quận 12 |
 | Hệ quy chiếu địa danh | **Cũ** (quận + phường trước sáp nhập 01/07/2025) |
 | Số dòng sau làm sạch | xem [`data-funnel.md`](../reports/tables/data-funnel.md) |

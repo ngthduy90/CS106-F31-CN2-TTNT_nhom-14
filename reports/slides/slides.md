@@ -1,6 +1,6 @@
 ---
 title: "Dự báo giá nhà TP.HCM từ dữ liệu rao vặt"
-subtitle: "CS106.F31.CN2 — Đồ án đề tài 5 — Nhóm 14"
+subtitle: "CS106.F31.CN2 · Đồ án đề tài 5 · Nhóm 14"
 date: "2026"
 lang: vi
 ---
@@ -12,7 +12,7 @@ lang: vi
 - các thuộc tính có cấu trúc: diện tích, phòng ngủ, số tầng, vị trí, pháp lý
 - và **mô tả tự do** của tin rao
 
-Vì sao đáng làm: mô tả chứa thông tin mà form không có — "hẻm xe hơi", "nở hậu", "ngộp
+Vì sao đáng làm: mô tả chứa thông tin mà form không có: "hẻm xe hơi", "nở hậu", "ngộp
 bank", "sổ hồng riêng". Câu hỏi trung tâm: phần văn bản đó đáng bao nhiêu?
 
 ---
@@ -46,17 +46,17 @@ bản gốc → chỉ đúng đoạn số điện thoại bị xoá.
 
 Bảy trường rút bằng regex. Ba luật khó nhất:
 
-- **"1 trệt 2 lầu" = 3 tầng** — tiếng Việt đếm tầng bằng phép cộng thành phần
-- **"4x15" là kích thước, không phải diện tích** — phải nhân ra, và chiều ngang chính là
+- **"1 trệt 2 lầu" = 3 tầng**: tiếng Việt đếm tầng bằng phép cộng thành phần
+- **"4x15" là kích thước, không phải diện tích**: phải nhân ra, và chiều ngang chính là
   mặt tiền
-- **"nhà mặt tiền" ≠ "mặt tiền 4m"** — một cái là loại vị trí, một cái là số đo
+- **"nhà mặt tiền" ≠ "mặt tiền 4m"**: một cái là loại vị trí, một cái là số đo
 
 ---
 
 # Đo chất lượng bằng nhãn độc lập
 
 Nhãn **không** do LLM gán, mà lấy từ chính **trường có cấu trúc người bán điền vào
-form** — thứ bộ luật regex không hề nhìn thấy.
+form**, thứ bộ luật regex không hề nhìn thấy.
 
 | Trường | F1 |
 |---|---|
@@ -87,9 +87,9 @@ thấp nhất 0,45.
 
 Danh sách kiểm chạy trước **mỗi** lần huấn luyện. Nó bắt được hai lỗi thật:
 
-1. Bước tách từ **tái tạo** cụm tiền sau khi đã lọc — bỏ dấu phẩy thập phân biến "5,85"
+1. Bước tách từ **tái tạo** cụm tiền sau khi đã lọc: bỏ dấu phẩy thập phân biến "5,85"
    thành "585" nằm cạnh chữ "tỷ" còn sót
-2. Đơn giá lọt qua dưới dạng "110 **triệum2**" — thứ nhân với diện tích ra thẳng nhãn
+2. Đơn giá lọt qua dưới dạng "110 **triệum2**", thứ nhân với diện tích ra thẳng nhãn
 
 Kết quả: **0/34.607** dòng mang token tiền vào TF-IDF.
 
@@ -105,12 +105,12 @@ Kết quả: **0/34.607** dòng mang token tiền vào TF-IDF.
 
 | Tầng | Mô hình |
 |---|---|
-| 0 — mốc | Dummy · **trung vị giá/m² theo nhóm** |
-| 1 — tuyến tính | Linear · Ridge · Lasso |
-| 2 — chủ lực | Random Forest · LightGBM · CatBoost · XGBoost |
-| 3 — mở rộng | KNN · Cây quyết định · MLP |
+| 0 · mốc | Dummy · **trung vị giá/m² theo nhóm** |
+| 1 · tuyến tính | Linear · Ridge · Lasso |
+| 2 · chủ lực | Random Forest · LightGBM · CatBoost · XGBoost |
+| 3 · mở rộng | KNN · Cây quyết định · MLP |
 
-Mốc đáng quan tâm nhất là **baseline môi giới** — cách một người môi giới định giá trong
+Mốc đáng quan tâm nhất là **baseline môi giới**: cách một người môi giới định giá trong
 đầu. Thắng Dummy chỉ chứng minh dữ liệu có tín hiệu.
 
 ---
@@ -147,7 +147,7 @@ văn bản.
 
 ---
 
-# E2 — trôi giá theo thời gian
+# E2: trôi giá theo thời gian
 
 Huấn luyện trên tin ≤ 06/2025 → kiểm trên tin crawl 08/2026.
 
@@ -167,14 +167,14 @@ trên hold-out, không phải con số tự đặt.
 
 ---
 
-# Hạn chế — nói thẳng
+# Hạn chế, nói thẳng
 
 - Học từ **giá rao**, không phải giá giao dịch. Nhóm không có dữ liệu để đo khoảng cách
   đó nên không phỏng đoán.
 - Chỉ phủ TP.HCM, dày nhất ở ba quận mục tiêu. E3 đo trực tiếp mức suy giảm khi sang khu
   vực chưa thấy.
 - Tin rao tự mâu thuẫn: form một đằng, mô tả một nẻo.
-- Số tầng chưa đạt chỉ tiêu F1 0,9 — báo cáo trung thực kèm phân tích lỗi thay vì chỉnh
+- Số tầng chưa đạt chỉ tiêu F1 0,9. Báo cáo trung thực kèm phân tích lỗi thay vì chỉnh
   luật cho khớp nhãn nhiễu.
 
 ---

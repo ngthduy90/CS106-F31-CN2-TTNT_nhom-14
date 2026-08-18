@@ -55,7 +55,7 @@ class Funnel:
 
     def to_markdown(self) -> str:
         lines = [
-            "# Data funnel — số dòng còn lại sau từng bước",
+            "# Data funnel: số dòng còn lại sau từng bước",
             "",
             "| Bước | Tổng | Chợ Tốt | mogi | HF (lịch sử) | Ghi chú |",
             "|---|---:|---:|---:|---:|---|",
