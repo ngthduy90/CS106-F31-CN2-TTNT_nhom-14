@@ -73,6 +73,29 @@ tuyến tính vô dụng; đọc MdAPE một mình sẽ kết luận nó ngang n
 luận đều sai. Sự thật là hồi quy tuyến tính đúng ở phần lớn ca nhưng sai thảm ở một số ít
 ca, còn boosting thì ổn định ở cả hai mặt.
 
+### Trường hợp cực đoan: dự báo tràn số
+
+Trên bộ lịch sử, MLP đẩy hiện tượng trên tới mức không còn đọc được: RMSE trung bình
+937,61 tỷ và R² âm tới năm chữ số, trong khi MdAPE vẫn là 20,9% và chỉ số trên tập
+hold-out lại hoàn toàn bình thường (R² 0,813). Ở thí nghiệm chuyển giao E2, cùng mô hình
+đó sinh ra giá trị **vô cực**: dự báo trên thang log lớn tới mức `exp` tràn số thực 64
+bit.
+
+Ba điều đáng rút ra, và nhóm giữ nguyên hiện tượng này trong báo cáo thay vì cắt ngưỡng
+dự báo cho bảng đẹp lên:
+
+1. **Đây là tính chất của cách huấn luyện, không phải lỗi cài đặt.** Sai lệch trên thang
+   log được `exp` khuếch đại theo hàm mũ. Với mô hình có phương sai dự báo lớn như mạng
+   nơ-ron chưa hội tụ, một điểm ngoại suy xa là đủ.
+2. **MLP chưa hội tụ trong ngân sách đã cho.** Nhật ký chạy ghi lại cảnh báo hội tụ ở
+   mọi fold: 400 vòng lặp không đủ. Ngân sách tinh chỉnh giữ nguyên cho mọi mô hình là
+   điều kiện của phép so công bằng, nên nhóm không nới riêng cho MLP; hệ quả là MLP được
+   đánh giá đúng ở mức ngân sách đó, và điều này phải nói rõ khi đọc bảng.
+3. **Phép đo phải chịu được mô hình hỏng.** Ban đầu, một dự báo vô cực làm gãy cả phiên
+   chạy thí nghiệm sau 45 phút. Bộ chỉ số giờ tính trên phần dự báo hữu hạn và ĐẾM số
+   dự báo tràn số, rồi nêu đích danh mô hình dưới bảng. Cắt ngưỡng cho gọn sẽ giấu mất
+   một tính chất có thật của phương pháp log-target.
+
 ### Không so R² giữa hai bảng E1
 
 Hai bảng E1 nằm cạnh nhau nên rất dễ bị đọc chéo cột. Với MdAPE thì đọc chéo được, vì đó

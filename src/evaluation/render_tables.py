@@ -31,7 +31,16 @@ def _tier(label: str) -> str:
 
 
 def _vi(value: float, digits: int = 3) -> str:
-    """Số theo cách viết Việt Nam: dấu phẩy thập phân."""
+    """Số theo cách viết Việt Nam: dấu phẩy thập phân.
+
+    Giá trị NaN nghĩa là mô hình không cho ra nổi một dự báo hữu hạn nào. In "nan" vào
+    bảng báo cáo thì người đọc tưởng script hỏng; ghi thẳng "tràn số" mới đúng chuyện
+    đã xảy ra.
+    """
+    if value != value:  # NaN
+        return "tràn số"
+    if value in (float("inf"), float("-inf")):
+        return "tràn số"
     return f"{value:.{digits}f}".replace(".", ",")
 
 
@@ -173,20 +182,42 @@ def render_e2(payload: dict) -> str:
     ]
 
     deltas = []
+    overflowed = []
     for model in payload["models"]:
+        n_bad = model["transfer"].get("n_non_finite", 0)
+        if n_bad:
+            overflowed.append((model["name"], n_bad))
         cells = [
             _vi(model["transfer"][metric], 1 if metric == "MdAPE (%)" else 3)
             for metric in METRIC_ORDER
         ]
         base = reference.get(model["name"])
-        if base:
-            delta = model["transfer"]["MdAPE (%)"] - base["MdAPE (%)"]
+        mdape = model["transfer"]["MdAPE (%)"]
+        if base and mdape == mdape:
+            delta = mdape - base["MdAPE (%)"]
             deltas.append((model["name"], delta))
             sign = "+" if delta > 0 else ""
             cells.append(f"{sign}{_vi(delta, 1)}")
+        elif mdape != mdape:
+            cells.append("không tính được")
         else:
             cells.append("(không có mốc)")
         lines.append(f"| {model['name']} | " + " | ".join(cells) + " |")
+
+    if overflowed:
+        lines += [
+            "",
+            "**Dự báo tràn số khi chuyển giao**: "
+            + ", ".join(f"{name} ({int(count)} dòng)" for name, count in overflowed)
+            + ".",
+            "",
+            "Đây là kết quả đáng chú ý chứ không phải sự cố kỹ thuật. Hồi quy tuyến tính",
+            "không có điều chuẩn, học trên hàng chục nghìn dòng với vài trăm cột, sinh ra hệ",
+            "số rất lớn; đem sang một tập có phân phối khác thì dự báo trên thang log vọt lên",
+            "tới mức `exp` tràn số thực 64 bit. Ridge, cũng là mô hình tuyến tính nhưng có",
+            "điều chuẩn, chuyển giao bình thường. Khoảng cách giữa hai dòng đó chính là giá",
+            "trị của điều chuẩn khi phân phối dữ liệu dịch chuyển.",
+        ]
 
     learned = [d for name, d in deltas if name not in ("Dummy (trung vị)",)]
     if learned:
