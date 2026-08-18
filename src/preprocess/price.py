@@ -222,14 +222,19 @@ RENTAL_MARKERS = re.compile(
 )
 
 
-def looks_like_rental(text: str | None, total_vnd: float | None = None) -> bool:
-    """Tin cho thuê lọt vào danh mục bán: nhận ra bằng từ khoá HOẶC bằng giá quá thấp.
+def looks_like_rental(title: str | None, total_vnd: float | None = None) -> bool:
+    """Tin cho thuê lọt vào danh mục bán: nhận ra bằng TIÊU ĐỀ hoặc bằng giá quá thấp.
+
+    Chỉ đọc TIÊU ĐỀ, không đọc mô tả. Quét cả mô tả thì tỷ lệ gắn cờ vọt lên 27%, vì
+    tin bán rất hay lấy dòng tiền cho thuê ra làm điểm bán hàng ("nhà đang cho thuê 15
+    triệu/tháng, mua là có thu nhập ngay"). Những tin đó là tin BÁN; loại chúng đi là
+    tự cắt mất một phần dữ liệu hợp lệ.
 
     Ngưỡng giá lấy từ `config.VALID_TOTAL_PRICE_VND`, không phải con số nhớ trong đầu:
     dưới cận dưới đó thì với nhà TP.HCM gần như chắc chắn là giá thuê tháng.
     """
     if total_vnd is not None and 0 < total_vnd < config.VALID_TOTAL_PRICE_VND[0]:
         return True
-    if not text:
+    if not title:
         return False
-    return bool(RENTAL_MARKERS.search(_strip_accents(str(text))))
+    return bool(RENTAL_MARKERS.search(_strip_accents(str(title))))

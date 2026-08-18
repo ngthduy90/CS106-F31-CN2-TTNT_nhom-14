@@ -1,0 +1,154 @@
+"""Chạy trọn bộ tiền xử lý và sinh bảng data funnel (T2.12).
+
+    python -m src.preprocess.run_pipeline
+    python -m src.preprocess.run_pipeline --hf-limit 20000
+
+Bảng funnel không phải để trang trí: nó là bằng chứng cho mọi con số "còn lại N dòng"
+trong báo cáo, và là chỗ duy nhất nói rõ dữ liệu mất đi ở đâu. Mỗi bước ghi số dòng
+vào, số dòng ra, và lý do loại.
+"""
+
+from __future__ import annotations
+
+import argparse
+
+import pandas as pd
+
+from src import config
+from src.preprocess import clean, dedup
+from src.preprocess.address import save_ward_mapping
+from src.preprocess.leakage import strip_price_mentions
+from src.preprocess.load import load_all
+from src.utils.logging_setup import get_logger
+from src.utils.run_manifest import RunManifest
+
+OUTPUT = config.DATA_PROCESSED / "listings.parquet"
+FUNNEL_PATH = config.TABLES / "data-funnel.md"
+
+
+def _vi(value: int, signed: bool = False) -> str:
+    """Số theo cách viết Việt Nam: dấu chấm phân nghìn."""
+    text = f"{abs(value):,}".replace(",", ".")
+    if signed:
+        return f"+{text}" if value >= 0 else f"-{text}"
+    return f"-{text}" if value < 0 else text
+
+
+class Funnel:
+    """Ghi lại số dòng qua từng bước, tách theo nguồn."""
+
+    def __init__(self) -> None:
+        self.steps: list[dict] = []
+
+    def record(self, name: str, frame: pd.DataFrame, note: str = "") -> None:
+        counts = frame["source"].value_counts().to_dict()
+        self.steps.append(
+            {
+                "bước": name,
+                "tổng": len(frame),
+                "chotot": counts.get("chotot", 0),
+                "mogi": counts.get("mogi", 0),
+                "hf": counts.get("hf", 0),
+                "ghi chú": note,
+            }
+        )
+
+    def to_markdown(self) -> str:
+        lines = [
+            "# Data funnel — số dòng còn lại sau từng bước",
+            "",
+            "| Bước | Tổng | Chợ Tốt | mogi | HF (lịch sử) | Ghi chú |",
+            "|---|---:|---:|---:|---:|---|",
+        ]
+        previous = None
+        for step in self.steps:
+            delta = "" if previous is None else f" ({_vi(step['tổng'] - previous, signed=True)})"
+            # Dấu chấm phân nghìn chỉ áp cho ô số; ghi chú giữ nguyên dấu phẩy của nó.
+            numbers = " | ".join(
+                _vi(step[key]) for key in ("tổng", "chotot", "mogi", "hf")
+            )
+            lines.append(f"| {step['bước']} | {_vi(step['tổng'])}{delta} | " +
+                         " | ".join(_vi(step[key]) for key in ("chotot", "mogi", "hf")) +
+                         f" | {step['ghi chú']} |")
+            previous = step["tổng"]
+        return "\n".join(lines) + "\n"
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Tiền xử lý ba nguồn thành bảng sẵn cho mô hình")
+    parser.add_argument("--hf-limit", type=int, default=40_000)
+    args = parser.parse_args()
+    logger = get_logger("preprocess")
+
+    with RunManifest("preprocess", params={"hf_limit": args.hf_limit}) as manifest:
+        save_ward_mapping()
+        funnel = Funnel()
+
+        frame = load_all(hf_limit=args.hf_limit)
+        funnel.record("Gộp ba nguồn", frame, "sau khử trùng theo id ngay lúc crawl")
+
+        frame, price_stats = clean.drop_missing_labels(frame)
+        funnel.record(
+            "Loại dòng thiếu giá hoặc diện tích",
+            frame,
+            f"thiếu giá {price_stats['thiếu giá']}, thiếu diện tích {price_stats['thiếu diện tích']}",
+        )
+
+        frame, hard_stats = clean.apply_hard_rules(frame)
+        funnel.record(
+            "Luật cứng miền hợp lệ + lọc tin cho thuê",
+            frame,
+            ", ".join(f"{k}: {v}" for k, v in hard_stats.items()),
+        )
+
+        frame, dedup_stats = dedup.deduplicate(frame)
+        funnel.record(
+            "Khử trùng lặp (chặn → cosine ký tự → giá)",
+            frame,
+            f"{dedup_stats['nhóm trùng']} nhóm, loại {dedup_stats['dòng bị loại']} dòng",
+        )
+
+        frame, iqr_stats = clean.apply_iqr_by_district(frame)
+        funnel.record(
+            "IQR log(giá/m²) theo từng quận",
+            frame,
+            f"loại {iqr_stats['đã loại']} dòng",
+        )
+
+        frame, impute_stats = clean.impute(frame)
+        funnel.record(
+            "Điền trung vị theo (loại nhà × quận) + cột chỉ báo",
+            frame,
+            ", ".join(f"{k}: {v}" for k, v in impute_stats.items()),
+        )
+
+        # Văn bản dùng cho mô hình là bản ĐÃ XOÁ GIÁ; bản gốc giữ lại để tra cứu.
+        frame["description_clean"] = (
+            frame["title"].fillna("") + " " + frame["description"].fillna("")
+        ).map(strip_price_mentions)
+        frame["price_per_m2"] = frame["total_price_vnd"] / frame["area_m2"]
+
+        OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+        frame.to_parquet(OUTPUT, index=False)
+
+        FUNNEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+        FUNNEL_PATH.write_text(funnel.to_markdown(), encoding="utf-8")
+
+        # Mẫu cặp trùng để rà tay, theo yêu cầu "kiểm 50 cặp" của runbook 02.
+        sample_path = config.DATA_INTERIM / "duplicate_pairs_sample.json"
+        pd.DataFrame(dedup_stats["mẫu cặp để rà tay"]).to_json(
+            sample_path, orient="records", force_ascii=False, indent=2
+        )
+
+        manifest.count("rows_out", len(frame))
+        manifest.count("duplicates_removed", dedup_stats["dòng bị loại"])
+        manifest.count("outliers_removed", iqr_stats["đã loại"])
+        manifest.note(f"ngưỡng IQR theo quận: {iqr_stats['ngưỡng theo quận']}")
+
+    logger.info("còn %d dòng → %s", len(frame), OUTPUT)
+    logger.info("funnel → %s", FUNNEL_PATH)
+    print(funnel.to_markdown())
+
+
+if __name__ == "__main__":
+    main()
