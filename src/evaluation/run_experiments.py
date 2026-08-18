@@ -64,7 +64,7 @@ def _cap(subset: pd.DataFrame, max_rows: int | None) -> pd.DataFrame:
 
 
 def run_e1(frame: pd.DataFrame, specs, logger, search_iterations: int,
-           max_rows: int | None = None) -> None:
+           max_rows: int | None = None, force: bool = False) -> None:
     """Bảng so sánh chính, chạy RIÊNG trên từng nguồn (runbook 03 §4).
 
     Không trộn hai nguồn làm thí nghiệm chính: hai nguồn phủ thời kỳ và địa bàn khác
@@ -75,6 +75,11 @@ def run_e1(frame: pd.DataFrame, specs, logger, search_iterations: int,
         subset = _cap(frame[frame["source"] == source].reset_index(drop=True), max_rows)
         if len(subset) < 500:
             logger.warning("%s chỉ có %d dòng, bỏ qua E1", source, len(subset))
+            continue
+
+        target = RESULTS_DIR / f"e1_{source}.json"
+        if target.exists() and not force:
+            logger.info("đã có %s, bỏ qua (dùng --force để chạy lại)", target.name)
             continue
 
         logger.info("=== E1 · %s · %d dòng ===", label, len(subset))
@@ -241,6 +246,11 @@ def main() -> None:
         help="giới hạn số dòng mỗi nguồn cho E1 (lấy mẫu phân tầng theo quận); 0 = không giới hạn",
     )
     parser.add_argument("--only", nargs="*", default=None, choices=["e1", "e2", "e3", "ablation"])
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="chạy lại cả những thí nghiệm đã có file kết quả",
+    )
     args = parser.parse_args()
 
     logger = get_logger("experiments")
@@ -260,7 +270,8 @@ def main() -> None:
     }
     with RunManifest("experiments", params=params) as manifest:
         if "e1" in wanted:
-            run_e1(frame, specs, logger, args.search_iterations, args.e1_max_rows or None)
+            run_e1(frame, specs, logger, args.search_iterations, args.e1_max_rows or None,
+                   force=args.force)
         if "e2" in wanted:
             run_e2(frame, specs, logger, args.search_iterations)
         if "ablation" in wanted:

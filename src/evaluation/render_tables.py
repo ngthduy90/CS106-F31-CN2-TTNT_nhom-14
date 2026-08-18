@@ -45,7 +45,8 @@ def render_e1(payload: dict) -> str:
         f"# E1 — {payload['label']}",
         "",
         f"{payload['n_rows']:,} dòng".replace(",", ".")
-        + f", chia hold-out {int(payload['test_size'] * 100) if 'test_size' in payload else 20}/80"
+        + f", chia hold-out {int((1 - config.HOLDOUT_TEST_SIZE) * 100)}/"
+        + f"{int(config.HOLDOUT_TEST_SIZE * 100)}"
         + f", {config.CV_FOLDS}-fold trên phần train, seed {payload['seed']}.",
         f"Ngân sách tinh chỉnh: RandomizedSearch {payload['search_iterations']} cấu hình, "
         "giống nhau cho mọi mô hình.",
@@ -84,6 +85,22 @@ def render_e1(payload: dict) -> str:
             for metric in METRIC_ORDER
         ]
         lines.append(f"| {model['name']} | " + " | ".join(cells) + " |")
+
+    # Nhóm tuyến tính hay có std của RMSE lớn hơn cả trung bình; đó là dấu hiệu chứ
+    # không phải lỗi, và người đọc bảng cần được cảnh báo ngay dưới bảng.
+    unstable = [
+        m["name"] for m in models
+        if m["cv_std"]["RMSE (tỷ)"] > m["cv_mean"]["RMSE (tỷ)"] * 0.6
+    ]
+    if unstable:
+        lines += [
+            "",
+            "**Chú ý khi đọc**: " + ", ".join(unstable) + " có độ lệch chuẩn của RMSE lớn",
+            "so với chính trung bình của nó. Nguyên nhân là mô hình huấn luyện trên log(giá)",
+            "và phép `exp` khuếch đại một vài dự báo ngoại suy xa thành sai số khổng lồ trên",
+            "thang VND. Trung vị không bị ảnh hưởng nên MdAPE của các mô hình này vẫn ở mức",
+            "khá — đó chính là lý do bảng báo cả bốn chỉ số thay vì chỉ một.",
+        ]
 
     lines += [
         "",
