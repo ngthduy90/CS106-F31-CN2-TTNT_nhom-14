@@ -73,6 +73,22 @@ tuyến tính vô dụng; đọc MdAPE một mình sẽ kết luận nó ngang n
 luận đều sai. Sự thật là hồi quy tuyến tính đúng ở phần lớn ca nhưng sai thảm ở một số ít
 ca, còn boosting thì ổn định ở cả hai mặt.
 
+### Không so R² giữa hai bảng E1
+
+Hai bảng E1 nằm cạnh nhau nên rất dễ bị đọc chéo cột. Với MdAPE thì đọc chéo được, vì đó
+là sai số phần trăm và không phụ thuộc phương sai của tập. Với **R² thì không**.
+
+R² đo phần phương sai được giải thích, mà mẫu số của nó chính là phương sai của tập đang
+xét. Bộ lịch sử phủ toàn thành phố với hơn hai mươi quận và biên độ giá rộng hơn hẳn bộ
+crawl, vốn tập trung vào ba quận. Tập nào có phương sai lớn hơn thì cùng một mô hình sẽ
+cho R² cao hơn, kể cả khi nó dự báo tệ hơn theo phần trăm. Trên dữ liệu của nhóm, hiện
+tượng đó xảy ra đúng như vậy: cùng một mô hình cho R² cao hơn nhưng MdAPE lại tệ hơn trên
+bộ lịch sử.
+
+Vì thế mỗi bảng E1 chỉ được dùng để xếp hạng các mô hình **bên trong** nó. So sánh giữa
+hai nguồn phải dựa vào MdAPE, và câu hỏi "chuyển giao giữa hai nguồn mất bao nhiêu" là
+việc của thí nghiệm E2 chứ không phải của việc đặt hai bảng cạnh nhau.
+
 ## Ablation: đặc trưng văn bản đáng bao nhiêu?
 
 <!-- include: reports/tables/ablation.md -->
