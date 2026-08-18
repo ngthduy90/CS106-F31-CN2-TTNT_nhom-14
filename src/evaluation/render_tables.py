@@ -143,7 +143,7 @@ def render_e2(payload: dict) -> str:
         "# E2: chuyển giao theo thời gian",
         "",
         f"Huấn luyện trên {payload['train_rows']:,} tin đăng tới {payload['cutoff']}, ".replace(",", ".")
-        + f"kiểm trên {payload['test_rows']:,} tin crawl tháng 08/2026.".replace(",", "."),
+        + f"kiểm trên {payload['test_rows']:,} tin Chợ Tốt crawl tháng 08/2026.".replace(",", "."),
         "",
         "Cả hai phía đều là GIÁ RAO nên chênh lệch đo được là trôi giá theo thời gian,",
         "không lẫn khoảng cách giữa giá rao và giá giao dịch.",

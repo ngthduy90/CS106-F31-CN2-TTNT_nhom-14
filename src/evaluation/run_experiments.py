@@ -120,13 +120,17 @@ def run_e2(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None:
     rao và giá giao dịch như thiết kế ban đầu.
     """
     train_frame = frame[frame["source"] == "hf"].reset_index(drop=True)
-    test_frame = frame[frame["source"].isin(["chotot", "mogi"])].reset_index(drop=True)
+    # Tập kiểm CHỈ lấy Chợ Tốt, không gộp mogi. Lý do: con số của E2 chỉ có nghĩa khi
+    # đặt cạnh bảng E1 nguồn Chợ Tốt, mà bảng đó đo trên đúng tập Chợ Tốt. Thêm mogi vào
+    # thì chênh lệch giữa hai bảng vừa mang thay đổi nguồn huấn luyện, vừa mang thay đổi
+    # thành phần tập kiểm, và không tách được hai thứ đó ra.
+    test_frame = frame[frame["source"] == "chotot"].reset_index(drop=True)
 
     if len(train_frame) < 500 or len(test_frame) < 200:
         logger.warning("không đủ dữ liệu cho E2")
         return
 
-    logger.info("=== E2 · train %d dòng (≤%s) → test %d dòng (2026) ===",
+    logger.info("=== E2 · train %d dòng HF (≤%s) → test %d dòng Chợ Tốt 2026 ===",
                 len(train_frame), config.HF_CUTOFF, len(test_frame))
 
     train_features = build_feature_frame(train_frame)
@@ -164,6 +168,7 @@ def run_e2(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None:
             "train_rows": len(train_frame),
             "test_rows": len(test_frame),
             "cutoff": config.HF_CUTOFF,
+            "test_source": "chotot",
             "models": rows,
         },
     )
