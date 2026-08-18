@@ -65,12 +65,43 @@ Trước khi sang bước tiền xử lý, kho thô được chấm theo sáu ng
 chấm điểm dữ liệu mà là buộc phải ra quyết định: chưa đạt thì hoặc mở nguồn dự phòng,
 hoặc nới phạm vi quận, và lựa chọn đó được ghi lại.
 
-<!-- include: reports/tables/qa-gate.md -->
+Chạy ngày 19/08/2026. Nguồn thô: chotot 2.400, mogi 360.
 
+| Kiểm tra | Đạt được | Ngưỡng | Kết quả |
+|---|---:|---:|:---:|
+| Tổng số tin thô (sau khử trùng theo id) | 2.760 | ≥ 8.000 | CHƯA ĐẠT |
+| Tỷ lệ tin có mô tả ≥ 200 ký tự | 87,8% | ≥ 90,0% | CHƯA ĐẠT |
+| Tỷ lệ tin có giá dạng số | 100,0% | ≥ 80,0% | ĐẠT |
+| Tỷ lệ tin có phường hoặc toạ độ | 100,0% | ≥ 70,0% | ĐẠT |
+| Tin ở 3 quận mục tiêu | 2.760 | ≥ 3.000 | CHƯA ĐẠT |
+| Số tin còn dấu vết số điện thoại | 0 | ≤ 0 | ĐẠT |
+
+**3/6 ngưỡng đạt.**
+
+#### Quyết định
+
+Chưa đạt: tổng số tin thô (sau khử trùng theo id); tỷ lệ tin có mô tả ≥ 200 ký tự; tin ở 3 quận mục tiêu.
+
+Theo runbook 01 §6, chưa đạt ngưỡng nào thì phải chọn một trong hai hướng và
+ghi lại lựa chọn: (a) mở nguồn dự phòng alonhadat/homedy, hoặc (b) nới phạm vi
+sang toàn bộ quận của TP.HCM.
+
+**Trạng thái hiện tại**: các script crawl đang chạy ở mức giới hạn có chủ ý để
+kiểm pipeline đầu-cuối, phần thu thập đủ số lượng do thành viên phụ trách dữ
+liệu chạy tiếp bằng chính các lệnh trong `docs/huong-dan-su-dung.md` §3. Nhờ
+checkpoint và khử trùng theo mã tin, lần chạy sau chỉ bổ sung phần còn thiếu.
+Vì vậy chưa mở nguồn dự phòng: nguyên nhân chưa đạt là hạn mức tự đặt, không
+phải nguồn dữ liệu cạn.
 ## Quy mô và quy trình làm sạch
 
-<!-- include: reports/tables/data-funnel.md -->
-
+| Bước | Tổng | Chợ Tốt | mogi | HF (lịch sử) | Ghi chú |
+|---|---:|---:|---:|---:|---|
+| Gộp ba nguồn | 42.760 | 2.400 | 360 | 40.000 | sau khử trùng theo id ngay lúc crawl |
+| Loại dòng thiếu giá hoặc diện tích | 41.997 (-763) | 2.397 | 356 | 39.244 | thiếu giá 756, thiếu diện tích 7 |
+| Luật cứng miền hợp lệ + lọc tin cho thuê | 38.370 (-3.627) | 2.358 | 347 | 35.665 | diện tích ngoài khoảng: 567, giá ngoài khoảng: 1364, tin cho thuê: 2110 |
+| Khử trùng lặp (chặn → cosine ký tự → giá) | 35.617 (-2.753) | 2.342 | 339 | 32.936 | 2372 nhóm, loại 2753 dòng |
+| IQR log(giá/m²) theo từng quận | 34.607 (-1.010) | 2.326 | 334 | 31.947 | loại 1010 dòng |
+| Điền trung vị theo (loại nhà × quận) + cột chỉ báo | 34.607 (+0) | 2.326 | 334 | 31.947 | bedrooms: 13167, bathrooms: 14827, floors: 5485, frontage_m: 16008, alley_width_m: 31752 |
 Bảng trên đọc từ trên xuống là toàn bộ vòng đời của dữ liệu. Ba bước cắt nhiều nhất:
 
 **Luật cứng miền hợp lệ và lọc tin cho thuê.** Bước lọc tin cho thuê từng gắn cờ 27% số
@@ -114,8 +145,46 @@ xạ chọn theo đa số và tỷ lệ đa số được lưu lại để biế
 
 ## Chất lượng trích xuất đặc trưng từ văn bản
 
-<!-- include: reports/tables/extraction-quality.md -->
+Bộ nhãn vàng: 200 tin lấy ngẫu nhiên (seed 42) từ kho thô Chợ Tốt.
+Nhãn lấy từ các trường có cấu trúc người đăng điền vào form của sàn; bộ luật
+regex chỉ đọc tiêu đề và mô tả nên không hề thấy các trường đó.
 
+| Trường | Nhãn được nêu trong mô tả | Precision | Recall | F1 |
+|---|---:|---:|---:|---:|
+| Diện tích (m²) | 99/200 | 0,939 | 0,939 | **0,939** ✓ |
+| Số phòng ngủ | 130/184 | 0,898 | 0,877 | **0,887** |
+| Số nhà tắm | 68/120 | 0,922 | 0,868 | **0,894** |
+| Số tầng | 86/113 | 0,802 | 0,802 | **0,802** |
+
+Chỉ tiêu của runbook 02: F1 ≥ 0,9 cho diện tích, số phòng ngủ và số tầng
+(đánh dấu ✓ ở bảng trên).
+
+#### Lỗi còn lại
+
+| Trường | Đúng | Bỏ sót | Lệch 1 đơn vị | Lệch khác |
+|---|---:|---:|---:|---:|
+| Diện tích (m²) | 93 | 0 | 0 | 6 |
+| Số phòng ngủ | 114 | 3 | 12 | 1 |
+| Số nhà tắm | 59 | 4 | 3 | 2 |
+| Số tầng | 69 | 0 | 13 | 4 |
+
+Sau hai vòng sửa luật, diện tích đạt chỉ tiêu còn số tầng dừng ở mức thấp hơn.
+Nhìn vào cột lỗi: 13 trong số 17 lỗi của trường
+số tầng là lệch đúng một đơn vị, và phần lớn rơi vào các tin viết "1 trệt 1 lầu"
+nhưng điền vào form con số 1. Đây là mâu thuẫn trong chính tin rao chứ không phải
+bộ luật đọc sai: cùng một cách viết, người bán này khai 1, người bán kia khai 2.
+
+Hai vòng sửa đã dùng hết theo đúng kịch bản rủi ro của kế hoạch ("F1 chững dưới
+0,9 sau hai vòng → báo cáo trung thực kèm phân tích lỗi"), nên nhóm dừng ở đây
+thay vì tiếp tục chỉnh luật cho khớp một tập nhãn tự nó đã nhiễu. Trường số tầng
+vẫn được đưa vào mô hình kèm cột chỉ báo thiếu, và mức nhiễu này được nêu lại ở
+phần hạn chế của báo cáo.
+
+Cột giữa cho biết bao nhiêu nhãn thật sự được nêu trong mô tả: con số phải nằm
+trong khoảng ±26 ký tự quanh một từ khoá của đúng trường đó. Phần còn lại là
+những tin mà người bán điền form một đằng, viết mô tả một nẻo; chúng nằm ngoài
+tầm với của bất kỳ bộ luật văn bản nào và được loại khỏi phép đo thay vì tính là
+lỗi của bộ luật.
 ## Mô tả trường dữ liệu
 
 Bảng đầy đủ nằm ở `docs/dataset-card.md`. Các trường chính:

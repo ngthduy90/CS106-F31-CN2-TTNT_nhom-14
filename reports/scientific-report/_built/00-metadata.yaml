@@ -1,0 +1,15 @@
+---
+title: "Dự báo giá nhà tại TP.HCM từ dữ liệu tin rao vặt"
+subtitle: "Đồ án cuối kỳ môn Trí tuệ nhân tạo — Đề tài 5"
+author:
+  - "Nhóm 14"          # T6.12: thay bằng danh sách thành viên đầy đủ (họ tên - MSSV - lớp)
+course: "CS106.F31.CN2"
+institution: "Trường Đại học Công nghệ Thông tin, ĐHQG-HCM"
+date: "2026"
+lang: vi
+toc: true
+toc-depth: 3
+numbersections: true
+figureTitle: "Hình"
+tableTitle: "Bảng"
+---
