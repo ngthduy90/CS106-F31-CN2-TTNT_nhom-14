@@ -1,35 +1,26 @@
 # Ablation: đặc trưng văn bản đáng bao nhiêu?
 
-Mô hình: Random Forest. Cả bốn cấu hình chạy trên CÙNG một bộ fold và cùng
+Mô hình: LightGBM. Cả bốn cấu hình chạy trên CÙNG một bộ fold và cùng
 một ngân sách tinh chỉnh, nên khác biệt duy nhất giữa các dòng là nhánh văn bản.
 
 | Cấu hình đặc trưng | MdAPE (%) | Δ so với chỉ bảng | RMSE (tỷ) | R² |
 |---|---:|---:|---:|---:|
-| Chỉ đặc trưng bảng | 14,18 | 0,00 | 4,243 | 0,646 |
-| Bảng + cờ văn bản thủ công | 13,69 | -0,49 | 4,193 | 0,655 |
-| Bảng + TF-IDF/SVD | 15,70 | +1,52 | 4,592 | 0,585 |
-| Bảng + TF-IDF/SVD + cờ | 15,07 | +0,88 | 4,626 | 0,579 |
+| Chỉ đặc trưng bảng | 14,77 ± 1,19 | 0,00 | 3,798 | 0,712 |
+| Bảng + cờ văn bản thủ công | 14,08 ± 1,15 | -0,69 | 3,795 | 0,713 |
+| Bảng + TF-IDF/SVD | 13,91 ± 0,35 | -0,86 | 3,935 | 0,692 |
+| Bảng + TF-IDF/SVD + cờ | 13,88 ± 0,77 | -0,89 | 3,844 | 0,709 |
 
 Δ âm nghĩa là thêm nhánh đó làm sai số giảm. Đây là con số trả lời trực tiếp câu
 hỏi của đề: mô tả rao vặt mang bao nhiêu tín hiệu giá.
 
 ## Đọc bảng
 
-Hai nhánh văn bản đi ngược chiều nhau, và đó mới là kết quả đáng nói.
+Cả ba cấu hình có văn bản đều thấp hơn cấu hình chỉ có đặc trưng bảng, và
+thấp theo cùng một chiều. Mô tả rao vặt vì thế có mang tín hiệu giá mà các
+trường điền sẵn không có.
 
-**Cờ thủ công giúp được** (0,49 điểm phần trăm). Đây là
-vài chục cột nhị phân, mỗi cột là một khái niệm mà người mua nhà thật sự
-quan tâm: hẻm xe hơi, sổ hồng riêng, ngộp bank, nở hậu. Cây quyết định tách
-trên chúng rất dễ, và mỗi lần tách đều giải thích được.
-
-**TF-IDF cộng SVD làm tệ đi** (1,52 điểm phần trăm).
-Nguyên nhân hợp lý nhất là tỷ lệ: hơn một trăm trục SVD dày đặc, mỗi trục
-mang rất ít tín hiệu, đổ vào một tập chỉ vài nghìn dòng. Rừng cây phải chọn
-điểm tách trong một rừng cột nhiễu, và xác suất chọn trúng cột hữu ích giảm
-xuống. Đây là hiện tượng quen thuộc của mô hình cây trên đặc trưng dày và
-yếu, không phải bằng chứng rằng mô tả rao vặt vô giá trị.
-
-Kết luận đúng của thí nghiệm này: **mô tả CÓ mang tín hiệu giá, nhưng phải
-được chưng cất trước khi dùng.** Nén cả mô tả thành trăm trục vô danh thì
-phần tín hiệu ít ỏi bị chôn trong nhiễu; rút thành vài chục khái niệm cụ thể
-thì nó nổi lên. Với cỡ dữ liệu hiện tại, cách rẻ hơn lại là cách tốt hơn.
+Cần đọc kèm cỡ hiệu ứng: mức cải thiện lớn nhất là 0,86 điểm
+phần trăm, trong khi độ lệch chuẩn giữa các fold lên tới 1,19.
+Bốn cấu hình dùng CHUNG một bộ fold nên đây là phép so bắt cặp, nhạy hơn hẳn
+so với việc đặt hai khoảng mean±std cạnh nhau; dù vậy vẫn nên đọc kết quả này
+là **một xu hướng nhất quán về dấu**, không phải một con số chốt.

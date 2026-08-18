@@ -271,10 +271,12 @@ def render_ablation(payload: dict) -> str:
     ]
     for row in rows:
         mdape = row["cv_mean"]["MdAPE (%)"]
+        std = row["cv_std"]["MdAPE (%)"]
         delta = mdape - baseline
         sign = "+" if delta > 0 else ""
         lines.append(
-            f"| {row['configuration']} | {_vi(mdape, 2)} | {sign}{_vi(delta, 2)} | "
+            f"| {row['configuration']} | {_vi(mdape, 2)} ± {_vi(std, 2)} | "
+            f"{sign}{_vi(delta, 2)} | "
             f"{_vi(row['cv_mean']['RMSE (tỷ)'], 3)} | {_vi(row['cv_mean']['R²'], 3)} |"
         )
     by_name = {r["configuration"]: r["cv_mean"]["MdAPE (%)"] for r in rows}
@@ -316,10 +318,19 @@ def render_ablation(payload: dict) -> str:
                 "thì nó nổi lên. Với cỡ dữ liệu hiện tại, cách rẻ hơn lại là cách tốt hơn.",
             ]
         elif tfidf_help and flags_help:
+            largest = max(baseline - flags, baseline - tfidf)
+            worst_std = max(r["cv_std"]["MdAPE (%)"] for r in rows)
             lines += [
                 "",
-                "Cả hai nhánh văn bản đều làm giảm sai số, tức là mô tả rao vặt mang tín hiệu",
-                "giá mà các trường có cấu trúc không có.",
+                "Cả ba cấu hình có văn bản đều thấp hơn cấu hình chỉ có đặc trưng bảng, và",
+                "thấp theo cùng một chiều. Mô tả rao vặt vì thế có mang tín hiệu giá mà các",
+                "trường điền sẵn không có.",
+                "",
+                f"Cần đọc kèm cỡ hiệu ứng: mức cải thiện lớn nhất là {_vi(largest, 2)} điểm",
+                f"phần trăm, trong khi độ lệch chuẩn giữa các fold lên tới {_vi(worst_std, 2)}.",
+                "Bốn cấu hình dùng CHUNG một bộ fold nên đây là phép so bắt cặp, nhạy hơn hẳn",
+                "so với việc đặt hai khoảng mean±std cạnh nhau; dù vậy vẫn nên đọc kết quả này",
+                "là **một xu hướng nhất quán về dấu**, không phải một con số chốt.",
             ]
         else:
             lines += [

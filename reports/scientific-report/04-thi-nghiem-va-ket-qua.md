@@ -120,6 +120,23 @@ Bốn cấu hình chạy trên cùng bộ fold, cùng mô hình, cùng ngân sá
 duy nhất là nhánh văn bản. Đây là con số trả lời trực tiếp câu hỏi trung tâm của đề tài:
 mô tả rao vặt mang bao nhiêu tín hiệu giá mà các trường có cấu trúc không có.
 
+### Một bài học về chính cách chạy ablation
+
+Nhóm chạy bảng này hai lần trên hai mô hình khác nhau, và **hai lần cho hai kết luận
+ngược nhau**. Với Random Forest, nhánh TF-IDF/SVD làm sai số tăng 1,52 điểm phần trăm.
+Với LightGBM, chính nhánh đó làm sai số giảm 0,86 điểm.
+
+Cách giải thích hợp lý: Random Forest chọn ngẫu nhiên một tập con cột ở mỗi lần tách,
+nên hơn một trăm trục SVD dày và yếu làm loãng xác suất bắt trúng cột hữu ích. Boosting
+xây cây tuần tự theo phần dư và chọn điểm tách theo mức giảm hàm mất mát, nên chịu được
+cột yếu tốt hơn nhiều.
+
+Hệ quả về phương pháp luận, và đây mới là phần đáng ghi lại: **ablation phải chạy trên
+đúng mô hình mà báo cáo kết luận.** Bảng đầu tiên của nhóm dùng Random Forest chỉ vì nó
+đứng trước trong danh sách khai báo, và nếu không phát hiện ra thì báo cáo đã kết luận
+"đặc trưng văn bản làm hại mô hình" trong khi mô hình được chọn thì ngược lại. Bộ chạy
+thí nghiệm hiện đọc mô hình vô địch từ chính bảng E1 thay vì lấy theo thứ tự khai báo.
+
 ## Chuyển giao theo thời gian (E2)
 
 <!-- include: reports/tables/e2-results.md -->

@@ -38,11 +38,10 @@ Ba kết luận rút ra từ bảng kết quả, mỗi kết luận kèm con s�
    phép chọn ra một mô hình thắng tuyệt đối. Điều đáng nói hơn là khoảng cách so với
    baseline môi giới, tức trung vị giá mỗi m² theo nhóm nhân diện tích. Đó mới là phần
    giá trị mà học máy thực sự tạo ra so với cách định giá thủ công.
-2. **Mô tả có mang tín hiệu giá, nhưng phải được chưng cất trước khi dùng.** Bốn cấu
-   hình chạy trên cùng bộ fold, khác biệt duy nhất là nhánh văn bản, và hai nhánh đi
-   ngược chiều nhau: vài chục cờ nhị phân thủ công làm sai số giảm, còn hơn trăm trục
-   TF-IDF/SVD lại làm sai số tăng. Với cỡ dữ liệu hiện tại, cách biểu diễn rẻ hơn lại
-   là cách tốt hơn. Chi tiết và cách giải thích ở bảng ablation chương 4.
+2. **Mô tả rao vặt có mang tín hiệu giá.** Cả ba cấu hình có nhánh văn bản đều cho sai
+   số thấp hơn cấu hình chỉ dùng đặc trưng bảng, nhất quán về dấu. Nhưng mức cải thiện
+   nhỏ hơn độ lệch chuẩn giữa các fold, nên đây là một xu hướng chứ chưa phải một con số
+   chốt. Chương 4 nêu rõ điều này thay vì trình bày nó như một chiến thắng.
 3. **Chuyển giao theo thời gian có giá của nó.** Mô hình huấn luyện trên tin tới
    06/2025 rồi đem dự báo tin tháng 08/2026 kém hơn hẳn mô hình huấn luyện trên chính dữ
    liệu 2026. Cả hai phía đều là giá rao, nên chênh lệch đó không lẫn khoảng cách giữa
@@ -74,16 +73,15 @@ lựa chọn có chủ ý và được ghi lại, không phải một thiếu s�
 
 ## Hướng phát triển
 
-**Bổ sung dữ liệu, nhưng không phải việc đáng làm trước tiên.** Câu hỏi "crawl thêm có
-đáng không" được trả lời bằng phép đo chứ không bằng cảm tính, và câu trả lời không như
-nhóm dự đoán ban đầu: đường cong học đã gần phẳng ở mốc 100% dữ liệu hiện có. Từ 186 lên
+**Bổ sung dữ liệu, nhưng đừng kỳ vọng nhiều vào riêng nó.** Câu hỏi "crawl thêm có đáng
+không" được trả lời bằng phép đo chứ không bằng cảm tính, và câu trả lời không như nhóm
+dự đoán ban đầu: đường cong học đã gần phẳng ở mốc 100% dữ liệu hiện có. Từ 186 lên
 khoảng 1.600 tin, sai số giảm rất mạnh; từ đó tới 1.860 tin thì gần như không giảm nữa.
-Nút thắt đã chuyển từ số lượng tin sang chất lượng đặc trưng và chất lượng nhãn.
 
-Điều này không có nghĩa là ngừng thu thập: bảng ablation cho thấy phần văn bản mới chỉ
-khai thác được qua vài chục cờ thủ công, và nhánh TF-IDF cần nhiều dữ liệu hơn hẳn mới
-có cơ hội phát huy. Nói cách khác, thu thập thêm đáng làm khi đi kèm một cách biểu diễn
-văn bản tốt hơn, chứ thêm dữ liệu mà giữ nguyên đặc trưng thì lợi ích đã bão hoà.
+Ba lý do vẫn nên thu thập thêm, nhưng với kỳ vọng đúng. Thứ nhất, đường cong đo trên
+2.326 tin của ba quận, chưa nói gì về việc mở rộng địa bàn. Thứ hai, nhánh TF-IDF cần
+nhiều mẫu hơn hẳn mới phát huy hết, và ablation cho thấy nó mới chỉ vừa bắt đầu có ích.
+Thứ ba, cả cổng kiểm chất lượng lẫn ngưỡng của đề đều chưa đạt bằng dữ liệu hiện có.
 
 **Toạ độ và đặc trưng khoảng cách.** Bước geocoding đã được thiết kế đầy đủ (Nominatim
 1 request mỗi giây, cache trên đĩa, lùi về centroid phường khi không giải được) nhưng
