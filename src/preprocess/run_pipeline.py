@@ -126,6 +126,17 @@ def main() -> None:
         frame["description_clean"] = (
             frame["title"].fillna("") + " " + frame["description"].fillna("")
         ).map(strip_price_mentions)
+        # Tách từ ngay ở bước tiền xử lý: làm một lần cho cả dự án thay vì lặp lại
+        # trong từng lần fit của từng fold.
+        from src.features.text import pretokenize
+
+        # Lọc giá LẦN HAI sau khi tách từ. Bộ tách từ bỏ dấu câu bên trong token, nên
+        # "5,85 tỷ" (đã bị lọc từ vòng đầu) có thể tái sinh dưới dạng "585 tỷ" từ những
+        # mảnh khác. Lọc trước khi vector hoá là chốt chặn cuối cùng, và test rò rỉ đo
+        # đúng cột này.
+        frame["description_tokens"] = (
+            frame["description_clean"].map(pretokenize).map(strip_price_mentions)
+        )
         frame["price_per_m2"] = frame["total_price_vnd"] / frame["area_m2"]
 
         OUTPUT.parent.mkdir(parents=True, exist_ok=True)
