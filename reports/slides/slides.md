@@ -154,7 +154,7 @@ Huấn luyện trên tin ≤ 06/2025 → kiểm trên tin crawl 08/2026.
 Cả hai phía đều là **giá rao**, nên con số đo được là trôi giá theo thời gian thuần
 tuý, không lẫn khoảng cách giá rao / giá giao dịch.
 
-![Giá mỗi m² trung vị theo quý](../figures/eda-04-gia-m2-theo-quy.png)
+![Giá mỗi m² trung vị theo tháng](../figures/eda-04-gia-m2-theo-thang.png)
 
 ---
 

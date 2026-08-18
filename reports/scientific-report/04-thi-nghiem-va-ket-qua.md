@@ -85,7 +85,27 @@ mô tả rao vặt mang bao nhiêu tín hiệu giá mà các trường có cấu
 
 <!-- include: reports/tables/e2-results.md -->
 
-![Giá mỗi m² trung vị theo quý](../figures/eda-04-gia-m2-theo-quy.png)
+![Giá mỗi m² trung vị theo tháng](../figures/eda-04-gia-m2-theo-thang.png)
+
+### Một cảnh báo phải đọc kèm hình trên
+
+Đường trung vị của cả ba quận mục tiêu đi ngang trong suốt mười tháng dữ liệu lịch sử
+(06/2025 – 03/2026), rồi **rơi xuống** ở điểm tin crawl tháng 08/2026. Cám dỗ là kết
+luận ngay rằng mặt bằng giá rao đã giảm. Kết luận đó chưa đủ căn cứ, vì đoạn nét đứt
+trên hình cùng lúc bắc qua hai thứ:
+
+- **năm tháng không có dữ liệu** (04/2026 – 07/2026), và
+- **một lần đổi nguồn**: phần bên trái là bộ lịch sử, điểm bên phải là dữ liệu nhóm tự
+  crawl từ hai sàn khác.
+
+Hai sàn khác nhau có tệp người đăng và cơ cấu sản phẩm khác nhau, nên một phần mức chênh
+là chênh giữa nguồn chứ không phải chênh theo thời gian. Nhóm không tách được hai thành
+phần này bằng dữ liệu hiện có, nên không quy toàn bộ mức rơi cho trôi giá. Đây cũng là
+lý do hình được vẽ nét đứt và ký hiệu điểm khác nhau ở hai phía thay vì một đường liền:
+người đọc phải thấy chỗ nối là chỗ đáng ngờ.
+
+Cách kiểm chứng cho lần sau đã rõ: crawl bù các tháng còn thiếu trên chính hai sàn đang
+dùng, khi đó cả đường sẽ nằm trên một nguồn duy nhất và mức trôi đọc được trực tiếp.
 
 ## Stress test không gian (E3)
 

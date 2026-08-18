@@ -104,32 +104,114 @@ def figure_count_by_district(frame: pd.DataFrame, logger) -> None:
     _save(fig, "eda-03-so-tin-theo-quan.png", logger)
 
 
-def figure_unit_price_by_quarter(frame: pd.DataFrame, logger) -> None:
-    """Giá/m² trung vị theo quý, tách theo quận — nền cho phần diễn giải trôi giá."""
-    data = frame.dropna(subset=["published_at"]).copy()
+SERIES_COLORS = ["#0891B2", "#D97706", "#7C3AED", "#059669", "#DC2626"]
+
+
+def figure_unit_price_by_month(frame: pd.DataFrame, logger) -> None:
+    """Giá/m² trung vị theo tháng, 2025-06 → 2026-08 (T4.12).
+
+    Bảng đã tiền xử lý chỉ chứa lát cắt ≤ mốc cắt của nguồn lịch sử cộng với tin crawl
+    2026, nên vẽ trên nó chỉ ra được hai điểm mốc và một đường thẳng nối chúng — nhìn
+    thì gọn mà không nói được gì về diễn biến ở giữa. Hình này vì thế đọc thêm file
+    `hf_hcmc_timeline.parquet` (toàn chuỗi 2025-06 → 2026-03) và ghép với dữ liệu crawl
+    tháng 08/2026, cho ra một đường thật sự có hình dạng.
+
+    Trung vị theo THÁNG chứ không theo quý: mười tháng dữ liệu chia thành bốn quý thì
+    mỗi quý chỉ còn một điểm, quá thô để thấy xu hướng.
+    """
+    parts = []
+
+    timeline_path = config.DATA_EXTERNAL / "hf_hcmc_timeline.parquet"
+    if timeline_path.exists():
+        timeline = pd.read_parquet(
+            timeline_path, columns=["district_name", "price", "area", "published_at"]
+        )
+        timeline = timeline.rename(
+            columns={"district_name": "district", "price": "total_price_vnd", "area": "area_m2"}
+        )
+        timeline["total_price_vnd"] = pd.to_numeric(timeline["total_price_vnd"], errors="coerce")
+        # Cùng miền hợp lệ với pipeline chính, nếu không đường trung vị bị vài tin rác kéo lệch.
+        low, high = config.VALID_TOTAL_PRICE_VND
+        timeline = timeline[
+            timeline["total_price_vnd"].between(low, high)
+            & timeline["area_m2"].between(*config.VALID_AREA_M2)
+        ]
+        from src.preprocess.address import normalise_district
+
+        timeline["district"] = [normalise_district(d) for d in timeline["district"]]
+        parts.append(timeline[["district", "total_price_vnd", "area_m2", "published_at"]])
+
+    crawl = frame[frame["source"].isin(["chotot", "mogi"])]
+    parts.append(crawl[["district", "total_price_vnd", "area_m2", "published_at"]])
+
+    data = pd.concat(parts, ignore_index=True)
     data["published_at"] = pd.to_datetime(data["published_at"], errors="coerce", utc=True)
-    data = data.dropna(subset=["published_at"])
-    data["quarter"] = data["published_at"].dt.to_period("Q").astype(str)
+    data = data.dropna(subset=["published_at", "total_price_vnd", "area_m2"])
+    data["month"] = data["published_at"].dt.tz_localize(None).dt.to_period("M").astype(str)
     data["unit_price"] = data["total_price_vnd"] / data["area_m2"] / 1e6
 
-    top = data["district"].value_counts().head(5).index
-    fig, ax = plt.subplots(figsize=(7.5, 3.8))
-    for district in top:
+    # Ba quận mục tiêu đứng trước, rồi bù thêm quận đông tin nhất cho đủ năm đường.
+    ranked = list(data["district"].value_counts().index)
+    districts = [d for d in config.TARGET_DISTRICTS if d in ranked]
+    districts += [d for d in ranked if d not in districts][: 5 - len(districts)]
+
+    # Dữ liệu lịch sử dừng ở 2026-03, tin crawl là 2026-08: giữa hai mốc có năm tháng
+    # trống. Nối thẳng qua khoảng trống đó là vẽ ra một xu hướng chưa hề quan sát được,
+    # nên đoạn bắc cầu được vẽ nét đứt và điểm crawl được đánh dấu riêng.
+    months = sorted(data["month"].unique())
+    crawl_months = sorted(
+        data.loc[data["published_at"].dt.year >= 2026, "month"].unique()
+    )
+    bridge_from = None
+    if len(months) >= 2:
+        gaps = [
+            (months[i], months[i + 1])
+            for i in range(len(months) - 1)
+            if (pd.Period(months[i + 1]) - pd.Period(months[i])).n > 1
+        ]
+        bridge_from = gaps[-1] if gaps else None
+
+    fig, ax = plt.subplots(figsize=(9, 4.2))
+
+    for colour, district in zip(SERIES_COLORS, districts):
         series = (
             data[data["district"] == district]
-            .groupby("quarter")["unit_price"]
-            .median()
+            .groupby("month")["unit_price"]
+            .agg(["median", "size"])
             .sort_index()
         )
-        if len(series) >= 2:
-            ax.plot(series.index, series.to_numpy(), marker="o", label=district, linewidth=1.8)
+        # Tháng dưới 15 tin thì trung vị quá nhiễu để vẽ thành xu hướng.
+        series = series[series["size"] >= 15]
+        if len(series) < 2:
+            continue
 
-    ax.set_title("Giá/m² trung vị theo quý")
-    ax.set_xlabel("Quý")
+        if bridge_from and bridge_from[0] in series.index and bridge_from[1] in series.index:
+            left = series.loc[:bridge_from[0]]
+            right = series.loc[bridge_from[1]:]
+            ax.plot(left.index, left["median"].to_numpy(), marker="o", markersize=4,
+                    label=district, linewidth=1.8, color=colour)
+            ax.plot(list(bridge_from), [left["median"].iloc[-1], right["median"].iloc[0]],
+                    linestyle="--", linewidth=1.2, color=colour, alpha=0.6)
+            ax.plot(right.index, right["median"].to_numpy(), marker="D", markersize=6,
+                    linewidth=1.8, color=colour)
+        else:
+            ax.plot(series.index, series["median"].to_numpy(), marker="o", markersize=4,
+                    label=district, linewidth=1.8, color=colour)
+
+    ax.set_title("Giá/m² trung vị theo tháng")
+    ax.set_xlabel("Tháng đăng tin")
     ax.set_ylabel("Triệu đồng/m²")
-    ax.legend(frameon=False, ncol=2)
-    plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
-    _save(fig, "eda-04-gia-m2-theo-quy.png", logger)
+    ax.legend(frameon=False, ncol=1, fontsize=9, loc="center left", bbox_to_anchor=(1.01, 0.5))
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", fontsize=8)
+
+    if bridge_from:
+        ax.text(
+            0.5, -0.42,
+            f"Nét đứt: khoảng trống dữ liệu {bridge_from[0]} → {bridge_from[1]}. "
+            "Hình thoi là tin crawl 08/2026 (nguồn B), tròn là bộ lịch sử (nguồn A).",
+            transform=ax.transAxes, ha="center", fontsize=8, color="#475569",
+        )
+    _save(fig, "eda-04-gia-m2-theo-thang.png", logger)
 
 
 def figure_error_by_slice(logger) -> None:
@@ -191,7 +273,7 @@ def main() -> None:
     figure_price_distribution(frame, logger)
     figure_area_distribution(frame, logger)
     figure_count_by_district(frame, logger)
-    figure_unit_price_by_quarter(frame, logger)
+    figure_unit_price_by_month(frame, logger)
     figure_error_by_slice(logger)
     figure_learning_curve(logger)
 
