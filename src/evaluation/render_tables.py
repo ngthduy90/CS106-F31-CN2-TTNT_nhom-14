@@ -99,6 +99,23 @@ def render_e1(payload: dict) -> str:
         ]
         lines.append(f"| {model['name']} | " + " | ".join(cells) + " |")
 
+    # Mô hình nào sinh ra dự báo vô cực thì phải nêu đích danh: chỉ số của nó tính trên
+    # phần dự báo hữu hạn, nên không so trực tiếp với các dòng khác được.
+    broken = [
+        (m["name"], m["cv_mean"].get("n_non_finite", 0))
+        for m in models
+        if m["cv_mean"].get("n_non_finite", 0) > 0
+    ]
+    if broken:
+        lines += [
+            "",
+            "**Dự báo tràn số**: "
+            + ", ".join(f"{name} ({count:.0f} dự báo/fold)" for name, count in broken)
+            + ". Các mô hình này sinh ra giá trị vô cực khi `exp` ngược từ thang log; chỉ",
+            "số của chúng tính trên phần dự báo hữu hạn nên không so ngang hàng với các",
+            "dòng còn lại được.",
+        ]
+
     # Nhóm tuyến tính hay có std của RMSE lớn hơn cả trung bình; đó là dấu hiệu chứ
     # không phải lỗi, và người đọc bảng cần được cảnh báo ngay dưới bảng.
     unstable = [

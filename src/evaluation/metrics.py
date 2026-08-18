@@ -32,14 +32,40 @@ def median_absolute_percentage_error(y_true, y_pred) -> float:
 
 
 def compute_metrics(y_true, y_pred) -> dict[str, float]:
-    """Bộ bốn chỉ số. RMSE/MAE quy ra tỷ đồng để bảng báo cáo đọc được bằng mắt."""
+    """Bộ bốn chỉ số. RMSE/MAE quy ra tỷ đồng để bảng báo cáo đọc được bằng mắt.
+
+    Chịu được dự báo vô cực. Mô hình huấn luyện trên log(giá) rồi lấy `exp` để quay về
+    thang VND; một dự báo log đủ lớn sẽ tràn số thành `inf`, và scikit-learn từ chối
+    tính chỉ số trên đó. Chuyện này xảy ra thật với MLP trên bộ lịch sử, và nó làm gãy
+    cả phiên chạy thí nghiệm.
+
+    Cách xử lý là báo cáo chứ không che: chỉ số tính trên phần dự báo hữu hạn, còn số
+    dự báo không hữu hạn được trả về ở khoá `n_non_finite` để bảng kết quả nêu ra. Cắt
+    ngưỡng dự báo cho đẹp sẽ giấu mất một tính chất có thật của phương pháp log-target,
+    mà đó lại đúng là điều đáng nói trong báo cáo.
+    """
     y_true = np.asarray(y_true, dtype="float64")
     y_pred = np.asarray(y_pred, dtype="float64")
+
+    finite = np.isfinite(y_pred) & np.isfinite(y_true)
+    n_bad = int((~finite).sum())
+
+    if not finite.any():
+        return {
+            "RMSE (tỷ)": float("nan"),
+            "MAE (tỷ)": float("nan"),
+            "MdAPE (%)": float("nan"),
+            "R²": float("nan"),
+            "n_non_finite": n_bad,
+        }
+
+    true_ok, pred_ok = y_true[finite], y_pred[finite]
     return {
-        "RMSE (tỷ)": float(np.sqrt(mean_squared_error(y_true, y_pred))) / BILLION,
-        "MAE (tỷ)": float(mean_absolute_error(y_true, y_pred)) / BILLION,
-        "MdAPE (%)": median_absolute_percentage_error(y_true, y_pred),
-        "R²": float(r2_score(y_true, y_pred)),
+        "RMSE (tỷ)": float(np.sqrt(mean_squared_error(true_ok, pred_ok))) / BILLION,
+        "MAE (tỷ)": float(mean_absolute_error(true_ok, pred_ok)) / BILLION,
+        "MdAPE (%)": median_absolute_percentage_error(true_ok, pred_ok),
+        "R²": float(r2_score(true_ok, pred_ok)) if len(true_ok) > 1 else float("nan"),
+        "n_non_finite": n_bad,
     }
 
 
