@@ -54,13 +54,16 @@ def _cap(subset: pd.DataFrame, max_rows: int | None) -> pd.DataFrame:
     """
     if not max_rows or len(subset) <= max_rows:
         return subset
+
     fraction = max_rows / len(subset)
-    sampled = (
-        subset.groupby("district", group_keys=False)
-        .apply(lambda g: g.sample(max(1, int(round(len(g) * fraction))), random_state=config.SEED))
-        .reset_index(drop=True)
-    )
-    return sampled
+    # Vòng lặp tường minh thay cho `groupby.apply`: pandas 2.2 cảnh báo rằng apply đang
+    # thao tác cả trên cột dùng để nhóm và sẽ đổi hành vi ở bản sau. Viết thẳng ra thì
+    # vừa hết cảnh báo vừa đọc rõ đang lấy bao nhiêu dòng mỗi quận.
+    parts = [
+        group.sample(max(1, int(round(len(group) * fraction))), random_state=config.SEED)
+        for _, group in subset.groupby("district", sort=True)
+    ]
+    return pd.concat(parts).reset_index(drop=True)
 
 
 def run_e1(frame: pd.DataFrame, specs, logger, search_iterations: int,

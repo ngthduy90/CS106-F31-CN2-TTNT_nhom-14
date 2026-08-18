@@ -19,6 +19,19 @@ from src.features.build import BANNED, build_feature_frame, build_pipeline
 from src.preprocess.leakage import count_money_tokens, strip_price_mentions, verify_no_money_tokens
 
 
+# Mô tả phải KHÁC NHAU giữa các dòng. Dùng 60 bản sao của cùng một câu thì nhánh văn bản
+# có phương sai bằng 0, TruncatedSVD chia cho 0, và quan trọng hơn là phép kiểm rò rỉ
+# không thật sự kiểm được gì: một từ vựng chỉ có một tài liệu thì không có gì để lọc.
+DESCRIPTIONS = [
+    "nhà đẹp hẻm xe hơi sổ hồng riêng full nội thất vào ở ngay",
+    "nhà mặt tiền đường lớn kinh doanh sầm uất vị trí đắc địa",
+    "căn hộ chung cư view đẹp ban công thoáng gần trường học",
+    "nhà nát cần bán gấp tiện xây mới hẻm ba gác",
+    "biệt thự khu compound an ninh có hồ bơi sân vườn rộng",
+    "đất thổ cư vuông vức đã tách thửa gần chợ và bệnh viện",
+]
+
+
 @pytest.fixture
 def frame():
     n = 60
@@ -45,9 +58,9 @@ def frame():
             "position": "hẻm",
             "published_at": pd.date_range("2025-06-01", periods=n, freq="D"),
             "title": "Bán nhà Tân Bình",
-            "description": ["Nhà đẹp hẻm xe hơi sổ hồng riêng full nội thất"] * n,
-            "description_clean": ["nhà đẹp hẻm xe hơi sổ hồng riêng full nội thất"] * n,
-            "description_tokens": ["nhà đẹp hẻm xe_hơi sổ_hồng riêng full nội_thất"] * n,
+            "description": [DESCRIPTIONS[i % len(DESCRIPTIONS)] for i in range(n)],
+            "description_clean": [DESCRIPTIONS[i % len(DESCRIPTIONS)] for i in range(n)],
+            "description_tokens": [DESCRIPTIONS[i % len(DESCRIPTIONS)] for i in range(n)],
         }
     )
 
@@ -66,10 +79,20 @@ def test_van_ban_da_bi_xoa_moi_dau_vet_gia():
 
 
 def test_top_dac_trung_tfidf_khong_con_token_tien(frame):
+    # Nhét giá vào mô tả rồi cho chạy đúng đường mà pipeline thật đi qua: nếu bộ lọc
+    # hỏng thì "5,2 tỷ" sẽ nằm trong từ vựng TF-IDF và phép kiểm phải bắt được.
+    frame = frame.copy()
+    frame["description_tokens"] = [
+        strip_price_mentions(f"{text} giá chỉ 5,2 tỷ thương lượng")
+        for text in frame["description_tokens"]
+    ]
     pipeline = build_pipeline(use_text=True)
     pipeline.fit(build_feature_frame(frame))
     tfidf = pipeline.named_transformers_["text"].named_steps["tfidf"]
-    assert verify_no_money_tokens(tfidf.get_feature_names_out()) == []
+    vocabulary = list(tfidf.get_feature_names_out())
+
+    assert verify_no_money_tokens(vocabulary) == []
+    assert len(vocabulary) > 5, "từ vựng quá nghèo để phép kiểm có ý nghĩa"
 
 
 def test_transform_chi_fit_tren_train(frame):
