@@ -1,0 +1,16 @@
+# Danh sách thành viên nhóm — nguồn duy nhất cho file Excel bài nộp, trang bìa báo cáo
+# và slide phân công. Sửa ở đây rồi chạy `python scripts/build-member-list.py`.
+#
+# CHƯA ĐIỀN. Thay ba dòng mẫu bên dưới bằng danh sách thật trước khi nộp.
+
+nhom: 14
+lop: CS106.F31.CN2
+thanh_vien:
+  - ho_ten: "Nguyễn Thanh Duy"
+    mssv: "26410030"
+    lop: "CS106.F31.CN2"
+    phu_trach: "Toàn bộ phần lập trình: thu thập, tiền xử lý, mô hình, demo"
+  # - ho_ten: ""
+  #   mssv: ""
+  #   lop: "CS106.F31.CN2"
+  #   phu_trach: ""

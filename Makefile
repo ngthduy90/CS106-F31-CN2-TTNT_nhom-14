@@ -1,6 +1,6 @@
 PYTHON ?= python
 
-.PHONY: help setup crawl qa prep features train analysis report submission lock demo test all clean
+.PHONY: help setup crawl qa prep features train analysis report members repro submission lock demo test all clean
 
 help:
 	@echo "setup     cài thư viện vào venv hiện tại"
@@ -11,6 +11,8 @@ help:
 	@echo "train     chạy E1, E2, E3, ablation, SHAP, learning curve"
 	@echo "analysis  phân tích lỗi, SHAP, learning curve, xuất mô hình vô địch"
 	@echo "report    sinh lại toàn bộ bảng/hình rồi build báo cáo Word và slide"
+	@echo "members   sinh danh-sach-nhom.xlsx từ config/thanh-vien.yaml"
+	@echo "repro     kiểm tra sinh lại bảng và huấn luyện lại ra cùng số"
 	@echo "submission ráp thư mục nộp + quét chéo môn + quét dữ liệu lọt"
 	@echo "lock      chốt phiên bản thư viện vào requirements-lock.txt"
 	@echo "demo      chạy web app Streamlit"
@@ -47,7 +49,13 @@ report: analysis
 	bash scripts/build-docx.sh
 	bash scripts/build-slides.sh
 
-submission:
+members:
+	$(PYTHON) scripts/build-member-list.py
+
+repro:
+	$(PYTHON) scripts/check-reproducibility.py
+
+submission: members
 	$(PYTHON) scripts/assemble-submission.py
 
 lock:
