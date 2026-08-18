@@ -26,7 +26,8 @@ CHAPTERS=(
   "$SRC/06-tai-lieu-tham-khao.md"
 )
 
-# Ghép chương + chèn bảng sinh tự động; script tự báo phần còn thiếu.
+# Danh sách thành viên cho trang bìa, rồi ghép chương + chèn bảng sinh tự động.
+"${PYTHON:-python}" "$ROOT/scripts/build-cover-members.py" || true
 "${PYTHON:-python}" "$ROOT/scripts/assemble-report.py" || true
 
 COMMON=(

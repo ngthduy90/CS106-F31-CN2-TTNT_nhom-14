@@ -1,7 +1,12 @@
 # Danh sách thành viên nhóm — nguồn duy nhất cho file Excel bài nộp, trang bìa báo cáo
 # và slide phân công. Sửa ở đây rồi chạy `python scripts/build-member-list.py`.
 #
-# CHƯA ĐIỀN. Thay ba dòng mẫu bên dưới bằng danh sách thật trước khi nộp.
+# CHƯA ĐIỀN ĐỦ. Thay/bổ sung danh sách thật trước khi nộp.
+#
+# CẦN NAR XÁC NHẬN: dòng đầu đang ghi "Nguyễn Thanh Duy" (có dấu). Quy ước riêng của Nar
+# nói bài nộp trường dùng dạng "Nguyen-Thanh-Duy" (không dấu, có gạch nối), nhưng ví dụ
+# kèm theo là TÊN FILE. Với trang bìa báo cáo tiếng Việt thì dạng có dấu tự nhiên hơn.
+# Chọn một dạng rồi sửa ở đây; trang bìa, file Excel và slide đều đọc từ file này.
 
 nhom: 14
 lop: CS106.F31.CN2
