@@ -69,6 +69,6 @@ Danh sách từ dừng và stoplist riêng cho tin rao do nhóm tự xây dựng
     08/2026 nên thuộc phạm vi điều chỉnh của luật mới.
 
 Nhóm không trích dẫn điều khoản cụ thể nào của hai văn bản trên. Quy tắc áp dụng trong
-đồ án — không thu thập, không lưu, không tái phân phối thông tin cá nhân người đăng tin
-— chặt hơn mức tối thiểu mà quy định yêu cầu, nên không cần diễn giải điều khoản để biện
+đồ án (không thu thập, không lưu, không tái phân phối thông tin cá nhân người đăng tin)
+chặt hơn mức tối thiểu mà quy định yêu cầu, nên không cần diễn giải điều khoản để biện
 minh cho một lựa chọn kỹ thuật nào.

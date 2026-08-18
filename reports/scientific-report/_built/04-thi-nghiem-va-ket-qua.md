@@ -198,7 +198,7 @@ thuộc của bài toán định giá: phân khúc giữa vừa nhiều mẫu v�
 đặc thù, nhà đắt thường là bất động sản dị biệt mà vài chục mẫu không đủ để học.
 Lát cắt theo quận cho biết mô hình yếu ở địa bàn nào. Lát cắt theo khoảng giá cho thấy
 một hình chữ U rất rõ: sai số thấp nhất ở phân khúc giữa, cao hơn hẳn ở cả hai đầu. Đọc
-được ngay từ hình này là một cảnh báo thực dụng cho người dùng mô hình — với căn nhà nằm
+được ngay từ hình này là một cảnh báo thực dụng cho người dùng mô hình: với căn nhà nằm
 ở hai đầu phân khúc, con số dự báo phải được coi là ước lượng thô, không phải một mức
 giá đáng tin.
 
@@ -212,7 +212,7 @@ Biểu đồ beeswarm cho biết đặc trưng nào ảnh hưởng mạnh nhất
 ![Permutation importance](../figures/ket-qua-05-permutation-importance.png)
 
 Permutation importance được báo kèm chứ không dùng riêng impurity importance của mô hình
-cây. Impurity importance thiên vị các biến có nhiều mức — như tên đường và phường — nên
+cây. Impurity importance thiên vị các biến có nhiều mức (như tên đường và phường), nên
 đọc một mình sẽ dẫn tới kết luận sai về biến nào thật sự quan trọng.
 
 ![Ca sai nặng nhất](../figures/ket-qua-04-shap-waterfall-1.png)
@@ -242,5 +242,5 @@ Từ 186 lên 1860 tin, MdAPE giảm từ 18,9% xuống 12,0%.
 **Bước cuối vẫn còn giảm 0,8 điểm phần trăm**, nghĩa là đường cong chưa phẳng: thu thập thêm dữ liệu vẫn còn cải thiện được sai số, và đó là chỗ đáng đầu tư tiếp theo.
 Đường cong này trả lời một câu hỏi thực tế mà nhóm phải quyết: crawl thêm dữ liệu có
 đáng không, hay nên dồn công sức vào chất lượng đặc trưng. Câu trả lời nằm ở bước cuối
-cùng của bảng — nếu thêm 15% dữ liệu cuối vẫn còn kéo sai số xuống thì đường chưa bão
+cùng của bảng: nếu thêm 15% dữ liệu cuối vẫn còn kéo sai số xuống thì đường chưa bão
 hoà và việc thu thập vẫn còn giá trị.

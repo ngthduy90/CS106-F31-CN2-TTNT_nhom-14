@@ -35,3 +35,12 @@ config/local.yaml
 # Bản build của báo cáo (sinh lại bằng scripts/build-docx.sh); bản cuối nằm trong submission/
 reports/bao-cao-khoa-hoc.docx
 reports/bao-cao-khoa-hoc.pdf
+reports/technical-report/technical-report.docx
+reports/slides/slides.pptx
+
+# Bản đã ghép bảng vào chương (sinh lại bằng scripts/assemble-report.py)
+reports/scientific-report/_built/
+reports/slides/_built/
+
+# Thư mục nộp được ráp lại bằng scripts/assemble-submission.py
+submission/[Project AI-UIT]*/

@@ -292,6 +292,73 @@ def render_learning_curve(payload: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+# Slide chỉ đủ chỗ cho vài dòng, nhưng con số trên slide bắt buộc phải là con số trong
+# báo cáo (thầy dễ soi nhất chỗ hai tài liệu làm tròn khác nhau). Bảng rút gọn vì thế
+# sinh từ CÙNG file kết quả, chỉ chọn ít dòng hơn và ít cột hơn.
+SLIDE_MODELS = [
+    "Dummy (trung vị)",
+    "Trung vị giá/m² theo nhóm",
+    "Ridge",
+    "Random Forest",
+    "LightGBM",
+    "XGBoost",
+]
+
+
+def render_e1_slide(payload: dict) -> str:
+    models = {m["name"]: m for m in payload["models"]}
+    best = min(
+        (m for m in payload["models"] if not m["tier"].startswith("0")),
+        key=lambda m: m["cv_mean"]["MdAPE (%)"],
+    )
+    lines = [
+        "# Kết quả chính (E1)",
+        "",
+        f"{payload['n_rows']:,} tin Chợ Tốt · 5-fold · cùng bộ fold, cùng ngân sách tinh chỉnh"
+        .replace(",", "."),
+        "",
+        "| Mô hình | MdAPE (%) | RMSE (tỷ) | R² |",
+        "|---|---:|---:|---:|",
+    ]
+    for name in SLIDE_MODELS:
+        model = models.get(name)
+        if not model:
+            continue
+        label = f"**{name}**" if name == best["name"] else name
+        lines.append(
+            f"| {label} | {_vi(model['cv_mean']['MdAPE (%)'], 1)} | "
+            f"{_vi(model['cv_mean']['RMSE (tỷ)'], 2)} | {_vi(model['cv_mean']['R²'], 3)} |"
+        )
+    baseline = models.get("Trung vị giá/m² theo nhóm")
+    if baseline:
+        gap = baseline["cv_mean"]["MdAPE (%)"] - best["cv_mean"]["MdAPE (%)"]
+        lines += [
+            "",
+            f"{best['name']} hơn baseline môi giới {_vi(gap, 1)} điểm phần trăm MdAPE.",
+        ]
+    return "\n".join(lines) + "\n"
+
+
+def render_ablation_slide(payload: dict) -> str:
+    rows = payload["rows"]
+    baseline = rows[0]["cv_mean"]["MdAPE (%)"]
+    lines = [
+        "# Ablation: văn bản đáng bao nhiêu?",
+        "",
+        "| Đặc trưng dùng | MdAPE (%) | Δ |",
+        "|---|---:|---:|",
+    ]
+    for row in rows:
+        mdape = row["cv_mean"]["MdAPE (%)"]
+        delta = mdape - baseline
+        sign = "+" if delta > 0 else ""
+        lines.append(
+            f"| {row['configuration']} | {_vi(mdape, 2)} | {sign}{_vi(delta, 2)} |"
+        )
+    lines += ["", "Cùng bộ fold, cùng mô hình, cùng ngân sách. Khác biệt duy nhất là nhánh văn bản."]
+    return "\n".join(lines) + "\n"
+
+
 RENDERERS = {
     "error_analysis": ("error-analysis.md", render_error_analysis),
     "learning_curve": ("learning-curve.md", render_learning_curve),
@@ -300,6 +367,12 @@ RENDERERS = {
     "e2": ("e2-results.md", render_e2),
     "e3": ("e3-results.md", render_e3),
     "ablation": ("ablation.md", render_ablation),
+}
+
+# Bảng chỉ dùng cho slide, ghi vào thư mục riêng để không lẫn với bảng của báo cáo.
+SLIDE_RENDERERS = {
+    "e1_chotot": ("slide-e1.md", render_e1_slide),
+    "ablation": ("slide-ablation.md", render_ablation_slide),
 }
 
 
@@ -316,6 +389,17 @@ def main() -> None:
         payload = json.loads(source.read_text(encoding="utf-8"))
         (TABLES_DIR / filename).write_text(renderer(payload), encoding="utf-8")
         logger.info("%s → %s", source.name, filename)
+        written += 1
+
+    slide_dir = config.REPORTS / "slides" / "tables"
+    slide_dir.mkdir(parents=True, exist_ok=True)
+    for key, (filename, renderer) in SLIDE_RENDERERS.items():
+        source = RESULTS_DIR / f"{key}.json"
+        if not source.exists():
+            continue
+        payload = json.loads(source.read_text(encoding="utf-8"))
+        (slide_dir / filename).write_text(renderer(payload), encoding="utf-8")
+        logger.info("%s → slides/tables/%s", source.name, filename)
         written += 1
 
     logger.info("đã sinh %d bảng", written)

@@ -115,10 +115,7 @@ Mốc đáng quan tâm nhất là **baseline môi giới**: cách một người
 
 ---
 
-# Kết quả chính (E1)
-
-<!-- SLIDE: chèn bảng rút gọn từ reports/tables/e1-results-chotot.md, giữ 6 dòng
-     Dummy · baseline nhóm · Ridge · Random Forest · LightGBM · CatBoost -->
+<!-- include: reports/slides/tables/slide-e1.md -->
 
 Điều kiện so sánh công bằng: cùng bộ fold, cùng ngân sách tinh chỉnh, cùng seed. Không
 tuyên bố hơn kém khi hai khoảng trung bình ± độ lệch chuẩn chồng lấn.
@@ -138,12 +135,7 @@ không bị ảnh hưởng, RMSE thì sụp.
 
 ---
 
-# Ablation: văn bản đáng bao nhiêu?
-
-<!-- SLIDE: chèn bảng từ reports/tables/ablation.md -->
-
-Bốn cấu hình, cùng bộ fold, cùng mô hình, cùng ngân sách. Khác biệt duy nhất là nhánh
-văn bản.
+<!-- include: reports/slides/tables/slide-ablation.md -->
 
 ---
 

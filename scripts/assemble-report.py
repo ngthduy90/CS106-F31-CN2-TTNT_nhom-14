@@ -46,14 +46,31 @@ def assemble(path: Path) -> tuple[str, list[str]]:
 
     def replace(match: re.Match) -> str:
         target = ROOT / match.group(1)
+        demote = 2 if "scientific-report" in str(path) else 0
         if not target.exists():
             missing.append(match.group(1))
             return (
                 f"> **Chưa có `{match.group(1)}`.** Chạy lại pipeline để sinh bảng này."
             )
-        return _demote(_strip_title(target.read_text(encoding="utf-8")))
+        body = target.read_text(encoding="utf-8")
+        # Slide giữ nguyên tiêu đề cấp 1 vì mỗi tiêu đề là một slide.
+        if demote:
+            return _demote(_strip_title(body), demote)
+        return body.strip()
 
     return INCLUDE.sub(replace, text), missing
+
+
+def assemble_slides() -> list[str]:
+    """Ghép slide theo cùng cơ chế, ghi ra reports/slides/_built/slides.md."""
+    source = ROOT / "reports" / "slides" / "slides.md"
+    if not source.exists():
+        return []
+    text, missing = assemble(source)
+    target = ROOT / "reports" / "slides" / "_built"
+    target.mkdir(parents=True, exist_ok=True)
+    (target / "slides.md").write_text(text, encoding="utf-8")
+    return missing
 
 
 def main() -> int:
@@ -69,6 +86,8 @@ def main() -> int:
 
     for path in SRC.glob("*.yaml"):
         (BUILD / path.name).write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
+
+    all_missing += assemble_slides()
 
     if all_missing:
         print("THIẾU bảng: " + ", ".join(sorted(set(all_missing))))

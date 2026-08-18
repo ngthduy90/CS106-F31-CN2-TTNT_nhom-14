@@ -9,18 +9,15 @@
 
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SRC="$ROOT/reports/slides/slides.md"
+RAW="$ROOT/reports/slides/slides.md"
+SRC="$ROOT/reports/slides/_built/slides.md"
 OUT="$ROOT/reports/slides/slides.pptx"
 
-if grep -q "<!-- SLIDE:" "$SRC"; then
-  echo "CHÚ Ý: còn chỗ cần chèn bảng thủ công:"
-  grep -n "<!-- SLIDE:" "$SRC" | cut -c1-110
-  echo
-fi
+"${PYTHON:-python}" "$ROOT/scripts/assemble-report.py" || true
 
 pandoc "$SRC" \
   --from=markdown \
-  --resource-path="$ROOT/reports/slides:$ROOT/reports/figures:$ROOT" \
+  --resource-path="$ROOT/reports/slides/_built:$ROOT/reports/slides:$ROOT/reports/figures:$ROOT" \
   --slide-level=1 \
   -o "$OUT"
 
