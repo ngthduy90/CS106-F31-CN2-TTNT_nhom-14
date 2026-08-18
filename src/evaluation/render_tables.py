@@ -126,6 +126,19 @@ def render_e1(payload: dict) -> str:
 
 
 def render_e2(payload: dict) -> str:
+    """Bảng chuyển giao, kèm chênh lệch TÍNH RA so với bảng E1 cùng nguồn kiểm.
+
+    Chênh lệch được tính chứ không viết tay: câu "chuyển giao làm sai số tăng lên" chỉ
+    đúng nếu con số nói vậy, và hướng của nó phải do dữ liệu quyết định. Nếu về sau dữ
+    liệu đổi và chuyển giao hoá ra không tệ hơn, bảng này tự nói điều đó thay vì giữ lại
+    một câu khẳng định đã sai.
+    """
+    reference: dict[str, dict] = {}
+    e1_path = RESULTS_DIR / "e1_chotot.json"
+    if e1_path.exists():
+        e1 = json.loads(e1_path.read_text(encoding="utf-8"))
+        reference = {m["name"]: m["cv_mean"] for m in e1["models"]}
+
     lines = [
         "# E2: chuyển giao theo thời gian",
         "",
@@ -135,22 +148,45 @@ def render_e2(payload: dict) -> str:
         "Cả hai phía đều là GIÁ RAO nên chênh lệch đo được là trôi giá theo thời gian,",
         "không lẫn khoảng cách giữa giá rao và giá giao dịch.",
         "",
-        "| Mô hình | " + " | ".join(METRIC_ORDER) + " |",
-        "|---|" + "---:|" * len(METRIC_ORDER),
+        "Cột Δ so với cột cùng tên ở bảng E1 nguồn Chợ Tốt (huấn luyện và kiểm cùng trên",
+        "dữ liệu 2026). Δ dương nghĩa là chuyển giao làm sai số xấu đi.",
+        "",
+        "| Mô hình | " + " | ".join(METRIC_ORDER) + " | Δ MdAPE |",
+        "|---|" + "---:|" * (len(METRIC_ORDER) + 1),
     ]
+
+    deltas = []
     for model in payload["models"]:
         cells = [
             _vi(model["transfer"][metric], 1 if metric == "MdAPE (%)" else 3)
             for metric in METRIC_ORDER
         ]
+        base = reference.get(model["name"])
+        if base:
+            delta = model["transfer"]["MdAPE (%)"] - base["MdAPE (%)"]
+            deltas.append((model["name"], delta))
+            sign = "+" if delta > 0 else ""
+            cells.append(f"{sign}{_vi(delta, 1)}")
+        else:
+            cells.append("(không có mốc)")
         lines.append(f"| {model['name']} | " + " | ".join(cells) + " |")
 
-    lines += [
-        "",
-        "So sánh trực tiếp với cột cùng tên trong bảng E1 nguồn B (train 2026 → test",
-        "2026): khoảng cách giữa hai bảng chính là cái giá phải trả khi dùng mô hình cũ",
-        "cho thị trường mới.",
-    ]
+    learned = [d for name, d in deltas if name not in ("Dummy (trung vị)",)]
+    if learned:
+        mean_delta = sum(learned) / len(learned)
+        worse = sum(1 for d in learned if d > 0)
+        lines += [
+            "",
+            f"Trung bình các mô hình mất {_vi(abs(mean_delta), 1)} điểm phần trăm MdAPE khi"
+            if mean_delta > 0 else
+            f"Trung bình các mô hình TỐT LÊN {_vi(abs(mean_delta), 1)} điểm phần trăm MdAPE khi",
+            f"chuyển giao ({worse}/{len(learned)} mô hình xấu đi).",
+            "",
+            "Đây là cái giá của việc dùng một mô hình huấn luyện trên dữ liệu cũ cho thị",
+            "trường hiện tại. Cần đọc kèm một cảnh báo: tập huấn luyện và tập kiểm không chỉ",
+            "khác nhau về thời gian mà còn khác nhau về SÀN, nên một phần chênh lệch là chênh",
+            "giữa hai nguồn chứ không phải trôi giá thuần tuý.",
+        ]
     return "\n".join(lines) + "\n"
 
 
