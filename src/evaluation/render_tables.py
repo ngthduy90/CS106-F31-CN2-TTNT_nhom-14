@@ -305,17 +305,35 @@ SLIDE_MODELS = [
 ]
 
 
+def _leaders(payload: dict) -> list[dict]:
+    """Các mô hình không phân biệt được với mô hình tốt nhất bằng dữ liệu hiện có.
+
+    Trả về mọi mô hình có MdAPE trung bình nằm trong một độ lệch chuẩn của mô hình dẫn
+    đầu. Slide in đậm CẢ NHÓM này chứ không in đậm một cái: chênh 0,1 điểm giữa hai mô
+    hình có độ lệch chuẩn ±1,2 không phải là hơn kém, và chính báo cáo dặn không tuyên
+    bố hơn kém khi hai khoảng chồng lấn. In đậm đúng một dòng trên slide là tự vi phạm
+    quy tắc mình vừa viết ở chương trước.
+    """
+    candidates = [m for m in payload["models"] if not m["tier"].startswith("0")]
+    best = min(candidates, key=lambda m: m["cv_mean"]["MdAPE (%)"])
+    margin = best["cv_std"]["MdAPE (%)"]
+    return [
+        m for m in candidates
+        if m["cv_mean"]["MdAPE (%)"] <= best["cv_mean"]["MdAPE (%)"] + margin
+    ]
+
+
 def render_e1_slide(payload: dict) -> str:
     models = {m["name"]: m for m in payload["models"]}
-    best = min(
-        (m for m in payload["models"] if not m["tier"].startswith("0")),
-        key=lambda m: m["cv_mean"]["MdAPE (%)"],
-    )
+    leaders = _leaders(payload)
+    leader_names = {m["name"] for m in leaders}
+    best = min(leaders, key=lambda m: m["cv_mean"]["MdAPE (%)"])
+
+    rows = f"{payload['n_rows']:,}".replace(",", ".")
     lines = [
         "# Kết quả chính (E1)",
         "",
-        f"{payload['n_rows']:,} tin Chợ Tốt · 5-fold · cùng bộ fold, cùng ngân sách tinh chỉnh"
-        .replace(",", "."),
+        f"{rows} tin Chợ Tốt · 5-fold · cùng bộ fold, cùng ngân sách tinh chỉnh",
         "",
         "| Mô hình | MdAPE (%) | RMSE (tỷ) | R² |",
         "|---|---:|---:|---:|",
@@ -324,18 +342,26 @@ def render_e1_slide(payload: dict) -> str:
         model = models.get(name)
         if not model:
             continue
-        label = f"**{name}**" if name == best["name"] else name
+        label = f"**{name}**" if name in leader_names else name
         lines.append(
             f"| {label} | {_vi(model['cv_mean']['MdAPE (%)'], 1)} | "
             f"{_vi(model['cv_mean']['RMSE (tỷ)'], 2)} | {_vi(model['cv_mean']['R²'], 3)} |"
         )
+
     baseline = models.get("Trung vị giá/m² theo nhóm")
     if baseline:
         gap = baseline["cv_mean"]["MdAPE (%)"] - best["cv_mean"]["MdAPE (%)"]
+        shown = [m["name"] for m in leaders if m["name"] in SLIDE_MODELS]
+        who = " và ".join(shown) if len(shown) > 1 else best["name"]
         lines += [
             "",
-            f"{best['name']} hơn baseline môi giới {_vi(gap, 1)} điểm phần trăm MdAPE.",
+            f"{who} hơn baseline môi giới khoảng {_vi(gap, 1)} điểm phần trăm MdAPE.",
         ]
+        if len(leaders) > 1:
+            lines.append(
+                "Cách biệt giữa các mô hình in đậm nhỏ hơn độ lệch chuẩn giữa các fold, "
+                "nên không chọn ra một mô hình thắng."
+            )
     return "\n".join(lines) + "\n"
 
 
