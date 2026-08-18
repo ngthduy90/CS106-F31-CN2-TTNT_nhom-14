@@ -131,10 +131,13 @@ dùng, khi đó cả đường sẽ nằm trên một nguồn duy nhất và m�
 
 ![Sai số theo quận và theo khoảng giá](../figures/ket-qua-01-sai-so-theo-lat-cat.png)
 
-Hai lát cắt được xem: theo quận và theo khoảng giá. Lát cắt theo quận cho biết mô hình
-yếu ở địa bàn nào, thường là các quận ít tin. Lát cắt theo khoảng giá cho biết mô hình
-xử lý phân khúc nào kém nhất; với dữ liệu lệch phải, phân khúc trên mười tỷ luôn là phần
-khó nhất vì vừa ít mẫu vừa đa dạng.
+<!-- include: reports/tables/error-analysis.md -->
+
+Lát cắt theo quận cho biết mô hình yếu ở địa bàn nào. Lát cắt theo khoảng giá cho thấy
+một hình chữ U rất rõ: sai số thấp nhất ở phân khúc giữa, cao hơn hẳn ở cả hai đầu. Đọc
+được ngay từ hình này là một cảnh báo thực dụng cho người dùng mô hình — với căn nhà nằm
+ở hai đầu phân khúc, con số dự báo phải được coi là ước lượng thô, không phải một mức
+giá đáng tin.
 
 ## Giải thích mô hình
 
@@ -158,7 +161,9 @@ sản dị biệt: diện tích rất lớn, vị trí đặc thù, hoặc tin g
 
 ![Đường cong học theo cỡ tập huấn luyện](../figures/ket-qua-02-duong-cong-hoc.png)
 
-Đường cong này trả lời một câu hỏi thực tế: crawl thêm dữ liệu có đáng không. Đường còn
-dốc ở mốc 100% nghĩa là thêm tin vẫn còn cải thiện đáng kể. Đường đã phẳng nghĩa là nút
-thắt nằm ở đặc trưng và ở chất lượng nhãn chứ không ở số lượng tin, và công sức nên
-chuyển sang chỗ khác.
+<!-- include: reports/tables/learning-curve.md -->
+
+Đường cong này trả lời một câu hỏi thực tế mà nhóm phải quyết: crawl thêm dữ liệu có
+đáng không, hay nên dồn công sức vào chất lượng đặc trưng. Câu trả lời nằm ở bước cuối
+cùng của bảng — nếu thêm 15% dữ liệu cuối vẫn còn kéo sai số xuống thì đường chưa bão
+hoà và việc thu thập vẫn còn giá trị.

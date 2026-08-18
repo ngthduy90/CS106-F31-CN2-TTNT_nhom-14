@@ -226,7 +226,7 @@ trên log(giá): thang log gần đối xứng hơn hẳn, và sai số trên th
 Phủ dữ liệu không đều: ba quận mục tiêu dày hơn hẳn phần còn lại. Kết quả cho các quận
 khác vì thế kém tin cậy hơn, và thí nghiệm E3 đo trực tiếp mức suy giảm đó.
 
-![Giá mỗi m² trung vị theo quý](../figures/eda-04-gia-m2-theo-quy.png)
+![Giá mỗi m² trung vị theo tháng](../figures/eda-04-gia-m2-theo-thang.png)
 
 Chênh lệch giá mỗi m² giữa các quận là lý do ngưỡng ngoại lai được tính theo từng quận
 chứ không tính chung cho cả thành phố.

@@ -117,6 +117,22 @@ tuyến tính vô dụng; đọc MdAPE một mình sẽ kết luận nó ngang n
 luận đều sai. Sự thật là hồi quy tuyến tính đúng ở phần lớn ca nhưng sai thảm ở một số ít
 ca, còn boosting thì ổn định ở cả hai mặt.
 
+### Không so R² giữa hai bảng E1
+
+Hai bảng E1 nằm cạnh nhau nên rất dễ bị đọc chéo cột. Với MdAPE thì đọc chéo được, vì đó
+là sai số phần trăm và không phụ thuộc phương sai của tập. Với **R² thì không**.
+
+R² đo phần phương sai được giải thích, mà mẫu số của nó chính là phương sai của tập đang
+xét. Bộ lịch sử phủ toàn thành phố với hơn hai mươi quận và biên độ giá rộng hơn hẳn bộ
+crawl, vốn tập trung vào ba quận. Tập nào có phương sai lớn hơn thì cùng một mô hình sẽ
+cho R² cao hơn, kể cả khi nó dự báo tệ hơn theo phần trăm. Trên dữ liệu của nhóm, hiện
+tượng đó xảy ra đúng như vậy: cùng một mô hình cho R² cao hơn nhưng MdAPE lại tệ hơn trên
+bộ lịch sử.
+
+Vì thế mỗi bảng E1 chỉ được dùng để xếp hạng các mô hình **bên trong** nó. So sánh giữa
+hai nguồn phải dựa vào MdAPE, và câu hỏi "chuyển giao giữa hai nguồn mất bao nhiêu" là
+việc của thí nghiệm E2 chứ không phải của việc đặt hai bảng cạnh nhau.
+
 ## Ablation: đặc trưng văn bản đáng bao nhiêu?
 
 > **Chưa có `reports/tables/ablation.md`.** Chạy lại pipeline để sinh bảng này.
@@ -127,7 +143,27 @@ mô tả rao vặt mang bao nhiêu tín hiệu giá mà các trường có cấu
 ## Chuyển giao theo thời gian (E2)
 
 > **Chưa có `reports/tables/e2-results.md`.** Chạy lại pipeline để sinh bảng này.
-![Giá mỗi m² trung vị theo quý](../figures/eda-04-gia-m2-theo-quy.png)
+![Giá mỗi m² trung vị theo tháng](../figures/eda-04-gia-m2-theo-thang.png)
+
+### Một cảnh báo phải đọc kèm hình trên
+
+Đường trung vị của cả ba quận mục tiêu đi ngang trong suốt mười tháng dữ liệu lịch sử
+(06/2025 – 03/2026), rồi **rơi xuống** ở điểm tin crawl tháng 08/2026. Cám dỗ là kết
+luận ngay rằng mặt bằng giá rao đã giảm. Kết luận đó chưa đủ căn cứ, vì đoạn nét đứt
+trên hình cùng lúc bắc qua hai thứ:
+
+- **năm tháng không có dữ liệu** (04/2026 – 07/2026), và
+- **một lần đổi nguồn**: phần bên trái là bộ lịch sử, điểm bên phải là dữ liệu nhóm tự
+  crawl từ hai sàn khác.
+
+Hai sàn khác nhau có tệp người đăng và cơ cấu sản phẩm khác nhau, nên một phần mức chênh
+là chênh giữa nguồn chứ không phải chênh theo thời gian. Nhóm không tách được hai thành
+phần này bằng dữ liệu hiện có, nên không quy toàn bộ mức rơi cho trôi giá. Đây cũng là
+lý do hình được vẽ nét đứt và ký hiệu điểm khác nhau ở hai phía thay vì một đường liền:
+người đọc phải thấy chỗ nối là chỗ đáng ngờ.
+
+Cách kiểm chứng cho lần sau đã rõ: crawl bù các tháng còn thiếu trên chính hai sàn đang
+dùng, khi đó cả đường sẽ nằm trên một nguồn duy nhất và mức trôi đọc được trực tiếp.
 
 ## Stress test không gian (E3)
 
@@ -136,10 +172,35 @@ mô tả rao vặt mang bao nhiêu tín hiệu giá mà các trường có cấu
 
 ![Sai số theo quận và theo khoảng giá](../figures/ket-qua-01-sai-so-theo-lat-cat.png)
 
-Hai lát cắt được xem: theo quận và theo khoảng giá. Lát cắt theo quận cho biết mô hình
-yếu ở địa bàn nào, thường là các quận ít tin. Lát cắt theo khoảng giá cho biết mô hình
-xử lý phân khúc nào kém nhất; với dữ liệu lệch phải, phân khúc trên mười tỷ luôn là phần
-khó nhất vì vừa ít mẫu vừa đa dạng.
+Đo trên tập hold-out của nguồn Chợ Tốt, bằng mô hình vô địch của bảng E1.
+
+#### Theo quận
+
+| Quận | Số tin kiểm | MdAPE (%) |
+|---|---:|---:|
+| Tân Bình | 154 | 15,3 |
+| Tân Phú | 156 | 13,5 |
+| Quận 12 | 156 | 12,0 |
+
+#### Theo khoảng giá
+
+| Khoảng giá | Số tin kiểm | MdAPE (%) |
+|---|---:|---:|
+| dưới 2 tỷ | 26 | 23,0 |
+| 2–5 tỷ | 154 | 13,9 |
+| 5–10 tỷ | 205 | 10,7 |
+| trên 10 tỷ | 81 | 20,4 |
+
+Sai số thấp nhất ở khoảng 5–10 tỷ (10,7%) và cao nhất
+ở khoảng dưới 2 tỷ (23,0%). Đây là hình chữ U quen
+thuộc của bài toán định giá: phân khúc giữa vừa nhiều mẫu vừa đồng nhất, còn hai
+đầu vừa ít mẫu vừa đa dạng — nhà rẻ thường là nhà có vấn đề pháp lý hoặc vị trí
+đặc thù, nhà đắt thường là bất động sản dị biệt mà vài chục mẫu không đủ để học.
+Lát cắt theo quận cho biết mô hình yếu ở địa bàn nào. Lát cắt theo khoảng giá cho thấy
+một hình chữ U rất rõ: sai số thấp nhất ở phân khúc giữa, cao hơn hẳn ở cả hai đầu. Đọc
+được ngay từ hình này là một cảnh báo thực dụng cho người dùng mô hình — với căn nhà nằm
+ở hai đầu phân khúc, con số dự báo phải được coi là ước lượng thô, không phải một mức
+giá đáng tin.
 
 ## Giải thích mô hình
 
@@ -163,7 +224,23 @@ sản dị biệt: diện tích rất lớn, vị trí đặc thù, hoặc tin g
 
 ![Đường cong học theo cỡ tập huấn luyện](../figures/ket-qua-02-duong-cong-hoc.png)
 
-Đường cong này trả lời một câu hỏi thực tế: crawl thêm dữ liệu có đáng không. Đường còn
-dốc ở mốc 100% nghĩa là thêm tin vẫn còn cải thiện đáng kể. Đường đã phẳng nghĩa là nút
-thắt nằm ở đặc trưng và ở chất lượng nhãn chứ không ở số lượng tin, và công sức nên
-chuyển sang chỗ khác.
+Mô hình: XGBoost. Mỗi dòng: lấy ngẫu nhiên một phần tập huấn luyện,
+huấn luyện lại, đo trên cùng một tập hold-out.
+
+| Tỷ lệ tập huấn luyện | Số tin | RMSE (tỷ) | MdAPE (%) |
+|---:|---:|---:|---:|
+| 10% | 186 | 4,679 | 18,9 |
+| 25% | 465 | 3,555 | 15,9 |
+| 40% | 744 | 3,475 | 14,7 |
+| 55% | 1023 | 3,078 | 14,6 |
+| 70% | 1302 | 3,216 | 13,8 |
+| 85% | 1581 | 2,822 | 12,8 |
+| 100% | 1860 | 2,699 | 12,0 |
+
+Từ 186 lên 1860 tin, MdAPE giảm từ 18,9% xuống 12,0%.
+
+**Bước cuối vẫn còn giảm 0,8 điểm phần trăm**, nghĩa là đường cong chưa phẳng: thu thập thêm dữ liệu vẫn còn cải thiện được sai số, và đó là chỗ đáng đầu tư tiếp theo.
+Đường cong này trả lời một câu hỏi thực tế mà nhóm phải quyết: crawl thêm dữ liệu có
+đáng không, hay nên dồn công sức vào chất lượng đặc trưng. Câu trả lời nằm ở bước cuối
+cùng của bảng — nếu thêm 15% dữ liệu cuối vẫn còn kéo sai số xuống thì đường chưa bão
+hoà và việc thu thập vẫn còn giá trị.

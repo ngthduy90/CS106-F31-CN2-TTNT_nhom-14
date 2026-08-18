@@ -201,7 +201,87 @@ def render_e3(payload: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def render_error_analysis(payload: dict) -> str:
+    lines = [
+        "# Phân tích lỗi theo lát cắt",
+        "",
+        "Đo trên tập hold-out của nguồn Chợ Tốt, bằng mô hình vô địch của bảng E1.",
+        "",
+        "## Theo quận",
+        "",
+        "| Quận | Số tin kiểm | MdAPE (%) |",
+        "|---|---:|---:|",
+    ]
+    for row in payload["by_district"]:
+        lines.append(f"| {row['district']} | {row['n']} | {_vi(row['MdAPE (%)'], 1)} |")
+
+    lines += [
+        "",
+        "## Theo khoảng giá",
+        "",
+        "| Khoảng giá | Số tin kiểm | MdAPE (%) |",
+        "|---|---:|---:|",
+    ]
+    for row in payload["by_price_bin"]:
+        lines.append(f"| {row['bin']} | {row['n']} | {_vi(row['MdAPE (%)'], 1)} |")
+
+    bins = payload["by_price_bin"]
+    if len(bins) >= 3:
+        worst = max(bins, key=lambda r: r["MdAPE (%)"])
+        best = min(bins, key=lambda r: r["MdAPE (%)"])
+        lines += [
+            "",
+            f"Sai số thấp nhất ở khoảng {best['bin']} ({_vi(best['MdAPE (%)'], 1)}%) và cao nhất",
+            f"ở khoảng {worst['bin']} ({_vi(worst['MdAPE (%)'], 1)}%). Đây là hình chữ U quen",
+            "thuộc của bài toán định giá: phân khúc giữa vừa nhiều mẫu vừa đồng nhất, còn hai",
+            "đầu vừa ít mẫu vừa đa dạng — nhà rẻ thường là nhà có vấn đề pháp lý hoặc vị trí",
+            "đặc thù, nhà đắt thường là bất động sản dị biệt mà vài chục mẫu không đủ để học.",
+        ]
+    return "\n".join(lines) + "\n"
+
+
+def render_learning_curve(payload: dict) -> str:
+    points = payload["points"]
+    lines = [
+        "# Đường cong học",
+        "",
+        f"Mô hình: {payload['model']}. Mỗi dòng: lấy ngẫu nhiên một phần tập huấn luyện,",
+        "huấn luyện lại, đo trên cùng một tập hold-out.",
+        "",
+        "| Tỷ lệ tập huấn luyện | Số tin | RMSE (tỷ) | MdAPE (%) |",
+        "|---:|---:|---:|---:|",
+    ]
+    for row in points:
+        lines.append(
+            f"| {int(row['fraction'] * 100)}% | {row['n_train']} | "
+            f"{_vi(row['RMSE (tỷ)'], 3)} | {_vi(row['MdAPE (%)'], 1)} |"
+        )
+
+    if len(points) >= 2:
+        first, last, prev = points[0], points[-1], points[-2]
+        gain = prev["MdAPE (%)"] - last["MdAPE (%)"]
+        still = gain > 0.3
+        lines += [
+            "",
+            f"Từ {first['n_train']} lên {last['n_train']} tin, MdAPE giảm từ "
+            f"{_vi(first['MdAPE (%)'], 1)}% xuống {_vi(last['MdAPE (%)'], 1)}%.",
+            "",
+            (
+                f"**Bước cuối vẫn còn giảm {_vi(gain, 1)} điểm phần trăm**, nghĩa là đường cong "
+                "chưa phẳng: thu thập thêm dữ liệu vẫn còn cải thiện được sai số, và đó là chỗ "
+                "đáng đầu tư tiếp theo."
+                if still else
+                "**Bước cuối gần như không giảm nữa**, nghĩa là đường cong đã phẳng: nút thắt "
+                "nằm ở chất lượng đặc trưng và nhãn chứ không ở số lượng tin, nên công sức nên "
+                "chuyển sang chỗ khác thay vì crawl thêm."
+            ),
+        ]
+    return "\n".join(lines) + "\n"
+
+
 RENDERERS = {
+    "error_analysis": ("error-analysis.md", render_error_analysis),
+    "learning_curve": ("learning-curve.md", render_learning_curve),
     "e1_chotot": ("e1-results-chotot.md", render_e1),
     "e1_hf": ("e1-results-hf.md", render_e1),
     "e2": ("e2-results.md", render_e2),

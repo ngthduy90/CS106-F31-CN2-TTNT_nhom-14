@@ -71,11 +71,11 @@ lựa chọn có chủ ý và được ghi lại, không phải một thiếu s�
 
 ## Hướng phát triển
 
-**Bổ sung dữ liệu, có kiểm chứng là đáng.** Các script crawl đã resume được và khử trùng
-theo mã tin, nên chạy tiếp chỉ bổ sung phần còn thiếu. Nhưng câu hỏi "crawl thêm có
-đáng không" không nên trả lời bằng cảm tính: đường cong học trong chương trước cho biết
-sai số còn giảm theo cỡ tập hay đã bão hoà. Nếu đường đã phẳng thì công sức nên chuyển
-sang chất lượng đặc trưng thay vì số lượng tin.
+**Bổ sung dữ liệu — đường cong học nói là còn đáng.** Các script crawl đã resume được và
+khử trùng theo mã tin, nên chạy tiếp chỉ bổ sung phần còn thiếu. Quan trọng hơn, câu hỏi
+"crawl thêm có đáng không" đã được trả lời bằng phép đo chứ không bằng cảm tính: đường
+cong học vẫn còn dốc ở mốc 100% dữ liệu hiện có, nghĩa là sai số còn giảm tiếp nếu thu
+thập thêm. Đây là việc đáng làm trước tiên, và cũng là việc rẻ nhất vì hạ tầng đã sẵn.
 
 **Toạ độ và đặc trưng khoảng cách.** Bước geocoding đã được thiết kế đầy đủ (Nominatim
 1 request mỗi giây, cache trên đĩa, lùi về centroid phường khi không giải được) nhưng
