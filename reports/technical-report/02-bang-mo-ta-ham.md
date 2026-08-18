@@ -152,7 +152,7 @@ _Chia tập, chạy thí nghiệm, chỉ số, bảng biểu, phân tích_
 | hàm | `figure_price_distribution(frame: pd.DataFrame, logger) -> None` | Phân phối giá ở thang gốc và thang log — lý do chọn log làm biến mục tiêu. |
 | hàm | `figure_area_distribution(frame: pd.DataFrame, logger) -> None` | _(chưa có mô tả)_ |
 | hàm | `figure_count_by_district(frame: pd.DataFrame, logger) -> None` | _(chưa có mô tả)_ |
-| hàm | `figure_unit_price_by_quarter(frame: pd.DataFrame, logger) -> None` | Giá/m² trung vị theo quý, tách theo quận — nền cho phần diễn giải trôi giá. |
+| hàm | `figure_unit_price_by_month(frame: pd.DataFrame, logger) -> None` | Giá/m² trung vị theo tháng, 2025-06 → 2026-08 (T4.12). |
 | hàm | `figure_error_by_slice(logger) -> None` | MdAPE theo quận và theo bin giá — chỗ giám khảo hỏi sâu nhất (T4.10). |
 | hàm | `figure_learning_curve(logger) -> None` | RMSE theo cỡ tập huấn luyện — trả lời "crawl thêm có đáng không" (T4.11). |
 | hàm | `main() -> None` | _(chưa có mô tả)_ |
@@ -176,7 +176,7 @@ _Chia tập, chạy thí nghiệm, chỉ số, bảng biểu, phân tích_
 | Loại | Chữ ký | Mô tả |
 |---|---|---|
 | hàm | `load_frame(sample: int \| None = None) -> pd.DataFrame` | _(chưa có mô tả)_ |
-| hàm | `run_e1(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None` | Bảng so sánh chính, chạy RIÊNG trên từng nguồn (runbook 03 §4). |
+| hàm | `run_e1(frame: pd.DataFrame, specs, logger, search_iterations: int, max_rows: int \| None = None, force: bool = False) -> None` | Bảng so sánh chính, chạy RIÊNG trên từng nguồn (runbook 03 §4). |
 | hàm | `run_e2(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None` | Trôi giá theo thời gian: huấn luyện trên tin ≤06/2025, kiểm trên tin crawl 2026. |
 | hàm | `run_ablation(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None` | Đặc trưng văn bản đáng bao nhiêu MdAPE (runbook 03 §6.1)? |
 | hàm | `run_e3(frame: pd.DataFrame, specs, logger) -> None` | Stress test không gian: giữ lần lượt từng phường đông tin làm tập kiểm. |
@@ -216,6 +216,7 @@ _Biểu diễn đặc trưng cho mô hình_
 | phương thức | `AdaptiveSVD.fit(self, X, y = None)` | _(chưa có mô tả)_ |
 | hàm | `build_feature_frame(frame: pd.DataFrame) -> pd.DataFrame` | Thêm các cột dẫn xuất rẻ (không cần fit) rồi trả về đúng phần dùng làm X. |
 | hàm | `build_pipeline(use_text: bool = True, use_flags: bool = True, svd_components: int = SVD_COMPONENTS)` | ColumnTransformer ba nhánh. Bật/tắt nhánh để chạy ablation mà không đổi code. |
+| hàm | `main() -> None` | Kiểm nhanh tầng đặc trưng: dựng bảng, fit pipeline, in kích thước ma trận. |
 
 ## `src/features/text.py`
 
@@ -381,4 +382,4 @@ _Ghi nhật ký và run manifest_
 
 ---
 
-Tổng cộng 158 hàm, lớp và phương thức công khai trong 32 tệp mã nguồn.
+Tổng cộng 159 hàm, lớp và phương thức công khai trong 32 tệp mã nguồn.

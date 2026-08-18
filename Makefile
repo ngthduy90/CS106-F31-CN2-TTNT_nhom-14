@@ -45,7 +45,7 @@ analysis:
 report: analysis
 	$(PYTHON) -m src.evaluation.render_tables
 	$(PYTHON) -m src.evaluation.render_figures
-	$(PYTHON) scripts/build-technical-report.py
+	bash scripts/build-technical-report.sh
 	bash scripts/build-docx.sh
 	bash scripts/build-slides.sh
 
