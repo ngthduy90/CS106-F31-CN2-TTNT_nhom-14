@@ -72,6 +72,13 @@ CHOTOT_DIRECTION = {
 }
 CHOTOT_HOUSE_TYPE = {1: "Nhà mặt phố", 2: "Nhà ngõ/hẻm", 3: "Nhà phố liền kề", 4: "Biệt thự"}
 
+# Mã loại nhà của Chợ Tốt mang luôn thông tin VỊ TRÍ: "Nhà mặt phố" và "Nhà ngõ/hẻm" là
+# hai mức của cùng một trường. Khi quy tên loại về bộ từ vựng chung, thông tin đó không
+# được vứt đi mà chuyển sang cột `position` — nơi nó thuộc về. Đây là trường người bán
+# chọn trong form nên đáng tin hơn kết quả regex đọc từ mô tả, và theo đúng quy tắc
+# "trường có cấu trúc thắng trường trích từ văn bản" của module này.
+CHOTOT_POSITION = {1: "mặt tiền", 2: "hẻm"}
+
 # Ba nguồn gọi cùng một loại bất động sản bằng ba bộ từ vựng khác nhau, và mogi thì trả
 # thẳng tên kiểu schema.org bằng tiếng Anh. Để nguyên thì one-hot sinh ra 16 cột cho
 # khoảng 5 khái niệm, mô hình không chia sẻ được thông tin giữa các nguồn, và giao diện
@@ -173,7 +180,7 @@ def _load_chotot(resolver: WardResolver) -> pd.DataFrame:
                 "floors": floors,
                 "frontage_m": _pick(record.get("width"), found.frontage_m, 1.5, 30)[0],
                 "alley_width_m": found.alley_width_m,
-                "position": found.position,
+                "position": CHOTOT_POSITION.get(record.get("house_type"), found.position),
                 "legal_status": CHOTOT_LEGAL.get(
                     record.get("property_legal_document"), found.legal_status
                 ),

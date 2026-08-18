@@ -108,3 +108,17 @@ def test_quy_ten_loai_bat_dong_san_ve_mot_bo_tu_vung():
     # Giá trị lạ không được âm thầm thành một loại có thật.
     assert canonical_property_type("Chuồng bồ câu") == "không rõ"
     assert canonical_property_type(None) == "không rõ"
+
+
+def test_ma_loai_nha_cho_tot_van_giu_thong_tin_vi_tri():
+    """Quy tên loại về bộ chung không được làm mất tín hiệu mặt tiền / hẻm."""
+    from src.preprocess.load import CHOTOT_HOUSE_TYPE, CHOTOT_POSITION, canonical_property_type
+
+    # Hai mã khác nhau cùng quy về "Nhà phố"…
+    assert canonical_property_type(CHOTOT_HOUSE_TYPE[1]) == "Nhà phố"
+    assert canonical_property_type(CHOTOT_HOUSE_TYPE[2]) == "Nhà phố"
+    # …nhưng vị trí thì vẫn phân biệt được.
+    assert CHOTOT_POSITION[1] == "mặt tiền"
+    assert CHOTOT_POSITION[2] == "hẻm"
+    # Mã không nói gì về vị trí thì không được đoán bừa.
+    assert 3 not in CHOTOT_POSITION and 4 not in CHOTOT_POSITION
