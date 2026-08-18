@@ -30,6 +30,15 @@ def _tier(label: str) -> str:
     return label.replace(" — ", " · ")
 
 
+def _n(value: int) -> str:
+    """Số nguyên với dấu chấm phân nghìn.
+
+    Có hàm riêng vì cách viết tắt `f"{n:,}".replace(",", ".")` đã ba lần nuốt luôn dấu
+    phẩy của câu văn bao quanh nó.
+    """
+    return f"{value:,}".replace(",", ".")
+
+
 def _vi(value: float, digits: int = 3) -> str:
     """Số theo cách viết Việt Nam: dấu phẩy thập phân.
 
@@ -168,8 +177,8 @@ def render_e2(payload: dict) -> str:
     lines = [
         "# E2: chuyển giao theo thời gian",
         "",
-        f"Huấn luyện trên {payload['train_rows']:,} tin đăng tới {payload['cutoff']}, ".replace(",", ".")
-        + f"kiểm trên {payload['test_rows']:,} tin Chợ Tốt crawl tháng 08/2026.".replace(",", "."),
+        f"Huấn luyện trên {_n(payload['train_rows'])} tin đăng tới {payload['cutoff']}, "
+        f"kiểm trên {_n(payload['test_rows'])} tin Chợ Tốt crawl tháng 08/2026.",
         "",
         "Cả hai phía đều là GIÁ RAO nên chênh lệch đo được là trôi giá theo thời gian,",
         "không lẫn khoảng cách giữa giá rao và giá giao dịch.",
@@ -219,16 +228,26 @@ def render_e2(payload: dict) -> str:
             "trị của điều chuẩn khi phân phối dữ liệu dịch chuyển.",
         ]
 
-    learned = [d for name, d in deltas if name not in ("Dummy (trung vị)",)]
+    learned = sorted(d for name, d in deltas if name != "Dummy (trung vị)")
     if learned:
-        mean_delta = sum(learned) / len(learned)
+        middle = len(learned) // 2
+        median_delta = (
+            learned[middle] if len(learned) % 2 else (learned[middle - 1] + learned[middle]) / 2
+        )
         worse = sum(1 for d in learned if d > 0)
+        # Trung VỊ chứ không phải trung bình: vài mô hình hỏng nặng (Lasso, MLP) kéo
+        # trung bình lên gấp đôi, khiến con số tổng kết nói về hai mô hình tệ nhất thay
+        # vì nói về hành vi điển hình.
         lines += [
             "",
-            f"Trung bình các mô hình mất {_vi(abs(mean_delta), 1)} điểm phần trăm MdAPE khi"
-            if mean_delta > 0 else
-            f"Trung bình các mô hình TỐT LÊN {_vi(abs(mean_delta), 1)} điểm phần trăm MdAPE khi",
-            f"chuyển giao ({worse}/{len(learned)} mô hình xấu đi).",
+            f"Trung vị mức xấu đi khi chuyển giao: **{_vi(abs(median_delta), 1)} điểm phần trăm"
+            if median_delta > 0 else
+            f"Trung vị mức TỐT LÊN khi chuyển giao: **{_vi(abs(median_delta), 1)} điểm phần trăm",
+            f"MdAPE** ({worse}/{len(learned)} mô hình xấu đi; khoảng {_vi(min(learned), 1)} tới "
+            f"{_vi(max(learned), 1)}).",
+            "",
+            "Dùng trung vị vì vài mô hình hỏng nặng khi chuyển giao kéo trung bình lên gấp",
+            "đôi; nhóm mô hình chủ lực mới là phần đáng đọc.",
             "",
             "Đây là cái giá của việc dùng một mô hình huấn luyện trên dữ liệu cũ cho thị",
             "trường hiện tại. Cần đọc kèm một cảnh báo: tập huấn luyện và tập kiểm không chỉ",
@@ -258,11 +277,56 @@ def render_ablation(payload: dict) -> str:
             f"| {row['configuration']} | {_vi(mdape, 2)} | {sign}{_vi(delta, 2)} | "
             f"{_vi(row['cv_mean']['RMSE (tỷ)'], 3)} | {_vi(row['cv_mean']['R²'], 3)} |"
         )
+    by_name = {r["configuration"]: r["cv_mean"]["MdAPE (%)"] for r in rows}
+    flags = by_name.get("Bảng + cờ văn bản thủ công")
+    tfidf = by_name.get("Bảng + TF-IDF/SVD")
+
     lines += [
         "",
         "Δ âm nghĩa là thêm nhánh đó làm sai số giảm. Đây là con số trả lời trực tiếp câu",
         "hỏi của đề: mô tả rao vặt mang bao nhiêu tín hiệu giá.",
     ]
+
+    # Kết luận viết theo dấu của số đo, không viết sẵn. Kết quả "văn bản làm tệ đi" là
+    # một kết quả hợp lệ và phải được nói thẳng nếu dữ liệu nói vậy.
+    if flags is not None and tfidf is not None:
+        flags_help = flags < baseline
+        tfidf_help = tfidf < baseline
+        lines += ["", "## Đọc bảng"]
+        if flags_help and not tfidf_help:
+            lines += [
+                "",
+                "Hai nhánh văn bản đi ngược chiều nhau, và đó mới là kết quả đáng nói.",
+                "",
+                f"**Cờ thủ công giúp được** ({_vi(baseline - flags, 2)} điểm phần trăm). Đây là",
+                "vài chục cột nhị phân, mỗi cột là một khái niệm mà người mua nhà thật sự",
+                "quan tâm: hẻm xe hơi, sổ hồng riêng, ngộp bank, nở hậu. Cây quyết định tách",
+                "trên chúng rất dễ, và mỗi lần tách đều giải thích được.",
+                "",
+                f"**TF-IDF cộng SVD làm tệ đi** ({_vi(tfidf - baseline, 2)} điểm phần trăm).",
+                "Nguyên nhân hợp lý nhất là tỷ lệ: hơn một trăm trục SVD dày đặc, mỗi trục",
+                "mang rất ít tín hiệu, đổ vào một tập chỉ vài nghìn dòng. Mô hình dựa trên cây",
+                "phải chọn điểm tách giữa một rừng cột nhiễu, nên xác suất chọn trúng cột hữu",
+                "ích giảm xuống. Đây là hiện tượng quen thuộc của họ mô hình cây trên đặc trưng",
+                "dày và yếu, không phải bằng chứng rằng mô tả rao vặt vô giá trị.",
+                "",
+                "Kết luận đúng của thí nghiệm này: **mô tả CÓ mang tín hiệu giá, nhưng phải",
+                "được chưng cất trước khi dùng.** Nén cả mô tả thành trăm trục vô danh thì",
+                "phần tín hiệu ít ỏi bị chôn trong nhiễu; rút thành vài chục khái niệm cụ thể",
+                "thì nó nổi lên. Với cỡ dữ liệu hiện tại, cách rẻ hơn lại là cách tốt hơn.",
+            ]
+        elif tfidf_help and flags_help:
+            lines += [
+                "",
+                "Cả hai nhánh văn bản đều làm giảm sai số, tức là mô tả rao vặt mang tín hiệu",
+                "giá mà các trường có cấu trúc không có.",
+            ]
+        else:
+            lines += [
+                "",
+                "Không nhánh văn bản nào làm giảm sai số trên tập dữ liệu hiện tại. Cần đọc",
+                "kèm cỡ dữ liệu: đặc trưng văn bản thường cần nhiều mẫu hơn mới phát huy.",
+            ]
     return "\n".join(lines) + "\n"
 
 

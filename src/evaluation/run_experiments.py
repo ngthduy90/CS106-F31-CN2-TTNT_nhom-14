@@ -12,6 +12,7 @@ giờ được gõ tay.
 from __future__ import annotations
 
 import argparse
+import json
 
 import pandas as pd
 
@@ -174,6 +175,21 @@ def run_e2(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None:
     )
 
 
+def _champion_from_e1(specs, source: str, logger):
+    """Mô hình có MdAPE thấp nhất trong bảng E1 (bỏ qua tầng mốc)."""
+    path = RESULTS_DIR / f"e1_{source}.json"
+    if not path.exists():
+        logger.warning("chưa có %s, ablation lùi về Random Forest", path.name)
+        return next((s for s in specs if s.name == "Random Forest"), None)
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    candidates = [m for m in payload["models"] if not m["tier"].startswith("0")]
+    best = min(candidates, key=lambda m: m["cv_mean"]["MdAPE (%)"])
+    logger.info("ablation dùng mô hình vô địch E1: %s (MdAPE %.2f%%)",
+                best["name"], best["cv_mean"]["MdAPE (%)"])
+    return next((s for s in specs if s.name == best["name"]), None)
+
+
 def run_ablation(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None:
     """Đặc trưng văn bản đáng bao nhiêu MdAPE (runbook 03 §6.1)?
 
@@ -185,9 +201,10 @@ def run_ablation(frame: pd.DataFrame, specs, logger, search_iterations: int) -> 
     if len(subset) < 500:
         return
 
-    champion = next(
-        (s for s in specs if s.name in ("LightGBM", "CatBoost", "Random Forest")), None
-    )
+    # Ablation phải chạy trên ĐÚNG mô hình tốt nhất của E1, không phải trên một mô hình
+    # chọn sẵn theo thứ tự khai báo. Nếu không, bảng ablation đo đóng góp của văn bản
+    # với một mô hình khác mô hình mà báo cáo kết luận, và hai chỗ không khớp nhau.
+    champion = _champion_from_e1(specs, "chotot", logger)
     if champion is None:
         return
 
@@ -220,7 +237,7 @@ def run_e3(frame: pd.DataFrame, specs, logger) -> None:
     đến mức nào.
     """
     subset = frame[frame["source"] == "chotot"].reset_index(drop=True)
-    champion = next((s for s in specs if s.name in ("LightGBM", "Random Forest")), None)
+    champion = _champion_from_e1(specs, "chotot", logger)
     if champion is None or len(subset) < 500:
         return
 

@@ -1,4 +1,4 @@
-# Model card — XGBoost
+# Model card: LightGBM
 
 ## Dùng để làm gì
 
@@ -18,10 +18,10 @@ giá tài sản thế chấp hay ra quyết định tài chính.
 
 | Chỉ số | Giá trị |
 |---|---:|
-| RMSE (tỷ) | 3,736 |
-| MAE (tỷ) | 1,560 |
-| MdAPE (%) | 12,975 |
-| R² | 0,726 |
+| RMSE (tỷ) | 3,925 |
+| MAE (tỷ) | 1,633 |
+| MdAPE (%) | 13,879 |
+| R² | 0,698 |
 
 ## Hạn chế đã biết
 
@@ -32,6 +32,6 @@ giá tài sản thế chấp hay ra quyết định tài chính.
 - Tin rao có nhiễu: cùng một căn có thể được mô tả bằng hai bộ số khác nhau
   (xem bảng chất lượng trích xuất).
 - Không dùng được cho bất động sản đặc thù: đất nền diện tích lớn, nhà xưởng,
-  khách sạn — chúng đã bị loại ở bước làm sạch.
+  khách sạn. Chúng đã bị loại ở bước làm sạch.
 
-Seed: 42. Tham số tốt nhất: `{'model__regressor__subsample': '0.7', 'model__regressor__n_estimators': '800', 'model__regressor__max_depth': '4', 'model__regressor__learning_rate': '0.05'}`.
+Seed: 42. Tham số tốt nhất: `{'model__regressor__subsample': '0.7', 'model__regressor__reg_lambda': '5.0', 'model__regressor__num_leaves': '15', 'model__regressor__n_estimators': '800', 'model__regressor__learning_rate': '0.05'}`.
