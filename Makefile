@@ -1,6 +1,6 @@
 PYTHON ?= python
 
-.PHONY: help setup crawl qa prep features train report demo test all clean
+.PHONY: help setup crawl qa prep features train analysis report submission lock demo test all clean
 
 help:
 	@echo "setup     cài thư viện vào venv hiện tại"
@@ -9,7 +9,10 @@ help:
 	@echo "prep      làm sạch, trích đặc trưng định lượng, chuẩn hoá địa chỉ, khử trùng lặp"
 	@echo "features  dựng pipeline đặc trưng (bảng + TF-IDF/SVD + cờ văn bản)"
 	@echo "train     chạy E1, E2, E3, ablation, SHAP, learning curve"
-	@echo "report    sinh lại toàn bộ bảng/hình rồi build báo cáo Word"
+	@echo "analysis  phân tích lỗi, SHAP, learning curve, xuất mô hình vô địch"
+	@echo "report    sinh lại toàn bộ bảng/hình rồi build báo cáo Word và slide"
+	@echo "submission ráp thư mục nộp + quét chéo môn + quét dữ liệu lọt"
+	@echo "lock      chốt phiên bản thư viện vào requirements-lock.txt"
 	@echo "demo      chạy web app Streamlit"
 	@echo "test      chạy pytest (bắt buộc gồm test chống leakage)"
 	@echo "all       crawl -> qa -> prep -> features -> train -> report"
@@ -34,10 +37,21 @@ features:
 train:
 	$(PYTHON) -m src.evaluation.run_experiments
 
-report:
+analysis:
+	$(PYTHON) -m src.evaluation.analysis
+
+report: analysis
 	$(PYTHON) -m src.evaluation.render_tables
 	$(PYTHON) -m src.evaluation.render_figures
+	$(PYTHON) scripts/build-technical-report.py
 	bash scripts/build-docx.sh
+	bash scripts/build-slides.sh
+
+submission:
+	$(PYTHON) scripts/assemble-submission.py
+
+lock:
+	$(PYTHON) -m pip freeze > requirements-lock.txt
 
 demo:
 	streamlit run src/demo/app.py

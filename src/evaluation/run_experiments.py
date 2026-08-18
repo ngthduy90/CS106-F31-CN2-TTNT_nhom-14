@@ -41,7 +41,30 @@ def load_frame(sample: int | None = None) -> pd.DataFrame:
     return frame
 
 
-def run_e1(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None:
+def _cap(subset: pd.DataFrame, max_rows: int | None) -> pd.DataFrame:
+    """Giới hạn số dòng của một nguồn cho E1, lấy mẫu phân tầng theo quận.
+
+    Nguồn lịch sử có hơn 30.000 dòng, gấp mười ba lần nguồn crawl. Chạy hết trên nguồn
+    đó tốn hàng giờ mà không đổi được kết luận: E1 so các mô hình VỚI NHAU trên cùng một
+    tập, và mức phân giải của phép so đã bão hoà từ vài nghìn dòng. Quan trọng hơn, hai
+    bảng E1 chỉ đọc cạnh nhau được khi cỡ tập không lệch quá xa — chênh mười ba lần thì
+    khác biệt giữa hai bảng một phần là khác biệt về lượng dữ liệu.
+
+    Lấy mẫu phân tầng theo quận để không làm méo phân bố địa bàn.
+    """
+    if not max_rows or len(subset) <= max_rows:
+        return subset
+    fraction = max_rows / len(subset)
+    sampled = (
+        subset.groupby("district", group_keys=False)
+        .apply(lambda g: g.sample(max(1, int(round(len(g) * fraction))), random_state=config.SEED))
+        .reset_index(drop=True)
+    )
+    return sampled
+
+
+def run_e1(frame: pd.DataFrame, specs, logger, search_iterations: int,
+           max_rows: int | None = None) -> None:
     """Bảng so sánh chính, chạy RIÊNG trên từng nguồn (runbook 03 §4).
 
     Không trộn hai nguồn làm thí nghiệm chính: hai nguồn phủ thời kỳ và địa bàn khác
@@ -49,7 +72,7 @@ def run_e1(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None:
     cho mỗi con số chỉ nói về đúng một thứ.
     """
     for source, label in (("chotot", "Nguồn B — Chợ Tốt 2026"), ("hf", "Nguồn A — bộ lịch sử")):
-        subset = frame[frame["source"] == source].reset_index(drop=True)
+        subset = _cap(frame[frame["source"] == source].reset_index(drop=True), max_rows)
         if len(subset) < 500:
             logger.warning("%s chỉ có %d dòng, bỏ qua E1", source, len(subset))
             continue
@@ -211,6 +234,12 @@ def main() -> None:
     parser.add_argument("--fast", action="store_true", help="rút gọn danh mục mô hình")
     parser.add_argument("--sample", type=int, default=None, help="lấy mẫu N dòng để chạy nhanh")
     parser.add_argument("--search-iterations", type=int, default=config.SEARCH_ITERATIONS)
+    parser.add_argument(
+        "--e1-max-rows",
+        type=int,
+        default=6_000,
+        help="giới hạn số dòng mỗi nguồn cho E1 (lấy mẫu phân tầng theo quận); 0 = không giới hạn",
+    )
     parser.add_argument("--only", nargs="*", default=None, choices=["e1", "e2", "e3", "ablation"])
     args = parser.parse_args()
 
@@ -226,11 +255,12 @@ def main() -> None:
         "n_rows": len(frame),
         "models": [s.name for s in specs],
         "search_iterations": args.search_iterations,
+        "e1_max_rows": args.e1_max_rows,
         "experiments": sorted(wanted),
     }
     with RunManifest("experiments", params=params) as manifest:
         if "e1" in wanted:
-            run_e1(frame, specs, logger, args.search_iterations)
+            run_e1(frame, specs, logger, args.search_iterations, args.e1_max_rows or None)
         if "e2" in wanted:
             run_e2(frame, specs, logger, args.search_iterations)
         if "ablation" in wanted:

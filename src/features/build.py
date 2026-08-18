@@ -157,3 +157,32 @@ def build_pipeline(use_text: bool = True, use_flags: bool = True, svd_components
         branches.append(("text", text, TEXT_FEATURE))
 
     return ColumnTransformer(branches, remainder="drop", verbose_feature_names_out=False)
+
+
+def main() -> None:
+    """Kiểm nhanh tầng đặc trưng: dựng bảng, fit pipeline, in kích thước ma trận.
+
+    `make features` gọi hàm này. Nó không sinh ra artefact nào — mục đích là phát hiện
+    sớm lỗi cấu hình cột (thiếu cột, cột lẫn kiểu, cột nhãn lọt vào X) ngay sau bước
+    tiền xử lý, thay vì để lỗi đó nổ ra giữa một lần chạy huấn luyện dài.
+    """
+    import pandas as pd
+
+    from src.utils.logging_setup import get_logger
+
+    logger = get_logger("features")
+    frame = pd.read_parquet(config.DATA_PROCESSED / "listings.parquet")
+    features = build_feature_frame(frame)
+    logger.info("bảng đặc trưng: %d dòng × %d cột", *features.shape)
+
+    pipeline = build_pipeline()
+    matrix = pipeline.fit_transform(features)
+    logger.info("ma trận sau ColumnTransformer: %d dòng × %d cột", *matrix.shape)
+    logger.info(
+        "nhánh: %s",
+        ", ".join(name for name, _, _ in pipeline.transformers),
+    )
+
+
+if __name__ == "__main__":
+    main()
