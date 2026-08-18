@@ -2,68 +2,122 @@
 
 ## Thiết kế thí nghiệm
 
+![Thiết kế ba thí nghiệm](../figures/03-thiet-ke-thi-nghiem.png)
+
 Ba thí nghiệm chạy trên cùng một danh mục mô hình và cùng quy tắc chia tập.
 
 - **E1, bảng so sánh chính**: hold-out 80/20 cộng 5-fold cross-validation trên phần
   huấn luyện, chạy riêng cho từng nguồn dữ liệu. Chia tập có phân tầng theo quận và theo
   khoảng giá. Khử trùng lặp thực hiện trước khi chia.
 - **E2, chuyển giao theo thời gian**: huấn luyện trên tin rao tới 06/2025, kiểm tra trên
-  tin rao 2026, đối chiếu với trường hợp huấn luyện và kiểm tra cùng trên dữ liệu 2026.
-  Chênh lệch giữa hai trường hợp là thước đo mức trôi giá theo thời gian.
-- **E3, stress test không gian**: giữ lần lượt 3 đến 5 phường nhiều tin nhất làm tập
-  kiểm tra, báo cáo trung bình và độ lệch chuẩn. Thí nghiệm này đo khả năng tổng quát
-  hoá sang khu vực mô hình chưa thấy.
+  tin rao crawl tháng 08/2026. Chênh lệch so với E1 nguồn 2026 là thước đo mức trôi giá
+  theo thời gian.
+- **E3, stress test không gian**: giữ lần lượt các phường nhiều tin nhất làm tập kiểm
+  tra, báo cáo trung bình và độ lệch chuẩn. Thí nghiệm này đo khả năng tổng quát hoá sang
+  khu vực mô hình chưa thấy.
 
-Hai nguồn dữ liệu không được trộn chung làm thí nghiệm chính vì chúng phủ thời kỳ khác
-nhau, nên cờ nguồn sẽ lẫn với biến thời gian.
+Hai nguồn dữ liệu không được trộn chung làm thí nghiệm chính vì chúng phủ thời kỳ và địa
+bàn khác nhau, nên cờ nguồn sẽ lẫn với biến thời gian và với địa bàn.
+
+Sau khi nguồn lịch sử chuyển sang bộ Hugging Face, cả hai phía của E2 đều là **giá rao**.
+Thiết kế ban đầu định đo chênh lệch giữa giá giao dịch và giá rao lẫn với trôi giá theo
+thời gian; thiết kế hiện tại chỉ đo một thứ, và vì thế dễ bảo vệ hơn.
+
+## Điều kiện so sánh công bằng
+
+Ba ràng buộc được cài vào code chứ không dựa vào kỷ luật của người chạy:
+
+**Cùng một bộ fold cho mọi mô hình.** Phép chia được tính một lần rồi ghi ra đĩa kèm mã
+băm của bộ mã tin. Nếu mỗi mô hình tự chia tập theo seed riêng thì chênh lệch giữa hai
+dòng trong bảng một phần là chênh lệch giữa hai phép chia, không đọc được gì.
+
+**Cùng ngân sách tinh chỉnh.** RandomizedSearch với số cấu hình như nhau cho mọi mô
+hình, cùng seed. Cho mô hình này hai trăm cấu hình còn mô hình kia mười thì bảng so sánh
+đo ngân sách chứ không đo mô hình.
+
+**Danh sách kiểm rò rỉ chạy trước mỗi lần huấn luyện**, không phải một lần lúc đầu. Kết
+quả được lưu cạnh mỗi file kết quả. Chi tiết ở chương Phương pháp.
 
 ## Chỉ số đánh giá
 
-RMSE và MAE tính trên thang đồng sau khi đổi ngược từ log, kèm MdAPE là sai số phần trăm
-trung vị vì chỉ số này bất biến theo thang đo và đọc được ngay. R² báo cáo kèm ghi chú
-về thang tính. Mỗi ô trong bảng kết quả ghi trung bình và độ lệch chuẩn của 5 fold.
+Mô hình huấn luyện trên log(tổng giá), mọi chỉ số tính **sau khi đã quy ngược về thang
+VND**. RMSE và MAE báo bằng tỷ đồng. MdAPE là sai số phần trăm trung vị, bất biến theo
+thang đo nên so được giữa quận đắt và quận rẻ. R² báo kèm ba chỉ số kia chứ không đứng
+một mình.
 
 ## Bảng kết quả chính (E1)
 
-{{T4.5: chèn bảng từ reports/tables/e1-results.md — hàng là mô hình theo thứ tự tầng,
-Dummy trên cùng; cột là RMSE, MAE, MdAPE, R²; in đậm giá trị tốt nhất mỗi cột}}
+> **Chưa có `reports/tables/e1-results-chotot.md`.** Chạy lại pipeline để sinh bảng này.
+> **Chưa có `reports/tables/e1-results-hf.md`.** Chạy lại pipeline để sinh bảng này.
+### Đọc bảng E1
 
-Ghi chú bắt buộc dưới bảng: biến mục tiêu huấn luyện là log(giá), chỉ số tính trên thang
-giá gốc, cách chia tập, seed, ngân sách tinh chỉnh tham số.
+**Mọi mô hình học máy đều thắng Dummy, nhưng mốc đáng quan tâm là baseline môi giới.**
+Trung vị giá mỗi m² theo (quận, phường, loại nhà) nhân diện tích chính là cách một người
+môi giới định giá trong đầu. Khoảng cách giữa mô hình tốt nhất và mốc đó mới là phần giá
+trị mà học máy thực sự tạo ra; khoảng cách so với Dummy chỉ nói rằng dữ liệu có tín hiệu.
 
-Nguyên tắc đọc bảng: không kết luận mô hình A tốt hơn mô hình B khi hai khoảng trung
-bình cộng trừ độ lệch chuẩn chồng lấn gần hết.
+**Nhóm boosting dẫn đầu, và cách biệt giữa chúng nhỏ hơn độ lệch chuẩn giữa các fold.**
+Khi hai khoảng trung bình ± độ lệch chuẩn chồng lấn gần hết thì không được tuyên bố mô
+hình này tốt hơn mô hình kia; bảng chỉ cho phép nói cả nhóm boosting cùng ở mức tốt nhất.
 
-## Kết quả chuyển giao theo thời gian (E2)
+**Nhóm tuyến tính có MdAPE khá nhưng RMSE và R² rất xấu, có khi âm.** Đây không phải lỗi
+cài đặt mà là hệ quả trực tiếp của việc huấn luyện trên log giá: mô hình tuyến tính trên
+không gian đặc trưng nhiều chiều thỉnh thoảng ngoại suy rất xa ở một vài điểm, và phép
+`exp` biến sai lệch đó thành con số khổng lồ trên thang VND. Trung vị không bị ảnh hưởng
+nên MdAPE vẫn đẹp, còn RMSE và R² thì sụp.
 
-{{T4.6: bảng so sánh hai trường hợp huấn luyện, kèm mức chênh lệch}}
+Đây chính là lý do đề tài yêu cầu báo cả ba chỉ số. Đọc R² một mình sẽ kết luận hồi quy
+tuyến tính vô dụng; đọc MdAPE một mình sẽ kết luận nó ngang ngửa boosting. Cả hai kết
+luận đều sai. Sự thật là hồi quy tuyến tính đúng ở phần lớn ca nhưng sai thảm ở một số ít
+ca, còn boosting thì ổn định ở cả hai mặt.
 
-{{T4.12: hình trung vị giá mỗi m² theo quý từ 2023 đến 2026 theo quận}}
+## Ablation: đặc trưng văn bản đáng bao nhiêu?
+
+> **Chưa có `reports/tables/ablation.md`.** Chạy lại pipeline để sinh bảng này.
+Bốn cấu hình chạy trên cùng bộ fold, cùng mô hình, cùng ngân sách tinh chỉnh, khác biệt
+duy nhất là nhánh văn bản. Đây là con số trả lời trực tiếp câu hỏi trung tâm của đề tài:
+mô tả rao vặt mang bao nhiêu tín hiệu giá mà các trường có cấu trúc không có.
+
+## Chuyển giao theo thời gian (E2)
+
+> **Chưa có `reports/tables/e2-results.md`.** Chạy lại pipeline để sinh bảng này.
+![Giá mỗi m² trung vị theo quý](../figures/eda-04-gia-m2-theo-quy.png)
 
 ## Stress test không gian (E3)
 
-{{T4.7: bảng mean ± std khi giữ từng phường làm tập kiểm tra}}
-
-Kết quả kém ở thí nghiệm này là một phát hiện về giới hạn tổng quát hoá, không phải một
-thất bại của mô hình.
-
-## Ablation đặc trưng văn bản
-
-{{T4.8: bảng ba cấu hình — chỉ đặc trưng bảng, cộng TF-IDF và SVD, cộng cờ văn bản thủ
-công — với cùng mô hình tốt nhất và cùng tập chia}}
-
-Câu hỏi thí nghiệm này trả lời: phần mô tả tự do trong tin rao đáng bao nhiêu điểm MdAPE.
-
+> **Chưa có `reports/tables/e3-results.md`.** Chạy lại pipeline để sinh bảng này.
 ## Phân tích lỗi
 
-{{T4.10: bảng MdAPE theo quận và theo khoảng giá dưới 2 tỷ, 2 đến 5 tỷ, 5 đến 10 tỷ,
-trên 10 tỷ}}
+![Sai số theo quận và theo khoảng giá](../figures/ket-qua-01-sai-so-theo-lat-cat.png)
 
-{{T4.9: hình SHAP beeswarm toàn cục và 2 đến 3 hình waterfall cho các ca sai nặng nhất}}
+Hai lát cắt được xem: theo quận và theo khoảng giá. Lát cắt theo quận cho biết mô hình
+yếu ở địa bàn nào, thường là các quận ít tin. Lát cắt theo khoảng giá cho biết mô hình
+xử lý phân khúc nào kém nhất; với dữ liệu lệch phải, phân khúc trên mười tỷ luôn là phần
+khó nhất vì vừa ít mẫu vừa đa dạng.
+
+## Giải thích mô hình
+
+![SHAP beeswarm](../figures/ket-qua-03-shap-beeswarm.png)
+
+Biểu đồ beeswarm cho biết đặc trưng nào ảnh hưởng mạnh nhất tới dự báo trên toàn tập, và
+ảnh hưởng theo chiều nào.
+
+![Permutation importance](../figures/ket-qua-05-permutation-importance.png)
+
+Permutation importance được báo kèm chứ không dùng riêng impurity importance của mô hình
+cây. Impurity importance thiên vị các biến có nhiều mức — như tên đường và phường — nên
+đọc một mình sẽ dẫn tới kết luận sai về biến nào thật sự quan trọng.
+
+![Ca sai nặng nhất](../figures/ket-qua-04-shap-waterfall-1.png)
+
+Ba biểu đồ waterfall cho ba ca sai nặng nhất được xem riêng. Chúng thường là bất động
+sản dị biệt: diện tích rất lớn, vị trí đặc thù, hoặc tin ghi thiếu thông tin then chốt.
 
 ## Đường cong học
 
-{{T4.11: hình RMSE theo cỡ tập huấn luyện từ 10% đến 100%}}
+![Đường cong học theo cỡ tập huấn luyện](../figures/ket-qua-02-duong-cong-hoc.png)
 
-Ý nghĩa thực tế: đường cong còn dốc nghĩa là thu thập thêm dữ liệu vẫn còn cải thiện
-được, đường cong đã phẳng nghĩa là nút thắt nằm ở đặc trưng chứ không ở số lượng mẫu.
+Đường cong này trả lời một câu hỏi thực tế: crawl thêm dữ liệu có đáng không. Đường còn
+dốc ở mốc 100% nghĩa là thêm tin vẫn còn cải thiện đáng kể. Đường đã phẳng nghĩa là nút
+thắt nằm ở đặc trưng và ở chất lượng nhãn chứ không ở số lượng tin, và công sức nên
+chuyển sang chỗ khác.
