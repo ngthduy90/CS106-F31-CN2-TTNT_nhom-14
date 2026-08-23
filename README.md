@@ -120,6 +120,7 @@ Chi tiết từng lệnh, bộ số mẫu cho demo và chỗ đọc kết quả:
 
 ## Thành viên
 
-| Họ tên | MSSV | Lớp |
-|---|---|---|
-| _(cập nhật trước khi nộp)_ | | |
+Danh sách chính thức nằm ở `config/thanh-vien.yaml`; trang bìa báo cáo, file Excel bài
+nộp và bảng phân công ở slide đều sinh từ đó.
+
+Việc còn lại và ai nhận gói nào: [`docs/phan-cong.md`](docs/phan-cong.md).

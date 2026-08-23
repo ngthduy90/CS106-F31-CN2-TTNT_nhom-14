@@ -184,7 +184,10 @@ trên hold-out, không phải con số tự đặt.
 
 | Thành viên | Phần phụ trách |
 |---|---|
-| _(cập nhật)_ | Thu thập dữ liệu |
-| _(cập nhật)_ | Tiền xử lý và đặc trưng |
-| _(cập nhật)_ | Mô hình và thí nghiệm |
-| _(cập nhật)_ | Báo cáo và demo |
+| Nguyễn Thanh Duy | Toàn bộ phần lập trình |
+| _(cập nhật)_ | Thu thập bù dữ liệu, cổng chất lượng |
+| _(cập nhật)_ | Rà bộ nhãn vàng và các cặp trùng lặp |
+| _(cập nhật)_ | Rà bảng mô tả hàm, technical report |
+| _(cập nhật)_ | Trích dẫn và phần hỏi đáp |
+
+Chi tiết từng gói việc: `docs/phan-cong.md`
