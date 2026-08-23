@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1280px" height="720px" viewBox="0 0 1280 720" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>02-nguon-du-lieu-va-schema</title>
+    <g id="02-nguon-du-lieu-va-schema" stroke="none" fill="none" fill-rule="evenodd" stroke-width="1">
+        <g id="Group">
+            <rect id="Rectangle" fill="#FAFAF9" x="0" y="0" width="1280" height="720"></rect>
+            <text id="Nguồn-dữ-liệu-và-schema-kho-thô" fill="#0F172A" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="23" font-weight="bold">
+                <tspan x="454" y="40">Nguồn dữ liệu và schema kho thô</tspan>
+            </text>
+            <text id="Khảo-sát-xác-minh-16/08/2026-·-2-nguồn-chính-+-2-dự-phòng-+-1-dataset-bảo-hiểm-·-mọi-con-số-do-trang-tự-hiển-thị" fill="#64748B" fill-rule="nonzero" font-family="Helvetica" font-size="13.5" font-weight="normal">
+                <tspan x="295.5" y="64">Khảo sát xác minh 16/08/2026 · 2 nguồn chính + 2 dự phòng + 1 dataset bảo hiểm · mọi con số do trang tự hiển thị</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#F59E0B" fill="#FFFBEB" x="270" y="80" width="14" height="14"></rect>
+            <text id="Nguồn-dữ-liệu" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="290" y="91">Nguồn dữ liệu</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#94A3B8" fill="#F1F5F9" x="410" y="80" width="14" height="14"></rect>
+            <text id="Script-/-dự-phòng" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="430" y="91">Script / dự phòng</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#7C3AED" fill="#F5F3FF" x="570" y="80" width="14" height="14"></rect>
+            <text id="Kho-dữ-liệu" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="590" y="91">Kho dữ liệu</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#0D9488" fill="#F0FDFA" x="710" y="80" width="14" height="14"></rect>
+            <text id="QA-gate" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="730" y="91">QA gate</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#FB7185" fill="#FFF1F2" x="820" y="80" width="14" height="14"></rect>
+            <text id="Đã-loại" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="840" y="91">Đã loại</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#F59E0B" stroke-width="1.5" fill="#FFFBEB" x="40" y="110" width="300" height="140" rx="12"></rect>
+            <path d="M40,140 L40,122 C40,114 44,110 52,110 L328,110 C336,110 340,114 340,122 L340,140 L40,140 Z" id="Path" fill="#D97706"></path>
+            <text id="CHỢ-TỐT-·-API-JSON-—-chính-#1" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="13.5" font-weight="bold">
+                <tspan x="54" y="130">CHỢ TỐT · API JSON — chính #1</tspan>
+            </text>
+            <text id="6.183-tin-bán-ngay-3-quận-mục-tiêu" fill="#92400E" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold">
+                <tspan x="56" y="164">6.183 tin bán ngay 3 quận mục tiêu</tspan>
+            </text>
+            <text id="Tân-Bình-1.343-·-Tân-Phú-1.871-·-Q12-2.969" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="184">Tân Bình 1.343 · Tân Phú 1.871 · Q12 2.969</tspan>
+            </text>
+            <text id="JSON-sạch:-mô-tả-+-phường-+-toạ-độ-+-pháp-lý" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="204">JSON sạch: mô tả + phường + toạ độ + pháp lý</tspan>
+            </text>
+            <text id="Trần-total=10.000-→-quét-theo-từng-quận" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="224">Trần total=10.000 </tspan>
+                <tspan x="153.294922" y="224" font-family="LucidaGrande, Lucida Grande">→</tspan>
+                <tspan x="165.294922" y="224"> quét theo từng quận</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#F59E0B" stroke-width="1.5" fill="#FFFBEB" x="40" y="270" width="300" height="120" rx="12"></rect>
+            <path d="M40,300 L40,282 C40,274 44,270 52,270 L328,270 C336,270 340,274 340,282 L340,300 L40,300 Z" id="Path" fill="#D97706"></path>
+            <text id="MOGI.VN-·-HTML-SSR-—-chính-#2" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="13.5" font-weight="bold">
+                <tspan x="54" y="290">MOGI.VN · HTML SSR — chính #2</tspan>
+            </text>
+            <text id="543.487-tin-TP.HCM-(trang-hiển-thị)" fill="#92400E" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold">
+                <tspan x="56" y="324">543.487 tin TP.HCM (trang hiển thị)</tspan>
+            </text>
+            <text id="HTML-render-sẵn,-không-challenge,-dễ-parse" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="344">HTML render sẵn, không challenge, dễ parse</tspan>
+            </text>
+            <text id="Chi-tiết:-mô-tả-dài-+-toạ-độ;-cấm-gọi-/api/" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="364">Chi tiết: mô tả dài + toạ độ; cấm gọi /api/</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#94A3B8" stroke-width="1.5" fill="#F1F5F9" x="40" y="410" width="300" height="100" rx="12"></rect>
+            <path d="M40,440 L40,422 C40,414 44,410 52,410 L328,410 C336,410 340,414 340,422 L340,440 L40,440 Z" id="Path" fill="#475569"></path>
+            <text id="DỰ-PHÒNG-(mở-khi-QA-hụt)" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="13.5" font-weight="bold">
+                <tspan x="54" y="430">DỰ PHÒNG (mở khi QA hụt)</tspan>
+            </text>
+            <text id="alonhadat.com.vn-—-167.257-tin,-SSR,-nhiều" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="464">alonhadat.com.vn — 167.257 tin, SSR, nhiều</tspan>
+            </text>
+            <text id="trường-nhà-phố-·-homedy.com-—-57.731-tin" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="484">trường nhà phố · homedy.com — 57.731 tin</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#FB7185" stroke-width="1.5" fill="#FFF1F2" x="40" y="540" width="300" height="110" rx="12"></rect>
+            <path d="M40,570 L40,552 C40,544 44,540 52,540 L328,540 C336,540 340,544 340,552 L340,570 L40,570 Z" id="Path" fill="#E11D48"></path>
+            <text id="ĐÃ-LOẠI-—-Cloudflare-403" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="13.5" font-weight="bold">
+                <tspan x="54" y="560">ĐÃ LOẠI — Cloudflare 403</tspan>
+            </text>
+            <text id="batdongsan.com.vn-·-muaban.net-·-cafeland" fill="#BE123C" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="594">batdongsan.com.vn · muaban.net · cafeland</tspan>
+            </text>
+            <text id="guland-·-nhadat24h-—-không-vượt-anti-bot" fill="#BE123C" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="614">guland · nhadat24h — không vượt anti-bot</tspan>
+            </text>
+            <text id="chủ-động-(ranh-giới-đạo-đức-của-đồ-án)" fill="#BE123C" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="56" y="634">chủ động (ranh giới đạo đức của đồ án)</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#94A3B8" stroke-width="1.5" fill="#F1F5F9" x="420" y="110" width="360" height="280" rx="12"></rect>
+            <path d="M420,140 L420,122 C420,114 424,110 432,110 L768,110 C776,110 780,114 780,122 L780,140 L420,140 Z" id="Path" fill="#475569"></path>
+            <text id="SCRIPT-CRAWL-—-quy-tắc-bắt-buộc" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="13.5" font-weight="bold">
+                <tspan x="434" y="130">SCRIPT CRAWL — quy tắc bắt buộc</tspan>
+            </text>
+            <circle id="Oval" fill="#475569" cx="442" cy="160" r="5"></circle>
+            <text id="Quét-theo-quận-(area_v2),-phân-trang-offset" fill="#0F172A" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold">
+                <tspan x="456" y="164">Quét theo quận (area_v2), phân trang offset</tspan>
+            </text>
+            <circle id="Oval" fill="#475569" cx="442" cy="186" r="5"></circle>
+            <text id="1-request-/-1–2-giây-+-backoff-khi-429/403" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="456" y="190">1 request / 1–2 giây + backoff khi 429/403</tspan>
+            </text>
+            <circle id="Oval" fill="#475569" cx="442" cy="212" r="5"></circle>
+            <text id="Checkpoint-+-resume,-không-tải-trùng-id" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="456" y="216">Checkpoint + resume, không tải trùng id</tspan>
+            </text>
+            <circle id="Oval" fill="#475569" cx="442" cy="238" r="5"></circle>
+            <text id="Lưu-JSONL-bất-biến,-1-file-/-quận-/-ngày" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="456" y="242">Lưu JSONL bất biến, 1 file / quận / ngày</tspan>
+            </text>
+            <circle id="Oval" fill="#475569" cx="442" cy="264" r="5"></circle>
+            <text id="Drop-dữ-liệu-cá-nhân-(account,-SĐT-trong" fill="#0F172A" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold">
+                <tspan x="456" y="268">Drop dữ liệu cá nhân (account, SĐT trong</tspan>
+            </text>
+            <text id="mô-tả)-ngay-tại-nguồn-—-NĐ-13/2023" fill="#0F172A" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold">
+                <tspan x="456" y="286">mô tả) ngay tại nguồn — NĐ 13/2023</tspan>
+            </text>
+            <circle id="Oval" fill="#475569" cx="442" cy="312" r="5"></circle>
+            <text id="Tôn-trọng-robots.txt-từng-trang-(đã-đọc)" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="456" y="316">Tôn trọng robots.txt từng trang (đã đọc)</tspan>
+            </text>
+            <circle id="Oval" fill="#475569" cx="442" cy="338" r="5"></circle>
+            <text id="Nhật-ký:-số-tin-lấy-/-lỗi-/-bỏ-qua-theo-quận" fill="#475569" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="456" y="342">Nhật ký: số tin lấy / lỗi / bỏ qua theo quận</tspan>
+            </text>
+            <text id="Code-do-AI-agent-máy-cá-nhân-sinh-từ-spec-này" fill="#78716C" fill-rule="nonzero" font-family="Helvetica-Oblique, Helvetica" font-size="11.5" font-style="italic" font-weight="normal">
+                <tspan x="456" y="372">Code do AI agent máy cá nhân sinh từ spec này</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#F59E0B" stroke-width="1.5" fill="#FFFBEB" x="420" y="540" width="360" height="110" rx="12"></rect>
+            <path d="M420,570 L420,552 C420,544 424,540 432,540 L768,540 C776,540 780,544 780,552 L780,570 L420,570 Z" id="Path" fill="#D97706"></path>
+            <text id="DATASET-BẢO-HIỂM-(Hugging-Face)" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="13.5" font-weight="bold">
+                <tspan x="434" y="560">DATASET BẢO HIỂM (Hugging Face)</tspan>
+            </text>
+            <text id="tinixai/vietnam-real-estates-—-TP.HCM-1,36-triệu-dòng" fill="#92400E" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold">
+                <tspan x="436" y="594">tinixai/vietnam-real-estates — TP.HCM 1,36 triệu dòng</tspan>
+            </text>
+            <text id="100%-có-mô-tả-·-tới-~06/2025-·-CC-BY-NC-4.0-(ghi-nguồn)" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="436" y="614">100% có mô tả · tới ~06/2025 · CC BY-NC 4.0 (ghi nguồn)</tspan>
+            </text>
+            <text id="Vai-trò:-đối-chứng-phân-phối-+-thay-thế-nếu-crawler-hỏng" fill="#B45309" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="436" y="634">Vai trò: đối chứng phân phối + thay thế nếu crawler hỏng</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#7C3AED" stroke-width="1.5" fill="#F5F3FF" x="860" y="110" width="380" height="280" rx="12"></rect>
+            <path d="M860,140 L860,122 C860,114 864,110 872,110 L1228,110 C1236,110 1240,114 1240,122 L1240,140 L860,140 Z" id="Path" fill="#7C3AED"></path>
+            <text id="KHO-THÔ-—-SCHEMA-HỢP-NHẤT" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="13.5" font-weight="bold">
+                <tspan x="874" y="130">KHO THÔ — SCHEMA HỢP NHẤT</tspan>
+            </text>
+            <text id="Định-danh:-id-tin-·-nguồn-·-ngày-crawl-·-URL" fill="#4C1D95" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold">
+                <tspan x="876" y="164">Định danh: id tin · nguồn · ngày crawl · URL</tspan>
+            </text>
+            <text id="Văn-bản:-tiêu-đề-·-mô-tả-tự-do-(đã-xoá-SĐT,-giá)" fill="#6D28D9" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="188">Văn bản: tiêu đề · mô tả tự do (đã xoá SĐT, giá)</tspan>
+            </text>
+            <text id="Giá:-tổng-giá-·-(đơn-giá-m²-chỉ-để-đối-chiếu-—" fill="#6D28D9" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="212">Giá: tổng giá · (đơn giá m² chỉ để đối chiếu —</tspan>
+            </text>
+            <text id="không-làm-feature,-chống-leakage)" fill="#6D28D9" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="230">không làm feature, chống leakage)</tspan>
+            </text>
+            <text id="Tài-sản:-diện-tích-·-phòng-ngủ-·-tầng-·-mặt-tiền" fill="#6D28D9" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="254">Tài sản: diện tích · phòng ngủ · tầng · mặt tiền</tspan>
+            </text>
+            <text id="·-loại-BĐS-·-pháp-lý-·-hướng" fill="#6D28D9" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="278">· loại BĐS · pháp lý · hướng</tspan>
+            </text>
+            <text id="Vị-trí:-quận-·-phường-·-đường-·-lat/long" fill="#6D28D9" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="302">Vị trí: quận · phường · đường · lat/long</tspan>
+            </text>
+            <text id="Thời-gian:-ngày-đăng-tin" fill="#6D28D9" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="326">Thời gian: ngày đăng tin</tspan>
+            </text>
+            <text id="Khớp-nhóm-thuộc-tính-của-bộ-data-thành-viên" fill="#78716C" fill-rule="nonzero" font-family="Helvetica-Oblique, Helvetica" font-size="11.5" font-style="italic" font-weight="normal">
+                <tspan x="876" y="356">Khớp nhóm thuộc tính của bộ data thành viên</tspan>
+            </text>
+            <text id="(thời-gian-·-vị-trí-·-tài-sản-·-giá)-+-thêm-mô-tả" fill="#78716C" fill-rule="nonzero" font-family="Helvetica-Oblique, Helvetica" font-size="11.5" font-style="italic" font-weight="normal">
+                <tspan x="876" y="374">(thời gian · vị trí · tài sản · giá) + thêm mô tả</tspan>
+            </text>
+            <rect id="Rectangle" stroke="#0D9488" stroke-width="1.5" fill="#F0FDFA" x="860" y="430" width="380" height="220" rx="12"></rect>
+            <path d="M860,460 L860,442 C860,434 864,430 872,430 L1228,430 C1236,430 1240,434 1240,442 L1240,460 L860,460 Z" id="Path" fill="#0D9488"></path>
+            <text id="QA-GATE-—-đạt-mới-sang-runbook-02" fill="#FFFFFF" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="13.5" font-weight="bold">
+                <tspan x="874" y="450">QA GATE — đạt mới sang runbook 02</tspan>
+            </text>
+            <text id="≥-8.000-tin-thô-(khử-trùng-theo-id)" fill="#115E59" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold">
+                <tspan x="876" y="484">≥ 8.000 tin thô (khử trùng theo id)</tspan>
+            </text>
+            <text id="≥-90%-tin-có-mô-tả-≥-200-ký-tự" fill="#0F766E" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="508">≥ 90% tin có mô tả ≥ 200 ký tự</tspan>
+            </text>
+            <text id="≥-80%-tin-có-giá-dạng-số-(không-&quot;thoả-thuận&quot;)" fill="#0F766E" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="532">≥ 80% tin có giá dạng số (không "thoả thuận")</tspan>
+            </text>
+            <text id="≥-70%-tin-có-phường-hoặc-toạ-độ" fill="#0F766E" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="556">≥ 70% tin có phường hoặc toạ độ</tspan>
+            </text>
+            <text id="≥-3.000-tin-thuộc-3-quận-mục-tiêu-(hệ-cũ)" fill="#0F766E" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="580">≥ 3.000 tin thuộc 3 quận mục tiêu (hệ cũ)</tspan>
+            </text>
+            <text id="100%-sạch-thông-tin-cá-nhân" fill="#0F766E" fill-rule="nonzero" font-family="Helvetica" font-size="12" font-weight="normal">
+                <tspan x="876" y="604">100% sạch thông tin cá nhân</tspan>
+            </text>
+            <text id="Hụt-→-mở-dự-phòng-/-nới-phạm-vi,-ghi-quyết-định" fill="#115E59" fill-rule="nonzero" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold">
+                <tspan x="876" y="632">Hụt </tspan>
+                <tspan x="899.326172" y="632" font-family="LucidaGrande-Bold, Lucida Grande">→</tspan>
+                <tspan x="911.326172" y="632"> mở dự phòng / nới phạm vi, ghi quyết định</tspan>
+            </text>
+            <line x1="342" y1="180" x2="412" y2="180" id="Path" stroke="#64748B" stroke-width="2.5" fill="#000000"></line>
+            <polygon id="Path" fill="#64748B" points="420 180 408 174 408 186"></polygon>
+            <line x1="342" y1="330" x2="412" y2="310" id="Path" stroke="#64748B" stroke-width="2.5" fill="#000000"></line>
+            <polygon id="Path" fill="#64748B" points="420 308 408 306 410 317"></polygon>
+            <path id="Path" d="M412,370 L397.879366,376.753347 L408.930297,385.348515 L412,370 Z M342.789352,460.613941 L346.472996,455.877827 L344.894291,454.649946 L341.210648,459.386059 L342.789352,460.613941 Z M348.928758,452.720418 L352.612402,447.984305 L351.033698,446.756424 L347.350054,451.492537 L348.928758,452.720418 Z M355.068164,444.826896 L358.751808,440.090783 L357.173104,438.862902 L353.48946,443.599015 L355.068164,444.826896 Z M361.207571,436.933374 L364.891214,432.197261 L363.31251,430.96938 L359.628866,435.705493 L361.207571,436.933374 Z M367.346977,429.039852 L371.03062,424.303739 L369.451916,423.075857 L365.768272,427.811971 L367.346977,429.039852 Z M373.486383,421.14633 L377.170027,416.410216 L375.591322,415.182335 L371.907678,419.918449 L373.486383,421.14633 Z M379.625789,413.252808 L383.309433,408.516694 L381.730728,407.288813 L378.047085,412.024926 L379.625789,413.252808 Z M385.765195,405.359285 L389.448839,400.623172 L387.870134,399.395291 L384.186491,404.131404 L385.765195,405.359285 Z M391.904601,397.465763 L395.588245,392.72965 L394.009541,391.501769 L390.325897,396.237882 L391.904601,397.465763 Z M398.044007,389.572241 L401.727651,384.836128 L400.148947,383.608247 L396.465303,388.34436 L398.044007,389.572241 Z M404.183414,381.678719 L404.876235,380.787948 L403.297531,379.560067 L402.604709,380.450838 L404.183414,381.678719 Z" fill="#94A3B8" fill-rule="nonzero"></path>
+            <line x1="782" y1="250" x2="852" y2="250" id="Path" stroke="#64748B" stroke-width="2.5" fill="#000000"></line>
+            <polygon id="Path" fill="#64748B" points="860 250 848 244 848 256"></polygon>
+            <line x1="1050" y1="392" x2="1050" y2="422" id="Path" stroke="#0D9488" stroke-width="2.5" fill="#000000"></line>
+            <polygon id="Path" fill="#0D9488" points="1050 430 1044 418 1056 418"></polygon>
+            <line x1="782" y1="595" x2="852" y2="560" id="Path" stroke="#D97706" stroke-width="2" fill="#000000" stroke-dasharray="6,4"></line>
+            <polygon id="Path" fill="#D97706" points="859 556 847 556 852 567"></polygon>
+            <text id="tải-thẳng" fill="#B45309" fill-rule="nonzero" font-family="Helvetica-Oblique, Helvetica" font-size="11" font-style="italic" font-weight="normal">
+                <tspan x="815" y="545">tải thẳng</tspan>
+            </text>
+            <text id="CS106-·-Đề-tài-5-—-spec-đầy-đủ-trong-runbook-01;-kiểm-tra-lại-trạng-thái-từng-trang-trước-khi-chạy-thật" fill="#78716C" fill-rule="nonzero" font-family="Helvetica-Oblique, Helvetica" font-size="11.5" font-style="italic" font-weight="normal">
+                <tspan x="378" y="700">CS106 · Đề tài 5 — spec đầy đủ trong runbook 01; kiểm tra lại trạng thái từng trang trước khi chạy thật</tspan>
+            </text>
+        </g>
+    </g>
+</svg>

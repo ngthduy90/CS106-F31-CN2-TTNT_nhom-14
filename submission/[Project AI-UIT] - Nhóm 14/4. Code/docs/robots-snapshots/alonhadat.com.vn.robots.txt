@@ -1,0 +1,10 @@
+# nguồn: https://alonhadat.com.vn/robots.txt
+# thời điểm tải: 2026-08-18T17:40:09+00:00
+# HTTP 200
+
+User-agent: *
+Disallow: /publish/handler/*
+Disallow: /publish/form/*
+Disallow: /nha-dat/can-mua/*
+Disallow: /nha-dat/can-thue/*
+Sitemap: https://alonhadat.com.vn/sitemap.xml

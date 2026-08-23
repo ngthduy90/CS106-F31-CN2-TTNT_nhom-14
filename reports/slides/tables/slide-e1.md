@@ -4,12 +4,12 @@
 
 | Mô hình | MdAPE (%) | RMSE (tỷ) | R² |
 |---|---:|---:|---:|
-| Dummy (trung vị) | 34,6 | 7,25 | -0,053 |
-| Trung vị giá/m² theo nhóm | 20,5 | 3,80 | 0,706 |
-| Ridge | 19,7 | 7,00 | -0,160 |
-| Random Forest | 15,1 | 4,63 | 0,579 |
-| **LightGBM** | 13,9 | 3,92 | 0,698 |
-| **XGBoost** | 14,0 | 3,79 | 0,716 |
+| Dummy (trung vị) | 34,6 | 7,250 | -0,053 |
+| Trung vị giá/m² theo nhóm | 20,5 | 3,802 | 0,706 |
+| Ridge | 19,7 | 7,002 | -0,160 |
+| Random Forest | 15,1 | 4,626 | 0,579 |
+| **LightGBM** | 13,9 | 3,925 | 0,698 |
+| **XGBoost** | 14,0 | 3,793 | 0,716 |
 
-LightGBM và XGBoost hơn baseline môi giới khoảng 6,7 điểm phần trăm MdAPE.
+LightGBM và XGBoost hơn baseline môi giới 6,66 điểm phần trăm MdAPE.
 Cách biệt giữa các mô hình in đậm nhỏ hơn độ lệch chuẩn giữa các fold, nên không chọn ra một mô hình thắng.

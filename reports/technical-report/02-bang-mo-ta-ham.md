@@ -149,12 +149,12 @@ _Chia tập, chạy thí nghiệm, chỉ số, bảng biểu, phân tích_
 
 | Loại | Chữ ký | Mô tả |
 |---|---|---|
-| hàm | `figure_price_distribution(frame: pd.DataFrame, logger) -> None` | Phân phối giá ở thang gốc và thang log — lý do chọn log làm biến mục tiêu. |
+| hàm | `figure_price_distribution(frame: pd.DataFrame, logger) -> None` | Phân phối giá ở thang gốc và thang log · lý do chọn log làm biến mục tiêu. |
 | hàm | `figure_area_distribution(frame: pd.DataFrame, logger) -> None` | _(chưa có mô tả)_ |
 | hàm | `figure_count_by_district(frame: pd.DataFrame, logger) -> None` | _(chưa có mô tả)_ |
 | hàm | `figure_unit_price_by_month(frame: pd.DataFrame, logger) -> None` | Giá/m² trung vị theo tháng, 2025-06 → 2026-08 (T4.12). |
-| hàm | `figure_error_by_slice(logger) -> None` | MdAPE theo quận và theo bin giá — chỗ giám khảo hỏi sâu nhất (T4.10). |
-| hàm | `figure_learning_curve(logger) -> None` | RMSE theo cỡ tập huấn luyện — trả lời "crawl thêm có đáng không" (T4.11). |
+| hàm | `figure_error_by_slice(logger) -> None` | MdAPE theo quận và theo bin giá · chỗ giám khảo hỏi sâu nhất (T4.10). |
+| hàm | `figure_learning_curve(logger) -> None` | RMSE theo cỡ tập huấn luyện · trả lời "crawl thêm có đáng không" (T4.11). |
 | hàm | `main() -> None` | _(chưa có mô tả)_ |
 
 ## `src/evaluation/render_tables.py`
@@ -164,9 +164,13 @@ _Chia tập, chạy thí nghiệm, chỉ số, bảng biểu, phân tích_
 | Loại | Chữ ký | Mô tả |
 |---|---|---|
 | hàm | `render_e1(payload: dict) -> str` | _(chưa có mô tả)_ |
-| hàm | `render_e2(payload: dict) -> str` | _(chưa có mô tả)_ |
+| hàm | `render_e2(payload: dict) -> str` | Bảng chuyển giao, kèm chênh lệch TÍNH RA so với bảng E1 cùng nguồn kiểm. |
 | hàm | `render_ablation(payload: dict) -> str` | _(chưa có mô tả)_ |
 | hàm | `render_e3(payload: dict) -> str` | _(chưa có mô tả)_ |
+| hàm | `render_error_analysis(payload: dict) -> str` | _(chưa có mô tả)_ |
+| hàm | `render_learning_curve(payload: dict) -> str` | _(chưa có mô tả)_ |
+| hàm | `render_e1_slide(payload: dict) -> str` | _(chưa có mô tả)_ |
+| hàm | `render_ablation_slide(payload: dict) -> str` | _(chưa có mô tả)_ |
 | hàm | `main() -> None` | _(chưa có mô tả)_ |
 
 ## `src/evaluation/run_experiments.py`
@@ -261,7 +265,7 @@ _Làm sạch, trích đặc trưng định lượng, chuẩn hoá địa chỉ_
 | hàm | `load_ward_mapping() -> dict` | _(chưa có mô tả)_ |
 | lớp | `WardResolver` | Quy một địa chỉ về hệ cũ, ưu tiên thông tin sẵn có rồi mới tra bảng. |
 | phương thức | `WardResolver.__init__(self, table: dict \| None = None) -> None` | _(chưa có mô tả)_ |
-| phương thức | `WardResolver.resolve(self, ward_old: str \| None = None, ward_new: str \| None = None, district: str \| None = None) -> tuple[str, str, str]` | Trả về (phường cũ, quận cũ, nguồn đơn vị) — nguồn để báo cáo minh bạch. |
+| phương thức | `WardResolver.resolve(self, ward_old: str \| None = None, ward_new: str \| None = None, district: str \| None = None) -> tuple[str, str, str]` | Trả về (phường cũ, quận cũ, nguồn đơn vị) · nguồn để báo cáo minh bạch. |
 | phương thức | `WardResolver.unmapped_rate(self) -> float` | _(chưa có mô tả)_ |
 
 ## `src/preprocess/clean.py`
@@ -298,7 +302,7 @@ _Làm sạch, trích đặc trưng định lượng, chuẩn hoá địa chỉ_
 | hàm | `extract_floors(flat: str) -> int \| None` | Số tầng, cộng dồn theo cách người Việt mô tả nhà phố. |
 | hàm | `extract_frontage(flat: str) -> float \| None` | _(chưa có mô tả)_ |
 | hàm | `extract_alley_width(flat: str) -> float \| None` | _(chưa có mô tả)_ |
-| hàm | `extract_position(flat: str) -> str` | "mặt tiền" / "hẻm" / "không rõ" — biến phân loại, không phải số đo. |
+| hàm | `extract_position(flat: str) -> str` | "mặt tiền" / "hẻm" / "không rõ" · biến phân loại, không phải số đo. |
 | hàm | `extract_legal(flat: str) -> str` | _(chưa có mô tả)_ |
 | hàm | `extract_direction(flat: str) -> str` | Hướng ghép ("Đông Nam") phải thử trước hướng đơn, nếu không "Đông" nuốt mất. |
 | lớp | `Extracted` | _(chưa có mô tả)_ |
@@ -333,6 +337,7 @@ _Làm sạch, trích đặc trưng định lượng, chuẩn hoá địa chỉ_
 
 | Loại | Chữ ký | Mô tả |
 |---|---|---|
+| hàm | `canonical_property_type(value: str \| None) -> str` | Quy tên loại bất động sản của ba nguồn về một bộ từ vựng tiếng Việt duy nhất. |
 | hàm | `load_all(hf_limit: int \| None = 40000) -> pd.DataFrame` | Bảng gộp của cả ba nguồn, theo đúng thứ tự cột của SCHEMA. |
 
 ## `src/preprocess/price.py`
@@ -382,4 +387,4 @@ _Ghi nhật ký và run manifest_
 
 ---
 
-Tổng cộng 159 hàm, lớp và phương thức công khai trong 32 tệp mã nguồn.
+Tổng cộng 164 hàm, lớp và phương thức công khai trong 32 tệp mã nguồn.

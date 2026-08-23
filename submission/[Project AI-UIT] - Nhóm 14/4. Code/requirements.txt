@@ -1,0 +1,37 @@
+# Python 3.11
+# Thu thập dữ liệu
+requests==2.32.3
+beautifulsoup4==4.12.3
+lxml==5.3.0
+
+# Dữ liệu
+pandas==2.2.3
+numpy==1.26.4
+pyarrow==17.0.0
+datasets==3.0.1
+
+# NLP tiếng Việt
+underthesea==6.8.4
+pyvi==0.1.1
+
+# Mô hình
+scikit-learn==1.5.2
+lightgbm==4.5.0
+xgboost==2.1.1
+catboost==1.2.7
+joblib==1.4.2
+
+# Giải thích mô hình
+shap==0.46.0
+
+# Trực quan hoá
+matplotlib==3.9.2
+
+# Demo
+streamlit==1.39.0
+
+# Bài nộp (file Excel danh sách nhóm)
+openpyxl==3.1.5
+
+# Kiểm thử
+pytest==8.3.3

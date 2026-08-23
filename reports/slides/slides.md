@@ -152,7 +152,7 @@ tuý, không lẫn khoảng cách giá rao / giá giao dịch.
 
 # Demo
 
-![Ảnh chụp web app](../../submission/Demo/demo-01-nhap-lieu.png)
+![Ảnh chụp web app](../../submission/Demo/demo-02-ket-qua-va-giai-thich.png)
 
 Streamlit, nạp đúng artefact mà bước huấn luyện xuất ra. Khoảng tin cậy lấy từ MdAPE đo
 trên hold-out, không phải con số tự đặt.
