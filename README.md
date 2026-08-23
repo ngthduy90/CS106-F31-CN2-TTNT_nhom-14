@@ -96,6 +96,16 @@ pip install -r requirements.txt
 make all        # hoặc từng bước: make crawl / prep / train / report / demo
 ```
 
+**Thu thập thêm dữ liệu.** Mặc định các script crawl lấy ít, đủ để kiểm pipeline chạy
+đúng. Muốn đạt mốc 8.000 tin của đề thì tăng hạn mức rồi chạy lại; nhờ checkpoint và
+khử trùng theo mã tin, lần chạy sau chỉ bổ sung phần còn thiếu:
+
+```bash
+python -m src.crawl.run_chotot --max-per-district 3000
+python -m src.crawl.run_mogi   --max-per-district 800
+make qa                                    # chấm lại theo 6 ngưỡng
+```
+
 Chi tiết từng lệnh, bộ số mẫu cho demo và chỗ đọc kết quả:
 [`docs/huong-dan-su-dung.md`](docs/huong-dan-su-dung.md).
 
