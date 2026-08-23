@@ -42,5 +42,8 @@ reports/slides/slides.pptx
 reports/scientific-report/_built/
 reports/slides/_built/
 
-# Thư mục nộp được ráp lại bằng scripts/assemble-submission.py
-submission/[Project AI-UIT]*/
+# Thư mục nộp được ráp lại bằng scripts/assemble-submission.py.
+# Dấu ngoặc vuông phải escape: git đọc [...] là character class, nên pattern không
+# escape sẽ khớp một ký tự bất kỳ trong tập đó thay vì khớp dấu ngoặc literal, và
+# toàn bộ thư mục 9 MB lọt vào git.
+submission/\[Project AI-UIT\]*/
