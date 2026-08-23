@@ -94,7 +94,7 @@ def main() -> None:
     st.caption(
         f"Mô hình: **{bundle['model_name']}** · huấn luyện trên "
         f"{bundle['trained_rows']:,} tin".replace(",", ".")
-        + " · CS106.F31.CN2 — Nhóm 14"
+        + " · CS106.F31.CN2 · Nhóm 14"
     )
 
     districts = sorted(reference["district"].unique()) if len(reference) else config.TARGET_DISTRICTS
@@ -109,10 +109,13 @@ def main() -> None:
             if len(reference) else ["không rõ"]
         )
         ward = st.selectbox("Phường", wards)
-        property_type = st.selectbox(
-            "Loại bất động sản",
-            sorted(reference["property_type"].unique()) if len(reference) else ["Nhà"],
-        )
+        # Mặc định là loại phổ biến nhất trong dữ liệu, không phải loại đứng đầu bảng
+        # chữ cái: người mở app lần đầu nên thấy một ca điển hình.
+        if len(reference):
+            types = list(reference["property_type"].value_counts().index)
+        else:
+            types = ["Nhà phố"]
+        property_type = st.selectbox("Loại bất động sản", types)
 
         col1, col2 = st.columns(2)
         area = col1.number_input("Diện tích (m²)", 10.0, 1000.0, 60.0, step=5.0)
