@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import re
 import shutil
+import zipfile
 import sys
 from pathlib import Path
 
@@ -45,15 +46,43 @@ OTHER_COURSE = re.compile(r"\b(?:CS|IT|SE|MA|IE|NT|EC|ENG)\d{3}\b", re.IGNORECAS
 
 TEXT_SUFFIXES = {".md", ".py", ".txt", ".yaml", ".yml", ".sh", ".json", ".cfg", ".toml"}
 
+# docx/pptx/xlsx là file ZIP chứa XML: đọc thẳng bằng read_text ra chuỗi nhị phân vô
+# nghĩa, nên hai phép quét "bắt buộc" từng mù với ĐÚNG bốn file giáo viên sẽ mở. Không
+# cần thư viện mới, chỉ cần bung phần XML bên trong.
+OFFICE_SUFFIXES = {".docx", ".pptx", ".xlsx"}
+
+
+def _read_searchable_text(path: Path) -> str | None:
+    """Nội dung tìm kiếm được của một file, kể cả file Office."""
+    suffix = path.suffix.lower()
+    if suffix in TEXT_SUFFIXES:
+        try:
+            return path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            return None
+    if suffix in OFFICE_SUFFIXES:
+        try:
+            with zipfile.ZipFile(path) as bundle:
+                parts = [
+                    name for name in bundle.namelist()
+                    if name.endswith(".xml") and not name.startswith("docProps/thumbnail")
+                ]
+                return "\n".join(
+                    bundle.read(name).decode("utf-8", errors="ignore") for name in parts
+                )
+        except (zipfile.BadZipFile, OSError):
+            return None
+    return None
+
 # Thư mục không bao giờ nằm trong bài nộp. Khi chạy --check-only trên chính repo, phải
 # bỏ qua chúng, nếu không phép quét sẽ báo hàng chục "vi phạm" nằm trong .venv và data/
 # — tức là kêu ầm ở nơi không có gì, và một phép quét hay kêu nhầm sẽ bị bỏ qua.
 SKIP_DIRS = {".venv", ".git", "data", "node_modules", "__pycache__", ".pytest_cache", "_built"}
 
 
-def _walk(root: Path):
+def _walk(root: Path, skip: set[str] | None = None):
     for path in root.rglob("*"):
-        if SKIP_DIRS & set(path.parts):
+        if (skip if skip is not None else SKIP_DIRS) & set(path.parts):
             continue
         if path.is_file():
             yield path
@@ -88,11 +117,8 @@ def scan_cross_course(root: Path) -> list[str]:
     """Mã môn của môn khác lọt vào bài nộp (T6.16)."""
     hits: list[str] = []
     for path in _walk(root):
-        if path.suffix.lower() not in TEXT_SUFFIXES:
-            continue
-        try:
-            text = path.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
+        text = _read_searchable_text(path)
+        if text is None:
             continue
         for match in OTHER_COURSE.finditer(text):
             if OWN_COURSE.match(match.group(0)):
@@ -102,11 +128,16 @@ def scan_cross_course(root: Path) -> list[str]:
     return hits
 
 
-def scan_data_leak(root: Path) -> list[str]:
-    """Dữ liệu thô lọt vào bài nộp — vi phạm cam kết không tái phân phối."""
+def scan_data_leak(root: Path, inside_submission: bool = False) -> list[str]:
+    """Dữ liệu thô lọt vào bài nộp — vi phạm cam kết không tái phân phối.
+
+    Khi quét CÂY NỘP thì không được bỏ qua `data/`: một thư mục data lọt vào bài nộp
+    chính là thứ phép quét này sinh ra để bắt. Bỏ qua nó chỉ đúng khi quét repo gốc.
+    """
     suffixes = {".jsonl", ".parquet"}
+    skip = (SKIP_DIRS - {"data"}) if inside_submission else SKIP_DIRS
     hits = []
-    for path in _walk(root):
+    for path in _walk(root, skip=skip):
         if path.suffix.lower() not in suffixes and not (
             path.suffix.lower() == ".csv" and "tables" not in path.parts
         ):
@@ -148,6 +179,11 @@ def collect_metrics(root: Path) -> dict[str, set[str]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Ráp thư mục nộp và quét kiểm tra cuối")
     parser.add_argument("--check-only", action="store_true", help="chỉ quét, không chép file")
+    parser.add_argument(
+        "--strict-numbers",
+        action="store_true",
+        help="coi mọi con số chỉ có ở một tài liệu là lỗi (mặc định: chỉ liệt kê để rà tay)",
+    )
     args = parser.parse_args()
 
     problems: list[str] = []
@@ -186,7 +222,7 @@ def main() -> int:
         problems.append(f"{len(cross)} chỗ nhắc mã môn khác")
 
     print("\n== Quét dữ liệu thô lọt vào bài nộp ==")
-    leaks = scan_data_leak(root)
+    leaks = scan_data_leak(root, inside_submission=root is not ROOT and root == TARGET)
     print("  0 file" if not leaks else "\n".join(f"  {h}" for h in leaks[:20]))
     if leaks:
         problems.append(f"{len(leaks)} file dữ liệu lọt vào bài nộp")
@@ -195,12 +231,28 @@ def main() -> int:
     metrics = collect_metrics(ROOT)
     for label, values in metrics.items():
         print(f"  {label}: {len(values)} con số")
-    slide_only = metrics.get("slide", set()) - metrics.get("báo cáo", set())
-    if slide_only:
-        print("  Con số chỉ có ở slide, không thấy trong báo cáo:")
-        for value in sorted(slide_only)[:15]:
+    # Trước đây chỉ so slide với báo cáo rồi in ra cho vui: README và model card cũng
+    # được thu thập nhưng không ai đối chiếu, và phép kiểm không thể làm hỏng lần chạy.
+    reference = metrics.get("báo cáo", set())
+    orphans = {
+        label: sorted(values - reference)
+        for label, values in metrics.items()
+        if label != "báo cáo" and (values - reference)
+    }
+    for label, values in orphans.items():
+        print(f"  Con số chỉ có ở {label}, không thấy trong báo cáo:")
+        for value in values[:15]:
             print(f"    {value}")
-        print("  (kiểm tay: hoặc là số làm tròn khác, hoặc là số slide tự thêm)")
+    if orphans:
+        print("  (kiểm tay: hoặc là số làm tròn khác, hoặc là số tài liệu đó tự thêm)")
+        # Mặc định chỉ liệt kê: script không phân biệt được "làm tròn khác" với "mâu
+        # thuẫn", mà một phép quét hay kêu nhầm thì sớm bị bỏ qua — đúng lý do repo này
+        # đã ghi cho SKIP_DIRS. --strict-numbers biến nó thành điều kiện chặn khi cần.
+        if args.strict_numbers:
+            problems.append(
+                "số liệu lệch giữa các tài liệu: "
+                + ", ".join(f"{label} {len(values)} con số" for label, values in orphans.items())
+            )
 
     print()
     if problems:

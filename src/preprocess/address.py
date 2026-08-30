@@ -64,6 +64,9 @@ def deaccent(text: str) -> str:
     return re.sub(r"\s+", " ", without.replace("đ", "d").replace("Đ", "D").lower()).strip()
 
 
+# Quận 2 và Quận 9 nhập vào TP Thủ Đức (Nghị quyết 1111/NQ-UBTVQH14, hiệu lực 2021).
+MERGED_INTO_THU_DUC = frozenset({2, 9})
+
 _NAMED_LOOKUP = {deaccent(name): name for name in NAMED_DISTRICTS}
 # "quận 12", "q.12", "q 12", "12"
 _NUMBERED_DISTRICT = re.compile(r"\b(?:quan|q)\s*\.?\s*(\d{1,2})\b|^(\d{1,2})$")
@@ -88,6 +91,11 @@ def normalise_district(text: str | None) -> str:
     match = _NUMBERED_DISTRICT.search(flat)
     if match:
         number = int(match.group(1) or match.group(2))
+        if number in MERGED_INTO_THU_DUC:
+            # Quận 2 và Quận 9 đã nhập vào TP Thủ Đức từ 2021. Mint chúng thành hạng mục
+            # riêng là tách MỘT địa bàn thành ba cột one-hot, và E2 (đo trôi giá giữa hai
+            # thời kỳ) chịu ảnh hưởng nặng nhất vì hai thời kỳ ghi tên khác nhau.
+            return "Thủ Đức"
         if 1 <= number <= 12:
             return f"Quận {number}"
     return UNKNOWN
@@ -196,14 +204,23 @@ def build_ward_mapping(source: str = "chotot") -> dict:
         }
 
     return {
-        "snapshot_date": date.today().isoformat(),
+        # Tên cũ là "snapshot_date" nhưng giá trị là ngày CHẠY: bảng dựng lại mỗi lần
+        # chạy pipeline nên "ngày chốt rõ ràng" thực ra trôi theo lần chạy gần nhất.
+        # Giờ bảng chỉ dựng lại khi chưa có (hoặc khi ép), nên ngày này mới có nghĩa.
+        "built_at": date.today().isoformat(),
         "derived_from": f"cặp ward_name / ward_name_v3 trong kho thô {source}",
         "n_new_wards": len(mapping),
         "mapping": mapping,
     }
 
 
-def save_ward_mapping(source: str = "chotot") -> dict:
+MIN_MAJORITY_SHARE = 0.60  # dưới ngưỡng này thì ánh xạ mới→cũ là "đa số mỏng"
+
+
+def save_ward_mapping(source: str = "chotot", force: bool = False) -> dict:
+    """Dựng và ghi bảng ánh xạ. Đã có bảng thì GIỮ NGUYÊN trừ khi ép dựng lại."""
+    if MAPPING_PATH.exists() and not force:
+        return json.loads(MAPPING_PATH.read_text(encoding="utf-8"))
     table = build_ward_mapping(source)
     MAPPING_PATH.parent.mkdir(parents=True, exist_ok=True)
     MAPPING_PATH.write_text(json.dumps(table, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -222,8 +239,9 @@ class WardResolver:
     def __init__(self, table: dict | None = None) -> None:
         table = table or load_ward_mapping()
         self.mapping = table["mapping"]
-        self.snapshot_date = table["snapshot_date"]
+        self.snapshot_date = table.get("built_at") or table.get("snapshot_date")
         self.stats = Counter()
+        self.weak_mappings: dict[str, float] = {}
 
     def resolve(
         self,
@@ -244,11 +262,21 @@ class WardResolver:
             ward = normalise_ward(ward_new)
             entry = self.mapping.get(ward)
             if entry:
-                self.stats["tra bảng mới→cũ"] += 1
+                # `majority_share` được tính và lưu từ đầu nhưng chưa ai đọc: ánh xạ 0,45
+                # (đa số mỏng, phần còn lại chia cho phường khác) trước đây được áp tự
+                # tin y như ánh xạ 1,00. Đánh dấu ra cột nguồn để bảng và người đọc thấy.
+                share = float(entry.get("majority_share", 1.0))
+                if share < MIN_MAJORITY_SHARE:
+                    self.stats["tra bảng mới→cũ (đa số mỏng)"] += 1
+                    self.weak_mappings[ward] = share
+                    label = f"mới (ánh xạ yếu {share:.2f})"
+                else:
+                    self.stats["tra bảng mới→cũ"] += 1
+                    label = "mới (đã ánh xạ)"
                 return (
                     entry["old_ward"],
                     known_district if known_district != UNKNOWN else entry["old_district"],
-                    "mới (đã ánh xạ)",
+                    label,
                 )
 
         self.stats["không ánh xạ được"] += 1
@@ -257,3 +285,14 @@ class WardResolver:
     def unmapped_rate(self) -> float:
         total = sum(self.stats.values())
         return self.stats["không ánh xạ được"] / total if total else 0.0
+
+    def quality_report(self) -> dict:
+        """Chỉ số minh bạch của bước quy đổi phường, để pipeline ghi ra và log."""
+        return {
+            "tỷ lệ không ánh xạ được": round(self.unmapped_rate(), 4),
+            "ánh xạ đa số mỏng": {
+                ward: round(share, 3)
+                for ward, share in sorted(self.weak_mappings.items(), key=lambda kv: kv[1])
+            },
+            "phân bố nguồn": dict(self.stats),
+        }

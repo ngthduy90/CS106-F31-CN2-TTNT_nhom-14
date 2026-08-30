@@ -20,13 +20,16 @@ PRICE_PLACEHOLDER = " GIÁTIỀN "
 # sau khi tách từ, "110 triệu/m2" mất dấu gạch chéo và dính thành "110 triệum2". Mẫu
 # nào yêu cầu \b sau "triệu" sẽ trượt đúng những dòng nguy hiểm nhất, vì đơn giá nhân
 # diện tích ra thẳng nhãn.
+# Dấu ngăn giữa con số và đơn vị nhận cả GẠCH DƯỚI: bộ tách từ nối token bằng "_", nên
+# "5 tỷ" sau khi tách có thể thành "5_tỷ" — mẫu chỉ chấp nhận khoảng trắng sẽ trượt đúng
+# dạng văn bản mà pipeline đưa vào TF-IDF.
 MONEY_PATTERNS = [
-    re.compile(r"\d+[.,]?\d*\s*(?:tỷ|tỉ|triệu|trieu|tr)\s*/?\s*m\s*[²2]", re.IGNORECASE),
-    re.compile(r"\d+[.,]?\d*\s*(?:tỷ|tỉ|ty|ti)\s*\d*\s*(?:triệu|trieu|tr)?", re.IGNORECASE),
-    re.compile(r"\d+[.,]?\d*\s*(?:triệu|trieu|tr|củ|cu)\b", re.IGNORECASE),
-    re.compile(r"\d{9,}\s*(?:đ|vnd|vnđ|đồng|dong)?", re.IGNORECASE),
-    re.compile(r"\d{4,}\s*(?:đ|vnd|vnđ|đồng|dong)\b", re.IGNORECASE),
-    re.compile(r"\bgiá\s*[:\-]?\s*\d+[.,]?\d*", re.IGNORECASE),
+    re.compile(r"\d+[.,]?\d*[\s_]*(?:tỷ|tỉ|triệu|trieu|tr)[\s_]*/?[\s_]*m[\s_]*[²2]", re.IGNORECASE),
+    re.compile(r"\d+[.,]?\d*[\s_]*(?:tỷ|tỉ|ty|ti)[\s_]*\d*[\s_]*(?:triệu|trieu|tr)?", re.IGNORECASE),
+    re.compile(r"\d+[.,]?\d*[\s_]*(?:triệu|trieu|tr|củ|cu)\b", re.IGNORECASE),
+    re.compile(r"\d{9,}[\s_]*(?:đ|vnd|vnđ|đồng|dong)?", re.IGNORECASE),
+    re.compile(r"\d{4,}[\s_]*(?:đ|vnd|vnđ|đồng|dong)\b", re.IGNORECASE),
+    re.compile(r"\bgiá[\s_]*[:\-]?[\s_]*\d+[.,]?\d*", re.IGNORECASE),
 ]
 
 # Token còn sót lại sau khi lọc thì coi là thất bại: dùng cho phép kiểm ngược.
@@ -34,9 +37,13 @@ MONEY_PATTERNS = [
 # số trở lên. Không có ràng buộc đó thì phép kiểm kêu nhầm ở hai chỗ rất phổ biến:
 # "74 Đồng Đen" là số nhà trên một con đường ở Tân Bình, và "đường 10 đồng bộ" là mô tả
 # hạ tầng. Một phép kiểm hay kêu nhầm sẽ sớm bị bỏ qua, tức là mất hẳn tác dụng.
+# Phép kiểm ngược phải mạnh NGANG bộ lọc, nếu không nó xác nhận "đã sạch" cho đúng
+# những dạng bộ lọc bỏ sót: token nối bằng "_" (bộ tách từ sinh ra) và dãy 9+ chữ số
+# trần (một mức giá viết đủ số, không kèm đơn vị).
 MONEY_TOKEN = re.compile(
-    r"(?:^|\W)(?:\d+[.,]?\d*\s*(?:tỷ|tỉ|ty\b|ti\b|triệu|trieu|tr\b|củ\b)"
-    r"|\d{4,}\s*(?:đồng|vnd|vnđ|đ)\b)",
+    r"(?:^|\W)(?:\d+[.,]?\d*[\s_]*(?:tỷ|tỉ|ty\b|ti\b|triệu|trieu|tr\b|củ\b)"
+    r"|\d{4,}[\s_]*(?:đồng|vnd|vnđ|đ)\b"
+    r"|\d{9,})",
     re.IGNORECASE,
 )
 

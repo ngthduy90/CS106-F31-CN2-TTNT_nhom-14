@@ -114,7 +114,11 @@ TEXT_FLAGS: dict[str, str] = {
     "so_hong_rieng": r"so\s*hong\s*rieng|\bshr\b",
     "giay_tay": r"giay\s*tay|vi\s*bang",
     "ngop_bank": r"ngop|ngan\s*hang\s*siet|\bno\s*bank\b|ket\s*tien",
-    "ban_gap": r"\bgap\b|can\s*ban\s*nhanh|ban\s*nhanh",
+    # "gấp" và "gặp" giống hệt nhau sau khi bỏ dấu, mà "gặp" là từ cực thường gặp trong
+    # tin rao ("hẹn gặp", "gặp chính chủ") — cờ bán gấp vì thế nhiễu thẳng vào narrative
+    # SHAP. Chỉ nhận "gấp" khi nó đứng cạnh từ chỉ việc bán/cần.
+    "ban_gap": r"(?:ban|can|thanh\s*ly|xa)\s*gap|gap\s*(?:ban|can|thanh\s*ly)"
+               r"|can\s*ban\s*nhanh|ban\s*nhanh",
     "giam_gia": r"giam\s*gia|giam\s*\d|cat\s*lo|\blo\s*von\b",
     "moi_xay": r"moi\s*xay|nha\s*moi|xay\s*moi|vao\s*o\s*ngay",
     "cu_nat": r"nha\s*cu|nha\s*nat|can\s*sua|xuong\s*cap",

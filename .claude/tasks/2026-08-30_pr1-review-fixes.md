@@ -48,15 +48,15 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - [x] N7 `registry.py:17` — "ngân sách tinh chỉnh giống nhau" thực ra là min(40, |grid|)
 - [x] N8 `run_experiments.py:84-87` — artifact `--fast` bị tái dùng âm thầm cho champion/ablation
 - [x] N9 `dedup.py:81-86` — TF-IDF fit riêng từng ô làm ngưỡng 0,85 đổi nghĩa theo mật độ
-- [~] N10 `clean.py:102-115,73-77` + `price.py:77` — band toàn thành phố cho quận nhỏ; funnel đếm đúp
-- [ ] N11 `extract.py:60,113,127,221-222` — "m" trần thành diện tích; "phòng" thành phòng ngủ; hẻm
+- [x] N10 `clean.py:102-115,73-77` + `price.py:77` — band toàn thành phố cho quận nhỏ; funnel đếm đúp
+- [x] N11 `extract.py:60,113,127,221-222` — "m" trần thành diện tích; "phòng" thành phòng ngủ; hẻm
 - [x] N12 `pii.py:126-131,51` — homoglyph chỉ chạy một lượt; danh sách ký tự vô hình hardcode
-- [ ] N13 `scripts/assemble-submission.py:46,51,180,194-203` — mù với docx/pptx/xlsx, không thể fail
+- [x] N13 `scripts/assemble-submission.py:46,51,180,194-203` — mù với docx/pptx/xlsx, không thể fail
 - [x] N14 `demo/app.py:166-173` — ba quy ước thập phân trong một panel
 - [x] N15 `scripts/update-readme-metrics.py:60-66` + `render_tables.py:136-145` — 6,66 là của riêng LightGBM
-- [ ] N16 `address.py:169-181,91` — `majority_share`/`unmapped_rate` ghi ra nhưng không ai đọc; Quận 2/9
+- [x] N16 `address.py:169-181,91` — `majority_share`/`unmapped_rate` ghi ra nhưng không ai đọc; Quận 2/9
 - [x] N17 `render_tables.py:88-90` — mô tả split đọc từ config sống thay vì payload của run
-- [ ] N18 `features/text.py:117` + `leakage.py:37-41` — `ban_gap` khớp "gặp"; checker yếu hơn stripper
+- [x] N18 `features/text.py:117` + `leakage.py:37-41` — `ban_gap` khớp "gặp"; checker yếu hơn stripper
 - [x] N19 `dedup.py:150` — `duplicate_group` đã có nhưng splits chưa group-aware
 - [x] N20 `tests/` — đã thêm test_extract, test_address, test_crawl_store (121 test)
 
@@ -77,3 +77,22 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - C9/C10: E2 và E3 giờ chạy trên mô hình ĐÃ tinh chỉnh → cả hai bảng đổi số (E2 bớt bị
   thổi phồng mức trôi, E3 bớt bị thổi phồng cái giá của khu vực chưa thấy).
 - N15: README + bảng E1 đã sinh lại, giờ ghi khoảng 6,32–6,66 của cả nhóm dẫn đầu.
+
+## Kết quả (2026-08-30)
+
+Tất cả 17 comment + 20 ghi chú đã áp. Kiểm chứng cuối:
+
+- `pytest tests/ -q`: 121 passed (78 test cũ + 43 test mới cho pii/extract/address/store/price).
+- `scripts/check-reproducibility.py`: sinh bảng hai lần giống hệt, train lại khớp 3 chữ số.
+- `scripts/assemble-submission.py --check-only`: exit 0; thêm `--strict-numbers` thì exit 1
+  và liệt kê 13 con số của README + 1 của model card không thấy trong báo cáo (cần rà tay).
+- `render_tables` + `update-readme-metrics` đã chạy lại: `learning-curve.md`,
+  `e1-results-*.md`, README cập nhật theo code mới; các bảng khác byte-identical.
+
+## Việc còn lại cho chủ nhân
+
+1. Chạy `make prep && make train && make report` khi có thời gian: mọi số trong
+   `reports/` hiện vẫn là của lần chạy CŨ, còn code đã đổi (danh sách mục làm lệch số ở
+   trên). Sau đó rà lại báo cáo Word/slide.
+2. Quyết định về 13 con số README + 1 model card mà `--strict-numbers` nêu.
+3. Nếu muốn nộp lại: chạy `make submission` sau khi đã chạy lại pipeline.

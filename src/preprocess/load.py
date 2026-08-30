@@ -321,9 +321,13 @@ def _load_hf(path=None, limit: int | None = None) -> pd.DataFrame:
     return out
 
 
-def load_all(hf_limit: int | None = 40_000) -> pd.DataFrame:
-    """Bảng gộp của cả ba nguồn, theo đúng thứ tự cột của SCHEMA."""
-    resolver = WardResolver()
+def load_all(hf_limit: int | None = 40_000, resolver: WardResolver | None = None) -> pd.DataFrame:
+    """Bảng gộp của cả ba nguồn, theo đúng thứ tự cột của SCHEMA.
+
+    Nơi gọi truyền *resolver* vào khi cần đọc lại chỉ số chất lượng của bước quy đổi
+    phường (`resolver.quality_report()`) — chỉ số đó vô nghĩa nếu không ai đọc.
+    """
+    resolver = resolver or WardResolver()
     frames = [_load_chotot(resolver), _load_mogi(resolver), _load_hf(limit=hf_limit)]
     frames = [f.dropna(axis=1, how="all") for f in frames if len(f)]
     frame = pd.concat(frames, ignore_index=True)

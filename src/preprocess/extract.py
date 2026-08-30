@@ -57,7 +57,7 @@ def _plausible(value: float | None, low: float, high: float) -> float | None:
 # --- diện tích ----------------------------------------------------------------
 
 # "DT 60m2", "diện tích: 60 m²", "60m2", "60 mv"
-_AREA_ANY = re.compile(rf"{_NUM}\s*(?:m2|m²|mv|m)\b")
+_AREA_ANY = re.compile(rf"{_NUM}\s*(m2|m²|mv|m)\b")
 _AREA_LABEL_NEAR = re.compile(r"(?:dt|dtcn|dtsd|dien\s*tich|cong\s*nhan|\bcn\b|so\s*do|shr)")
 _RECOGNISED_NEAR = re.compile(r"(?:cong\s*nhan|dtcn|\bcn\b)")
 
@@ -106,6 +106,11 @@ def extract_area(flat: str) -> float | None:
             score = 2
         elif _AREA_LABEL_NEAR.search(left):
             score = 1
+        # "m" TRẦN không phải đơn vị diện tích: "cách Aeon Mall 500m" là khoảng cách,
+        # "hẻm 6m" là bề rộng. Ứng viên không nhãn nào đứng trước thì thắng (score 0),
+        # nên một con số như thế từng ra diện tích 500 m² cho căn nhà 60 m².
+        if match.group(2) == "m" and score == 0:
+            continue
         # Con số dính ngay vào "x" là một chiều của kích thước, không phải diện tích.
         if re.search(r"[x*×]\s*$", left) or re.match(r"\s*[x*×]", right):
             continue
@@ -124,7 +129,12 @@ def extract_area(flat: str) -> float | None:
 
 # --- phòng ngủ / nhà tắm ------------------------------------------------------
 
-_BEDROOMS = re.compile(r"(\d{1,2})\s*(?:pn\b|phong\s*ngu|p\.?n\b|bedroom|phong\b|p\b)")
+# "phòng" trần chỉ tính là phòng ngủ khi KHÔNG phải phòng khách/tắm/bếp/ăn/thờ/giặt:
+# "1 phòng khách, 2 phòng ngủ" từng ra 1 phòng ngủ vì con số đầu tiên thắng.
+_BEDROOMS = re.compile(
+    r"(\d{1,2})\s*(?:pn\b|phong\s*ngu|p\.?n\b|bedroom"
+    r"|phong\b(?!\s*(?:khach|tam|bep|an\b|tho\b|giat|ve\s*sinh|karaoke|gym))|p\b)"
+)
 _BEDROOMS_SUFFIX = re.compile(r"(?:phong\s*ngu|pn)\s*[:\-]?\s*(\d{1,2})\b")
 _BATHROOMS = re.compile(r"(\d{1,2})\s*(?:wc\b|toilet|nha\s*tam|phong\s*tam|vs\b)")
 _BATHROOMS_SUFFIX = re.compile(r"(?:wc|toilet|nha\s*tam)\s*[:\-]?\s*(\d{1,2})\b")
@@ -221,14 +231,22 @@ def _int_or_none(value: int, low: int, high: int) -> int | None:
 # Bắt buộc có số + đơn vị mét ngay sau, để "nhà mặt tiền đường Âu Cơ" không bị hiểu
 # thành một số đo.
 _FRONTAGE = re.compile(rf"(?:mat\s*tien|mt|ngang|rong)\s*[:\-]?\s*{_NUM}\s*m\b")
-_ALLEY_WIDTH = re.compile(rf"(?:hem|hxh|ngo)\s*[:\-]?\s*{_NUM}\s*m\b")
+# "hẻm rộng 6m" phải về alley_width: bắt buộc nhận cả từ nối "rộng/ngang" ở giữa, nếu
+# không thì _FRONTAGE (có "rong" trong danh sách) giành mất và alley_width về None.
+_ALLEY_WIDTH = re.compile(rf"(?:hem|hxh|ngo)\s*(?:rong|ngang)?\s*[:\-]?\s*{_NUM}\s*m\b")
 _ALLEY_ANY = re.compile(r"\b(?:hem|hxh|hxt|ngo)\b")
 _STREET_FRONT = re.compile(r"\b(?:mat\s*tien|mt)\s*(?:duong|dg|kinh\s*doanh|kd)?\b")
 
 
+_ALLEY_BEFORE = re.compile(r"(?:hem|hxh|ngo)\s*(?:rong|ngang)?\s*[:\-]?\s*$")
+
+
 def extract_frontage(flat: str) -> float | None:
-    match = _FRONTAGE.search(flat)
-    if match:
+    for match in _FRONTAGE.finditer(flat):
+        # "hẻm rộng 6m" là bề rộng hẻm, không phải mặt tiền: "rong" nằm trong danh sách
+        # từ khoá mặt tiền nên nếu không kiểm phía trước thì hẻm bị đọc thành mặt tiền.
+        if _ALLEY_BEFORE.search(flat[: match.start()]):
+            continue
         return _plausible(_num(match.group(1)), 1.5, 30)
     width, _ = extract_dimensions(flat)
     return width

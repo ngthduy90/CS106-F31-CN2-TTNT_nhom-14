@@ -16,7 +16,7 @@ import pandas as pd
 
 from src import config
 from src.preprocess import clean, dedup
-from src.preprocess.address import save_ward_mapping
+from src.preprocess.address import WardResolver, save_ward_mapping
 from src.preprocess.leakage import strip_price_mentions
 from src.preprocess.load import load_all
 from src.utils.logging_setup import get_logger
@@ -84,7 +84,8 @@ def main() -> None:
         save_ward_mapping()
         funnel = Funnel()
 
-        frame = load_all(hf_limit=args.hf_limit)
+        resolver = WardResolver()
+        frame = load_all(hf_limit=args.hf_limit, resolver=resolver)
         funnel.record("Gộp ba nguồn", frame, "sau khử trùng theo id ngay lúc crawl")
 
         frame, price_stats = clean.drop_missing_labels(frame)
@@ -161,8 +162,20 @@ def main() -> None:
 
         manifest.count("rows_out", len(frame))
         manifest.count("duplicates_removed", dedup_stats["dòng bị loại"])
-        manifest.count("outliers_removed", iqr_stats["đã loại"])
-        manifest.note(f"ngưỡng IQR theo quận: {iqr_stats['ngưỡng theo quận']}")
+        # Không còn "outliers_removed" ở bước này: ngưỡng IQR nay học theo từng fold
+        # trong luồng huấn luyện, bảng dưới đây chỉ để báo cáo.
+        manifest.note(f"ngưỡng IQR theo quận (chỉ để báo cáo): {iqr_stats['ngưỡng theo quận']}")
+
+        # Chỉ số minh bạch của bước quy đổi phường: trước đây được tính rồi bỏ đó.
+        ward_quality = resolver.quality_report()
+        manifest.note(f"chất lượng ánh xạ phường: {ward_quality}")
+        logger.info(
+            "ánh xạ phường: %.2f%% không quy được về hệ cũ, %d ánh xạ đa số mỏng",
+            ward_quality["tỷ lệ không ánh xạ được"] * 100,
+            len(ward_quality["ánh xạ đa số mỏng"]),
+        )
+        for ward, share in ward_quality["ánh xạ đa số mỏng"].items():
+            logger.warning("ánh xạ yếu: %s (đa số chỉ %.2f)", ward, share)
 
     logger.info("còn %d dòng → %s", len(frame), OUTPUT)
     logger.info("funnel → %s", FUNNEL_PATH)

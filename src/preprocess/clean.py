@@ -93,12 +93,17 @@ def apply_hard_rules(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         "giá ngoài khoảng": ~frame["total_price_vnd"].between(price_low, price_high),
         "tin cho thuê": frame["is_rental"].fillna(False).astype(bool),
     }
+    # Một dòng có thể trượt nhiều luật cùng lúc (giá dưới sàn của tin BÁN thường chính
+    # là một tin CHO THUÊ), nên cộng các con số này lại sẽ lớn hơn số dòng thật sự bị
+    # loại — funnel từng ghi 4.041 trong khi delta chỉ là 3.627. Mỗi dòng vì thế được
+    # tính cho ĐÚNG MỘT lý do, theo thứ tự khai báo, và tổng được ghi ra tường minh.
     remove = np.zeros(len(frame), dtype=bool)
     stats = {}
     for label, mask in checks.items():
         mask = mask.to_numpy()
-        stats[label] = int(mask.sum())
+        stats[label] = int((mask & ~remove).sum())
         remove |= mask
+    stats["tổng dòng bị loại"] = int(remove.sum())
 
     return frame[~remove].copy(), stats
 
