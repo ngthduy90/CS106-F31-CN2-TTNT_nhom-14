@@ -1,0 +1,4 @@
+# nguồn: https://gateway.chotot.com/robots.txt
+# thời điểm tải: 2026-08-18T17:40:06+00:00
+# KHÔNG TẢI ĐƯỢC: 404 Client Error: Not Found for url: https://gateway.chotot.com/robots.txt
+

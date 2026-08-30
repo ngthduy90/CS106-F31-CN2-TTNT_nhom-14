@@ -1,0 +1,91 @@
+# nguồn: https://www.nhatot.com/robots.txt
+# thời điểm tải: 2026-08-18T17:40:05+00:00
+# HTTP 200
+
+User-agent: *
+Allow: /
+Sitemap: https://www.nhatot.com/sitemap-index.xml
+Disallow: /notfound.htm
+Disallow: /*undefined*
+Disallow: /*tin-dang-tuong-tu*
+Disallow: /user/
+Disallow: /*chatroom*
+Disallow: /*q=
+Disallow: /*chi-tiet-danh-gia*
+Disallow: /nhan/
+## Disallow Param
+Disallow: /*f=
+Disallow: /*seller_addr=
+Disallow: /*price=
+Disallow: /*subject=
+Disallow: /*body=
+Disallow: /*_escaped_fragment_=
+Disallow: /*giveaway=
+Disallow: /*o=
+Disallow: /*pricelists=
+Disallow: /*project_name=
+Disallow: /*ref=
+Disallow: /*room=
+Disallow: /*rooms=
+Disallow: /*ca=
+Disallow: /*get_location=
+Disallow: /mua-ban-ban-ghe*
+Disallow: /mua-ban-bep-lo-do-dien-nha-bep*
+Disallow: /mua-ban-cay-canh-do-trang-tri*
+Disallow: /mua-ban-chim*
+Disallow: /mua-ban-cho*
+Disallow: /mua-ban-den*
+Disallow: /mua-ban-dien-thoai*
+Disallow: /mua-ban-do*
+Disallow: /mua-ban-dung-cu-nha-bep*
+Disallow: /mua-ban-ga*
+Disallow: /mua-ban-giai-tri-the-thao-so-thich*
+Disallow: /mua-ban-giay-dep*
+Disallow: /mua-ban-giuong-chan-ga-goi-nem*
+Disallow: /mua-ban-laptop*
+Disallow: /mua-ban-linh-kien*
+Disallow: /mua-ban-may*
+Disallow: /mua-ban-meo*
+Disallow: /mua-ban-nhac-cu*
+Disallow: /mua-ban-noi-that-do-gia-dung-khac*
+Disallow: /mua-ban-nuoc-hoa*
+Disallow: /mua-ban-oto*
+Disallow: /mua-ban-phu*
+Disallow: /mua-ban-phuong-tien-khac*
+Disallow: /mua-ban-quan-ao*
+Disallow: /mua-ban-quat*
+Disallow: /mua-ban-sach*
+Disallow: /mua-ban-so-thich-khac*
+Disallow: /mua-ban-thiet-bi*
+Disallow: /mua-ban-thoi-trang-do-dung-ca-nhan*
+Disallow: /mua-ban-thu-cung*
+Disallow: /mua-ban-tivi-am-thanh*
+Disallow: /mua-ban-tu*
+Disallow: /mua-ban-xe*
+Disallow: /nguoi-tim-viec*
+Disallow: /viec-lam*
+Disallow: /dich-vu*
+Disallow: /video
+Disallow: /cdn-cgi/
+Disallow: /*page=
+Disallow: /*sort=
+Disallow: /*contain_videos=
+Disallow: /*distance=
+Disallow: /dashboard
+Disallow: /itunes*
+Disallow: /feed
+Disallow: /*ctfp=
+Disallow: /*_ga=
+# Allow AI search and agent use
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /

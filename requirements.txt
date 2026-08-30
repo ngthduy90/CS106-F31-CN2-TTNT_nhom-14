@@ -30,5 +30,8 @@ matplotlib==3.9.2
 # Demo
 streamlit==1.39.0
 
+# Bài nộp (file Excel danh sách nhóm)
+openpyxl==3.1.5
+
 # Kiểm thử
 pytest==8.3.3

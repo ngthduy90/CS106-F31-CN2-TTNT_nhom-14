@@ -16,10 +16,14 @@ bằng đồng Việt Nam.
 
 - **Không gian**: TP.HCM, phủ dày ba quận theo hệ hành chính trước 2025 là Tân Bình,
   Tân Phú và Quận 12, mở rộng ra toàn thành phố để đủ số lượng mẫu.
-- **Loại bất động sản**: nhà ở riêng lẻ và nhà phố; loại trừ tin cho thuê, đất nền
-  không có công trình và các tin không ghi giá bằng số.
-- **Thời gian**: dữ liệu tin rao thu thập trong năm 2026, đối chiếu với dữ liệu lịch sử
-  tới giữa năm 2025.
+- **Loại bất động sản**: nhà ở riêng lẻ, nhà phố, căn hộ chung cư, biệt thự, đất và mặt
+  bằng kinh doanh. Loại bất động sản là một đặc trưng đầu vào của mô hình, nên năm nhóm
+  này được giữ chung trong một bảng thay vì tách thành năm bài toán. Loại trừ: tin cho
+  thuê, tin không ghi giá bằng số, và tin có diện tích hoặc giá nằm ngoài miền hợp lệ
+  khai báo ở chương 2.
+- **Thời gian**: tin rao thu thập tháng 08/2026. Dữ liệu lịch sử trải từ 06/2025 tới
+  03/2026; lát cắt tới 06/2025 dùng làm tập huấn luyện cho thí nghiệm chuyển giao theo
+  thời gian, phần còn lại dùng để quan sát mặt bằng giá thay đổi ra sao.
 - **Loại giá**: giá rao (asking price), không phải giá giao dịch. Đây là giới hạn quan
   trọng của mọi kết luận trong báo cáo, được nhắc lại ở chương 5.
 
@@ -33,8 +37,10 @@ bằng đồng Việt Nam.
    đơn vị hành chính năm 2025.
 4. Biểu diễn phần mô tả bằng TF-IDF kết hợp giảm chiều, và đo xem phần văn bản đóng góp
    bao nhiêu vào độ chính xác.
-5. So sánh tối thiểu ba thuật toán bằng RMSE, MAE và R², bổ sung MdAPE vì phân phối giá
-   lệch mạnh.
+5. So sánh các thuật toán bằng RMSE, MAE và R² theo yêu cầu của đề, bổ sung MdAPE vì
+   phân phối giá lệch phải mạnh khiến ba chỉ số kia dễ bị đọc sai. Đề yêu cầu tối thiểu
+   ba thuật toán; đồ án chạy một danh mục rộng hơn để bảng kết quả nói được vì sao mỗi
+   họ mô hình ứng xử như vậy, chứ không chỉ để nhiều dòng.
 
 ## Đóng góp của đồ án
 
@@ -44,8 +50,11 @@ bằng đồng Việt Nam.
   bộ nhãn kiểm chứng thay vì chỉ mô tả định tính.
 - Một bảng so sánh mô hình có kiểm soát: cùng tập chia, cùng ngân sách tinh chỉnh tham
   số, báo cáo trung bình và độ lệch chuẩn qua 5 fold.
-- Thí nghiệm chuyển giao theo thời gian: huấn luyện trên tin rao tới giữa 2025, kiểm tra
-  trên tin rao 2026, để đo mức độ mô hình mất chính xác khi giá thị trường trôi.
+- Thí nghiệm chuyển giao theo thời gian: huấn luyện trên tin rao tới 06/2025, kiểm tra
+  trên tin rao tháng 08/2026, để đo mức độ mô hình mất chính xác khi giá thị trường trôi.
+- Một bộ kiểm chống rò rỉ nhãn chạy tự động trước mỗi lần huấn luyện. Nó không phải phần
+  trang trí: trong quá trình làm, bộ kiểm này bắt được hai lỗi rò rỉ thật mà đọc mã
+  nguồn bằng mắt không phát hiện ra (chi tiết ở chương 3).
 
 ## Cấu trúc báo cáo
 

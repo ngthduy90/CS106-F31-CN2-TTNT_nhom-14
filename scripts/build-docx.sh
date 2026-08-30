@@ -10,9 +10,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SRC="$ROOT/reports/scientific-report"
+SRC="$ROOT/reports/scientific-report/_built"
+RAW="$ROOT/reports/scientific-report"
 OUT="$ROOT/reports"
-REF="$SRC/reference.docx"
+REF="$RAW/reference.docx"
 FILTER="$ROOT/scripts/pandoc/pdf-fixes.lua"
 
 CHAPTERS=(
@@ -25,16 +26,13 @@ CHAPTERS=(
   "$SRC/06-tai-lieu-tham-khao.md"
 )
 
-# Cảnh báo nếu còn placeholder chưa điền
-if grep -rn "{{T" "$SRC"/*.md >/dev/null 2>&1; then
-  echo "CHÚ Ý: báo cáo còn placeholder chưa điền:"
-  grep -rno "{{T[0-9.]*[^}]*}}" "$SRC"/*.md | cut -c1-120
-  echo
-fi
+# Danh sách thành viên cho trang bìa, rồi ghép chương + chèn bảng sinh tự động.
+"${PYTHON:-python}" "$ROOT/scripts/build-cover-members.py" || true
+"${PYTHON:-python}" "$ROOT/scripts/assemble-report.py" || true
 
 COMMON=(
   --from=markdown+lists_without_preceding_blankline
-  --resource-path="$SRC:$ROOT/reports/figures"
+  --resource-path="$SRC:$RAW:$ROOT/reports/figures"
   --toc --toc-depth=3
   -M lang=vi
 )
