@@ -26,12 +26,12 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - [ ] C8 `run_pipeline.py:111` — IQR + impute chạy trước khi chia tập (trái quy tắc 3 của báo cáo)
 - [ ] C9 `run_experiments.py:112` — `run_e2` nhận `search_iterations` rồi bỏ không dùng
 - [ ] C10 `run_experiments.py:253` — E3 fit champion bằng tham số mặc định, không dùng `best_params`
-- [ ] C11 `splits.py:33` — fingerprint băm id đã sort nên bất biến với thứ tự dòng
-- [ ] C12 `render_tables.py:459-477` — kết luận learning curve thiếu nhánh "xấu đi"
-- [ ] C13 `demo/app.py:83` — demo thiếu lượt `strip_price_mentions` sau `pretokenize`
-- [ ] C14 `scripts/check-reproducibility.py:46-49` — không nhìn `returncode`, crash vẫn báo PASS
+- [x] C11 `splits.py:33` — fingerprint băm id đã sort nên bất biến với thứ tự dòng
+- [x] C12 `render_tables.py:459-477` — kết luận learning curve thiếu nhánh "xấu đi"
+- [x] C13 `demo/app.py:83` — demo thiếu lượt `strip_price_mentions` sau `pretokenize`
+- [x] C14 `scripts/check-reproducibility.py:46-49` — không nhìn `returncode`, crash vẫn báo PASS
 - [x] C15 `price.py:159-163` — "5.850 tỷ" đọc thành 5.850 nghìn tỷ rồi bị loại âm thầm
-- [ ] C16 `fetch_hf_dataset.py:155` — "12" vs "Quận 12" nên `isin` trượt cả một quận mục tiêu
+- [x] C16 `fetch_hf_dataset.py:155` — "12" vs "Quận 12" nên `isin` trượt cả một quận mục tiêu
 
 ## Suggestion (1)
 
@@ -52,7 +52,7 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - [ ] N11 `extract.py:60,113,127,221-222` — "m" trần thành diện tích; "phòng" thành phòng ngủ; hẻm
 - [x] N12 `pii.py:126-131,51` — homoglyph chỉ chạy một lượt; danh sách ký tự vô hình hardcode
 - [ ] N13 `scripts/assemble-submission.py:46,51,180,194-203` — mù với docx/pptx/xlsx, không thể fail
-- [ ] N14 `demo/app.py:166-173` — ba quy ước thập phân trong một panel
+- [x] N14 `demo/app.py:166-173` — ba quy ước thập phân trong một panel
 - [ ] N15 `scripts/update-readme-metrics.py:60-66` + `render_tables.py:136-145` — 6,66 là của riêng LightGBM
 - [ ] N16 `address.py:169-181,91` — `majority_share`/`unmapped_rate` ghi ra nhưng không ai đọc; Quận 2/9
 - [ ] N17 `render_tables.py:88-90` — mô tả split đọc từ config sống thay vì payload của run
@@ -66,3 +66,6 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - C4 (floors) + siết `gold.py`: recall trích xuất trong `extraction-quality.md` sẽ dịch.
 - C15 (giá "X.850 tỷ"): thêm tin được giữ lại → funnel và mọi số E1/E2/E3 dịch nhẹ.
 - C5/C6 (địa chỉ): cột phường của nhánh mogi đổi → dataset-card, dedup, `unmapped_rate`.
+- C12: `reports/tables/learning-curve.md` ĐÃ sinh lại (kết luận đổi sang nhánh "xấu đi");
+  báo cáo Word/slide include bảng này nên cần `make report` để build lại tài liệu.
+- C16: `rows_target_districts` trong manifest HF sẽ tăng (Quận 12 trước đây đếm thiếu).

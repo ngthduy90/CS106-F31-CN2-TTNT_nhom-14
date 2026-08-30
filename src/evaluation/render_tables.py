@@ -459,21 +459,39 @@ def render_learning_curve(payload: dict) -> str:
     if len(points) >= 2:
         first, last, prev = points[0], points[-1], points[-2]
         gain = prev["MdAPE (%)"] - last["MdAPE (%)"]
-        still = gain > 0.3
-        lines += [
-            "",
-            f"Từ {first['n_train']} lên {last['n_train']} tin, MdAPE giảm từ "
-            f"{_vi(first['MdAPE (%)'], 1)}% xuống {_vi(last['MdAPE (%)'], 1)}%.",
-            "",
-            (
+        # Ba nhánh chứ không hai: bước cuối có thể giảm, có thể đứng yên, và có thể XẤU
+        # ĐI. Gộp nhánh xấu đi vào nhánh đứng yên thì báo cáo kết luận "đường cong đã
+        # phẳng" ngay bên dưới một bảng có sai số đang tăng.
+        if gain > 0.3:
+            verdict = (
                 f"**Bước cuối vẫn còn giảm {_vi(gain, 1)} điểm phần trăm**, nghĩa là đường cong "
                 "chưa phẳng: thu thập thêm dữ liệu vẫn còn cải thiện được sai số, và đó là chỗ "
                 "đáng đầu tư tiếp theo."
-                if still else
+            )
+        elif gain < -0.3:
+            verdict = (
+                f"**Bước cuối xấu đi {_vi(abs(gain), 1)} điểm phần trăm** chứ không giảm. "
+                "Mỗi tỷ lệ chỉ chạy một lần trên một tập con ngẫu nhiên, nên một bước đi lên "
+                "cỡ này chưa tách được khỏi dao động giữa các lần lấy mẫu. Vì vậy không thể "
+                "dựa vào riêng bước cuối để kết luận đường cong đã phẳng: muốn chốt thì phải "
+                "lặp lại mỗi tỷ lệ nhiều lần rồi so trung bình."
+            )
+        else:
+            verdict = (
                 "**Bước cuối gần như không giảm nữa**, nghĩa là đường cong đã phẳng: nút thắt "
                 "nằm ở chất lượng đặc trưng và nhãn chứ không ở số lượng tin, nên công sức nên "
                 "chuyển sang chỗ khác thay vì crawl thêm."
-            ),
+            )
+        direction = "giảm" if last["MdAPE (%)"] <= first["MdAPE (%)"] else "tăng"
+        lines += [
+            "",
+            f"Từ {first['n_train']} lên {last['n_train']} tin, MdAPE {direction} từ "
+            f"{_vi(first['MdAPE (%)'], 1)}% xuống {_vi(last['MdAPE (%)'], 1)}%."
+            if direction == "giảm" else
+            f"Từ {first['n_train']} lên {last['n_train']} tin, MdAPE tăng từ "
+            f"{_vi(first['MdAPE (%)'], 1)}% lên {_vi(last['MdAPE (%)'], 1)}%.",
+            "",
+            verdict,
         ]
     return "\n".join(lines) + "\n"
 

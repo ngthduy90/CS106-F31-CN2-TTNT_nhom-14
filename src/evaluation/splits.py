@@ -29,8 +29,15 @@ MIN_STRATUM = 10  # tầng ít hơn ngần này thì gộp vào "khác"
 
 
 def _fingerprint(frame: pd.DataFrame) -> str:
-    """Mã băm của bộ id, để phép chia lưu trên đĩa luôn khớp với dữ liệu đang dùng."""
-    joined = "|".join(sorted(frame["listing_id"].astype(str)))
+    """Mã băm của bộ id, để phép chia lưu trên đĩa luôn khớp với dữ liệu đang dùng.
+
+    CỐ Ý không sort: split lưu trên đĩa là CHỈ SỐ VỊ TRÍ, nên cùng tập id mà khác thứ
+    tự dòng (đổi keep-first của dedup, đổi thứ tự concat nguồn, ghi lại parquet) là một
+    phân hoạch khác hẳn. Băm trên bộ id đã sort thì hash vẫn khớp và split cũ được tái
+    dùng trong khi nó đang trỏ vào những tin khác — đúng kịch bản module này sinh ra để
+    chặn.
+    """
+    joined = "|".join(frame["listing_id"].astype(str))
     return hashlib.sha256(joined.encode()).hexdigest()[:16]
 
 

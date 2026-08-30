@@ -33,7 +33,10 @@ def _digest(path: Path) -> str:
 
 def check_tables() -> list[str]:
     """Sinh lại toàn bộ bảng và so với bản hiện có."""
-    tables = sorted(config.TABLES.glob("*.md"))
+    # Bảng của slide cũng do render_tables sinh ra và cũng là chỗ thầy soi lệch số giữa
+    # hai tài liệu, nên gate phải phủ luôn, không chỉ reports/tables.
+    slide_dir = config.REPORTS / "slides" / "tables"
+    tables = sorted(config.TABLES.glob("*.md")) + sorted(slide_dir.glob("slide-*.md"))
     if not tables:
         return ["chưa có bảng nào để so — chạy pipeline trước"]
 
@@ -41,16 +44,22 @@ def check_tables() -> list[str]:
     before = {}
     for path in tables:
         shutil.copy2(path, snapshot / path.name)
-        before[path.name] = _digest(path)
+        before[path.name] = (path, _digest(path))
 
-    subprocess.run(
+    result = subprocess.run(
         [sys.executable, "-m", "src.evaluation.render_tables"],
         cwd=ROOT, capture_output=True, check=False,
     )
+    # Không nhìn returncode thì render_tables crash cũng không ghi lại file nào, digest
+    # trước với sau trùng nhau theo định nghĩa, và gate in "Tái lập được" đúng trong ca
+    # nó sinh ra để bắt.
+    if result.returncode != 0:
+        shutil.rmtree(snapshot, ignore_errors=True)
+        stderr = result.stderr.decode("utf-8", errors="replace").strip()
+        return [f"render_tables thoát mã {result.returncode}:\n{stderr}"]
 
     problems = []
-    for name, digest in before.items():
-        path = config.TABLES / name
+    for name, (path, digest) in before.items():
         if not path.exists():
             problems.append(f"{name}: biến mất sau khi sinh lại")
         elif _digest(path) != digest:

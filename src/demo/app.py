@@ -25,6 +25,16 @@ from src.features.build import build_feature_frame
 from src.features.text import pretokenize
 from src.preprocess.leakage import strip_price_mentions
 
+def _vi(value: float, digits: int = 2) -> str:
+    """Số theo quy ước Việt Nam: nghìn ngăn bằng ".", thập phân bằng ",".
+
+    Một `.replace(".", ",", 1)` trên cả câu chỉ đổi số ĐẦU TIÊN, nên panel từng in
+    "6,90 – 9.19" trong cùng một dòng. Mọi con số hiển thị đi qua đây.
+    """
+    formatted = f"{value:,.{digits}f}"
+    return formatted.replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+
+
 MODEL_PATH = config.ROOT / "models" / "champion.joblib"
 ERROR_PATH = config.REPORTS / "results" / "error_analysis.json"
 BILLION = 1e9
@@ -80,7 +90,10 @@ def build_input_row(values: dict) -> pd.DataFrame:
         "title": "",
         "description": description,
         "description_clean": cleaned,
-        "description_tokens": pretokenize(cleaned),
+        # Pipeline huấn luyện chạy strip_price_mentions LẦN NỮA sau pretokenize vì tách
+        # từ có thể tái tạo cụm tiền ("5,85" → "585 tỷ"). Thiếu lượt này thì token tiền
+        # do người dùng gõ vào đi thẳng vào một vocabulary chưa từng thấy nó.
+        "description_tokens": strip_price_mentions(pretokenize(cleaned)),
     }
     return pd.DataFrame([row])
 
@@ -163,15 +176,13 @@ def main() -> None:
         mdape = errors.get("overall", {}).get("MdAPE (%)", 20.0)
         low, high = prediction * (1 - mdape / 100), prediction * (1 + mdape / 100)
 
-        st.metric("Giá ước lượng", f"{prediction / BILLION:,.2f} tỷ đồng".replace(",", "."))
+        st.metric("Giá ước lượng", f"{_vi(prediction / BILLION)} tỷ đồng")
         st.write(
-            f"Khoảng tham khảo: **{low / BILLION:.2f} – {high / BILLION:.2f} tỷ**  \n"
+            f"Khoảng tham khảo: **{_vi(low / BILLION)} – {_vi(high / BILLION)} tỷ**  \n"
             f"Khoảng này rộng bằng sai số phần trăm trung vị đo trên tập hold-out "
-            f"({mdape:.1f}%), không phải một con số tự đặt.".replace(".", ",", 1)
+            f"({_vi(mdape, 1)}%), không phải một con số tự đặt."
         )
-        st.caption(
-            f"Đơn giá tương ứng: {prediction / area / 1e6:,.1f} triệu đồng/m²".replace(",", ".")
-        )
+        st.caption(f"Đơn giá tương ứng: {_vi(prediction / area / 1e6, 1)} triệu đồng/m²")
 
         with st.expander("Vì sao mô hình cho ra con số này?", expanded=True):
             render_explanation(bundle["pipeline"], features)

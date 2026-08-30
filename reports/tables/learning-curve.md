@@ -15,4 +15,4 @@ huấn luyện lại, đo trên cùng một tập hold-out.
 
 Từ 186 lên 1860 tin, MdAPE giảm từ 22,9% xuống 14,2%.
 
-**Bước cuối gần như không giảm nữa**, nghĩa là đường cong đã phẳng: nút thắt nằm ở chất lượng đặc trưng và nhãn chứ không ở số lượng tin, nên công sức nên chuyển sang chỗ khác thay vì crawl thêm.
+**Bước cuối xấu đi 0,8 điểm phần trăm** chứ không giảm. Mỗi tỷ lệ chỉ chạy một lần trên một tập con ngẫu nhiên, nên một bước đi lên cỡ này chưa tách được khỏi dao động giữa các lần lấy mẫu. Vì vậy không thể dựa vào riêng bước cuối để kết luận đường cong đã phẳng: muốn chốt thì phải lặp lại mỗi tỷ lệ nhiều lần rồi so trung bình.

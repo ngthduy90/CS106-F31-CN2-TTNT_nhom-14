@@ -152,7 +152,11 @@ def main() -> None:
             logger.info("cắt mốc %s: %d → %d dòng", config.HF_CUTOFF, before, len(frame))
         manifest.count("rows_after_cutoff", len(frame))
 
-        in_target = frame["district_name"].isin(config.TARGET_DISTRICTS)
+        # Bộ HF ghi quận số dạng trần ("12") còn TARGET_DISTRICTS ghi "Quận 12", nên so
+        # thẳng thì lát Quận 12 không bao giờ khớp và manifest đếm thiếu nguyên một quận.
+        from src.preprocess.address import normalise_district
+
+        in_target = frame["district_name"].map(normalise_district).isin(config.TARGET_DISTRICTS)
         manifest.count("rows_target_districts", int(in_target.sum()))
         logger.info(
             "3 quận mục tiêu: %d dòng | %d quận khác nhau",
