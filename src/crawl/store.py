@@ -12,6 +12,7 @@ lưu vị trí quét để không phải phân trang lại từ đầu.
 from __future__ import annotations
 
 import json
+import os
 import re
 import unicodedata
 from datetime import date, datetime, timezone
@@ -97,7 +98,11 @@ class Checkpoint:
         self.path = folder / f"{source}__{slugify(partition)}.json"
         self.state: dict[str, Any] = {}
         if self.path.exists():
-            self.state = json.loads(self.path.read_text(encoding="utf-8"))
+            try:
+                self.state = json.loads(self.path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                # Checkpoint hỏng không được phép giết lần chạy sau: coi như chưa có.
+                self.state = {}
 
     def get(self, key: str, default: Any = None) -> Any:
         return self.state.get(key, default)
@@ -105,9 +110,11 @@ class Checkpoint:
     def save(self, **values: Any) -> None:
         self.state.update(values)
         self.state["updated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-        self.path.write_text(
-            json.dumps(self.state, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        # Ghi thẳng bằng write_text không atomic: bị giết giữa chừng là để lại JSON cụt,
+        # và lần chạy sau abort trước khi kịp crawl. Ghi ra .tmp rồi đổi tên.
+        tmp = self.path.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(self.state, ensure_ascii=False, indent=2), encoding="utf-8")
+        os.replace(tmp, self.path)
 
     def reset(self) -> None:
         self.state = {}

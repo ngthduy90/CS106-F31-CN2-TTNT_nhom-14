@@ -79,7 +79,13 @@ class PoliteSession:
                 last_error = exc
             else:
                 if response.status_code not in RETRY_STATUS:
-                    response.raise_for_status()
+                    # raise_for_status() nằm ngoài try thì 4xx không-retry thoát ra dưới
+                    # dạng requests.HTTPError, trái contract "chỉ ném CrawlError" ở
+                    # docstring, và giết cả run thay vì được nơi gọi bắt như lỗi crawl.
+                    try:
+                        response.raise_for_status()
+                    except requests.HTTPError as exc:
+                        raise CrawlError(f"{url} → HTTP {response.status_code}") from exc
                     return response
                 last_error = f"HTTP {response.status_code}"
 

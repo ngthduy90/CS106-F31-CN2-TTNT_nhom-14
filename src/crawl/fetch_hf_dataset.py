@@ -87,7 +87,13 @@ def _load_shard(index: int, logger) -> pd.DataFrame:
     logger.info("%s: %d dòng → %d dòng TP.HCM", filename, total, len(frame))
 
     # Shard gốc chiếm ~170 MB và không dùng lại; xoá ngay để đĩa không phình.
-    Path(path).unlink(missing_ok=True)
+    # hf_hub_download trả về một SYMLINK trỏ vào blob trong cache: xoá mỗi symlink thì
+    # blob vẫn nằm nguyên đó, trái hẳn với cam kết "đỉnh đĩa bằng một shard".
+    downloaded = Path(path)
+    blob = downloaded.resolve()
+    downloaded.unlink(missing_ok=True)
+    if blob != downloaded:
+        blob.unlink(missing_ok=True)
     return frame
 
 
@@ -140,7 +146,16 @@ def main() -> None:
     params = {"repo": REPO_ID, "max_shards": args.max_shards, "cutoff": config.HF_CUTOFF}
 
     with RunManifest("fetch_hf_dataset", params=params) as manifest:
-        frames = [_load_shard(i, logger) for i in range(min(args.max_shards, N_SHARDS))]
+        shards = min(args.max_shards, N_SHARDS)
+        if args.keep_after_cutoff and shards < N_SHARDS:
+            # --keep-after-cutoff hứa "trọn chuỗi thời gian", nhưng mặc định chỉ tải 3/10
+            # shard: chuỗi ghi ra bị cụt mà không có dòng nào nói ra điều đó.
+            logger.warning(
+                "chỉ tải %d/%d shard nên chuỗi thời gian ghi ra là CỤT — "
+                "thêm --max-shards %d nếu cần trọn 2025-06 → 2026-03",
+                shards, N_SHARDS, N_SHARDS,
+            )
+        frames = [_load_shard(i, logger) for i in range(shards)]
         frame = pd.concat(frames, ignore_index=True)
         manifest.count("rows_hcmc_raw", len(frame))
 

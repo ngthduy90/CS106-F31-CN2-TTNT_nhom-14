@@ -14,6 +14,7 @@ con số mà code đã dùng.
 from __future__ import annotations
 
 import argparse
+import re
 from datetime import date
 
 from src import config
@@ -26,6 +27,26 @@ from src.utils.run_manifest import RunManifest
 
 OUTPUT = config.TABLES / "qa-gate.md"
 MIN_DESCRIPTION_CHARS = 200
+
+# Detector ĐỘC LẬP, cố ý không dùng lại src.crawl.pii: gate chấm bằng chính detector của
+# scrubber thì "0 tin còn dấu vết SĐT" là hằng đúng theo cấu trúc (mù đúng những ca
+# scrubber mù) chứ không phải một phép đo. Regex dưới đây thô và độc lập — nó chỉ bắt
+# cách viết trần (0/84 + 9–11 chữ số, dấu ngăn nhẹ), nhưng đó chính là điều làm nó có
+# khả năng KHÔNG đồng ý với scrubber.
+_INDEPENDENT_PHONE = re.compile(
+    r"(?<!\d)(?:\+?84|0)[\s.\-_()]{0,2}\d(?:[\s.\-_()]{0,2}\d){8,10}(?!\d)"
+)
+
+
+def _independent_phone_hit(value) -> bool:
+    """Có chuỗi nào trong bản ghi còn giống số điện thoại theo detector độc lập không."""
+    if isinstance(value, str):
+        return bool(_INDEPENDENT_PHONE.search(value))
+    if isinstance(value, dict):
+        return any(_independent_phone_hit(item) for item in value.values())
+    if isinstance(value, (list, tuple)):
+        return any(_independent_phone_hit(item) for item in value)
+    return False
 
 
 def _chotot_view(record: dict) -> dict:
@@ -64,6 +85,7 @@ def collect() -> dict:
         "ward_or_coords": 0,
         "target_districts": 0,
         "pii_hits": 0,
+        "pii_hits_independent": 0,
         "per_source": {},
     }
 
@@ -84,6 +106,8 @@ def collect() -> dict:
                 stats["target_districts"] += 1
             if contains_phone(record):
                 stats["pii_hits"] += 1
+            if _independent_phone_hit(record):
+                stats["pii_hits_independent"] += 1
         stats["per_source"][source] = count
 
     return stats
@@ -129,13 +153,26 @@ def evaluate(stats: dict) -> list[dict]:
         check["passed"] = check["value"] >= check["threshold"]
 
     # Ngưỡng PII là ngưỡng TRẦN, không phải sàn: càng ít càng tốt, và chỉ 0 mới đạt.
+    # Hai dòng, hai detector: dòng đầu dùng chính detector của scrubber nên chỉ bắt được
+    # thứ scrubber không sửa được (trường _source_url, _collected_at gắn SAU khi scrub);
+    # dòng sau dùng detector độc lập và là dòng duy nhất có thể bác lại scrubber.
     checks.append(
         {
-            "name": "Số tin còn dấu vết số điện thoại",
+            "name": "Số tin còn dấu vết SĐT (detector của scrubber)",
             "value": stats["pii_hits"],
             "threshold": thresholds["max_pii_matches"],
             "format": "count",
             "passed": stats["pii_hits"] <= thresholds["max_pii_matches"],
+            "upper_bound": True,
+        }
+    )
+    checks.append(
+        {
+            "name": "Số tin còn dấu vết SĐT (detector độc lập)",
+            "value": stats["pii_hits_independent"],
+            "threshold": thresholds["max_pii_matches"],
+            "format": "count",
+            "passed": stats["pii_hits_independent"] <= thresholds["max_pii_matches"],
             "upper_bound": True,
         }
     )

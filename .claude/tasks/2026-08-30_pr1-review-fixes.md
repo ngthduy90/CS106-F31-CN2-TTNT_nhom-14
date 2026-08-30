@@ -15,7 +15,7 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 
 - [x] C1 `src/crawl/pii.py:117-120` — bỏ nhánh 9 chữ số không hint (đang xoá nhầm giá 850.000.000)
 - [x] C2 `src/crawl/pii.py:90` — `_DIGIT_RUN` nuốt cụm số liền kề → SĐT lọt; quét cửa sổ con trong run
-- [ ] C3 `src/crawl/chotot.py:141` — con trỏ resume theo offset làm quận đã cạn đứng im vĩnh viễn
+- [x] C3 `src/crawl/chotot.py:141` — con trỏ resume theo offset làm quận đã cạn đứng im vĩnh viễn
 - [x] C4 `src/preprocess/extract.py:160-162` — "tắm/lâu/mẹ" bỏ dấu bị đếm thành tầng (+ siết `gold.py:63`)
 
 ## Warning (12)
@@ -39,11 +39,11 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 
 ## Ghi chú thêm (20 mục trong review)
 
-- [ ] N1 `qa_gate.py:85` — gate PII dùng chính detector của scrubber → luôn 0
-- [ ] N2 `http.py:82` — `raise_for_status()` ngoài `try` → 4xx thoát ra sai kiểu; `mogi.py:94` chưa guard
-- [ ] N3 `store.py:99-110` — checkpoint ghi không atomic
-- [ ] N4 `mogi.py:207,209` — resume bỏ trang 1, `seen_before` đóng băng; `chotot.py:123` đếm sai `max_ads`
-- [ ] N5 `fetch_hf_dataset.py:89,126-152` — `unlink` không xoá blob HF; `--max-shards` mặc định 3 cắt timeline
+- [x] N1 `qa_gate.py:85` — gate PII dùng chính detector của scrubber → luôn 0
+- [x] N2 `http.py:82` — `raise_for_status()` ngoài `try` → 4xx thoát ra sai kiểu; `mogi.py:94` chưa guard
+- [x] N3 `store.py:99-110` — checkpoint ghi không atomic
+- [x] N4 `mogi.py:207,209` — resume bỏ trang 1, `seen_before` đóng băng; `chotot.py:123` đếm sai `max_ads`
+- [x] N5 `fetch_hf_dataset.py:89,126-152` — `unlink` không xoá blob HF; `--max-shards` mặc định 3 cắt timeline
 - [ ] N6 `runner.py:117-133` — tuning không nested (cột CV lạc quan một chiều)
 - [ ] N7 `registry.py:17` — "ngân sách tinh chỉnh giống nhau" thực ra là min(40, |grid|)
 - [ ] N8 `run_experiments.py:84-87` — artifact `--fast` bị tái dùng âm thầm cho champion/ablation
@@ -58,7 +58,7 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - [ ] N17 `render_tables.py:88-90` — mô tả split đọc từ config sống thay vì payload của run
 - [ ] N18 `features/text.py:117` + `leakage.py:37-41` — `ban_gap` khớp "gặp"; checker yếu hơn stripper
 - [ ] N19 `dedup.py:150` — `duplicate_group` đã có nhưng splits chưa group-aware
-- [ ] N20 `tests/` — chưa phủ crawl/store/address/extract
+- [x] N20 `tests/` — đã thêm test_extract, test_address, test_crawl_store (121 test)
 
 ## Mục làm số trong reports/ lệch (cần quyết định chạy lại)
 

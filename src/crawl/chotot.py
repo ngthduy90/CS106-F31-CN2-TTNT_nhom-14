@@ -127,6 +127,10 @@ def iter_district(
             break
 
 
+# Số tin liên tiếp ĐÃ CÓ trong kho đủ để kết luận đã chạm phần cũ của danh sách.
+STOP_AFTER_SEEN = 120
+
+
 def crawl_district(
     session: PoliteSession,
     district: str,
@@ -138,18 +142,41 @@ def crawl_district(
     """Crawl một quận vào kho thô. Trả về thống kê của quận đó."""
     store = RawStore(SOURCE, district, ID_FIELD)
     checkpoint = Checkpoint(SOURCE, district)
-    start = int(checkpoint.get("offset", 0)) if resume else 0
+    if not resume:
+        checkpoint.reset()
 
-    for ad, offset in iter_district(session, area_code, max_ads, start, logger):
+    # Con trỏ resume cũ là VỊ TRÍ trong một tập kết quả sống, và không bao giờ được
+    # reset. Hai hệ quả: quận đã cạn lưu offset == total nên mọi lần chạy sau bắt đầu
+    # đúng chỗ hết tin và ghi 0 tin mới vĩnh viễn; và giữa hai lần chạy, tin mới đăng
+    # đẩy tập kết quả trượt đi nên resume tại offset N rơi vào tin cũ thứ N-k và không
+    # bao giờ thấy k tin mới nhất. Dedup theo list_id đã bảo đảm quét lại từ đầu là an
+    # toàn tuyệt đối, nên quét từ 0 và dừng sau một chuỗi tin đã có trong kho.
+    seen_before = set(store.seen_ids)
+    consecutive_seen = 0
+
+    for ad, _offset in iter_district(session, area_code, max_ads * 3, 0, logger):
+        # max_ads đếm tin GHI ĐƯỢC, đúng như help text, chứ không phải tin fetch về.
+        if store.written >= max_ads:
+            break
+        if str(ad.get("list_id")) in seen_before:
+            consecutive_seen += 1
+            if resume and consecutive_seen >= STOP_AFTER_SEEN:
+                if logger:
+                    logger.info(
+                        "%s: %d tin liên tiếp đã có trong kho → dừng sớm",
+                        district, consecutive_seen,
+                    )
+                break
+            continue
+        consecutive_seen = 0
         url = AD_URL_TEMPLATE.format(list_id=ad.get("list_id"))
         store.append(ad, source_url=url)
-        checkpoint.save(offset=offset, written_total=store.written)
+        checkpoint.save(written_total=store.written)
 
     stats = {
         "written": store.written,
         "skipped_duplicate": store.skipped_duplicate,
         "pii_redactions": store.pii_redactions,
-        "offset": int(checkpoint.get("offset", 0)),
     }
     if logger:
         logger.info("%s: %s", district, stats)

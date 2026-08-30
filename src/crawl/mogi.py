@@ -91,7 +91,15 @@ def iter_listing_urls(
 
     while taken < max_urls:
         url = f"{BASE}/{path}" + (f"?cp={page}" if page > 1 else "")
-        summaries = parse_list_page(session.get(url).text)
+        # Trang danh sách cũng phải được guard như trang chi tiết: một lần hỏng ở đây
+        # từng ném CrawlError ra ngoài và giết cả phiên crawl của mọi quận còn lại.
+        try:
+            markup = session.get(url).text
+        except Exception as exc:  # noqa: BLE001 — một trang hỏng không giết cả phiên
+            if logger:
+                logger.warning("%s trang %d hỏng (%s) → dừng quét quận này", district, page, exc)
+            break
+        summaries = parse_list_page(markup)
         if logger:
             logger.info("%s trang %d → %d tin", district, page, len(summaries))
         if not summaries:
@@ -204,9 +212,12 @@ def crawl_district(
     """Crawl một quận: quét danh sách rồi tải từng trang chi tiết chưa có trong kho."""
     store = RawStore(SOURCE, district, ID_FIELD)
     checkpoint = Checkpoint(SOURCE, district)
-    start_page = int(checkpoint.get("page", 1)) if resume else 1
+    if not resume:
+        checkpoint.reset()
 
-    seen_before = set(store.seen_ids)
+    # Luôn bắt đầu từ trang 1: tin mới luôn xuất hiện ở đó, nên resume theo số trang bỏ
+    # qua đúng phần cần lấy. Quét lại phần cũ vô hại vì dedup theo id đã chặn ghi trùng.
+    start_page = 1
     detail_errors = 0
     scanned = 0
 
@@ -217,7 +228,9 @@ def crawl_district(
             break
         scanned += 1
         code = listing_id(summary["url"])
-        if code in seen_before:
+        # store.seen_ids là tập SỐNG: ảnh chụp đóng băng lúc bắt đầu sẽ tải lại các tin
+        # vừa ghi trong chính lần chạy này.
+        if code in store.seen_ids:
             continue
 
         try:
