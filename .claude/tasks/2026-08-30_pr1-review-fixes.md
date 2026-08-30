@@ -16,12 +16,12 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - [x] C1 `src/crawl/pii.py:117-120` — bỏ nhánh 9 chữ số không hint (đang xoá nhầm giá 850.000.000)
 - [x] C2 `src/crawl/pii.py:90` — `_DIGIT_RUN` nuốt cụm số liền kề → SĐT lọt; quét cửa sổ con trong run
 - [ ] C3 `src/crawl/chotot.py:141` — con trỏ resume theo offset làm quận đã cạn đứng im vĩnh viễn
-- [ ] C4 `src/preprocess/extract.py:160-162` — "tắm/lâu/mẹ" bỏ dấu bị đếm thành tầng (+ siết `gold.py:63`)
+- [x] C4 `src/preprocess/extract.py:160-162` — "tắm/lâu/mẹ" bỏ dấu bị đếm thành tầng (+ siết `gold.py:63`)
 
 ## Warning (12)
 
-- [ ] C5 `address.py:142` — `P.13`/`P13` bị loại; "Xa lộ" bị nhận thành phường
-- [ ] C6 `address.py:107-109` — `normalise_ward` không có đường thất bại → "Phường không rõ"
+- [x] C5 `address.py:142` — `P.13`/`P13` bị loại; "Xa lộ" bị nhận thành phường
+- [x] C6 `address.py:107-109` — `normalise_ward` không có đường thất bại → "Phường không rõ"
 - [ ] C7 `dedup.py:74` — ô > 400 dòng bị bỏ im lặng, không vào funnel
 - [ ] C8 `run_pipeline.py:111` — IQR + impute chạy trước khi chia tập (trái quy tắc 3 của báo cáo)
 - [ ] C9 `run_experiments.py:112` — `run_e2` nhận `search_iterations` rồi bỏ không dùng
@@ -30,7 +30,7 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - [ ] C12 `render_tables.py:459-477` — kết luận learning curve thiếu nhánh "xấu đi"
 - [ ] C13 `demo/app.py:83` — demo thiếu lượt `strip_price_mentions` sau `pretokenize`
 - [ ] C14 `scripts/check-reproducibility.py:46-49` — không nhìn `returncode`, crash vẫn báo PASS
-- [ ] C15 `price.py:159-163` — "5.850 tỷ" đọc thành 5.850 nghìn tỷ rồi bị loại âm thầm
+- [x] C15 `price.py:159-163` — "5.850 tỷ" đọc thành 5.850 nghìn tỷ rồi bị loại âm thầm
 - [ ] C16 `fetch_hf_dataset.py:155` — "12" vs "Quận 12" nên `isin` trượt cả một quận mục tiêu
 
 ## Suggestion (1)
@@ -62,4 +62,7 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 
 ## Mục làm số trong reports/ lệch (cần quyết định chạy lại)
 
-(điền dần khi làm)
+- C1/C2 (pii): kho thô đổi → phải crawl lại mới thấy tác dụng; số hiện tại KHÔNG đổi.
+- C4 (floors) + siết `gold.py`: recall trích xuất trong `extraction-quality.md` sẽ dịch.
+- C15 (giá "X.850 tỷ"): thêm tin được giữ lại → funnel và mọi số E1/E2/E3 dịch nhẹ.
+- C5/C6 (địa chỉ): cột phường của nhánh mogi đổi → dataset-card, dedup, `unmapped_rate`.

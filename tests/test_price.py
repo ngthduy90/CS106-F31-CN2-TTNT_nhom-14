@@ -122,3 +122,17 @@ def test_ma_loai_nha_cho_tot_van_giu_thong_tin_vi_tri():
     assert CHOTOT_POSITION[2] == "hẻm"
     # Mã không nói gì về vị trí thì không được đoán bừa.
     assert 3 not in CHOTOT_POSITION and 4 not in CHOTOT_POSITION
+
+
+def test_dau_ngan_ngay_truoc_ty_la_dau_thap_phan():
+    """"5.850 tỷ" là 5,85 tỷ, không phải 5.850 nghìn tỷ.
+
+    Đọc sai làm giá vượt trần hợp lệ rồi bị apply_hard_rules loại ÂM THẦM, và funnel
+    ghi nhầm lý do thành "giá ngoài khoảng" — mất tin mà không ai thấy.
+    """
+    assert parse_price("5.850 tỷ").total_vnd == 5_850_000_000
+    assert parse_price("Giá 2.750 tỷ, thương lượng").total_vnd == 2_750_000_000
+    # Các cách viết lân cận không đổi nghĩa.
+    assert parse_price("6.79 tỷ").total_vnd == 6_790_000_000
+    assert parse_price("5 tỷ 850").total_vnd == 5_850_000_000
+    assert parse_price("5.200 triệu").total_vnd == 5_200_000_000

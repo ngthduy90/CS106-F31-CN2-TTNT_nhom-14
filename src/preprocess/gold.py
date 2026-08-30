@@ -60,7 +60,13 @@ FIELD_KEYWORDS = {
     "area_m2": re.compile(r"(?:m2|m²|mv|dt|dien\s*tich|cong\s*nhan|dtcn|dtsd)"),
     "bedrooms": re.compile(r"(?:pn|phong\s*ngu|phong|ngu|bedroom|\bp\b)"),
     "bathrooms": re.compile(r"(?:wc|toilet|nha\s*tam|phong\s*tam|\bvs\b)"),
-    "floors": re.compile(r"(?:tang|lau|tam|me\b|tret|lung|cap\s*4|ket\s*cau)"),
+    # "tam" (tấm) và "me" (mê) trần trùng với "phòng tắm" và "ba mẹ", "lau" trùng với
+    # "lâu dài": vẫn rộng hơn bộ trích xuất, nhưng không còn đếm boilerplate là "tin có
+    # nêu số tầng" — nếu không, recall đo được sẽ dịch vì lý do không liên quan.
+    "floors": re.compile(
+        r"(?:tang|lau\b(?!\s*(?:dai|nam))|(?<!phong )(?<!nha )tam\b"
+        r"|me\b(?!\s*con)|tret|lung|cap\s*4|ket\s*cau)"
+    ),
 }
 
 KEYWORD_WINDOW = 26  # số ký tự nhìn hai bên con số

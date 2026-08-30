@@ -106,7 +106,17 @@ def normalise_ward(text: str | None) -> str:
 
     cleaned = re.sub(r"^(?:phường|phuong|p\.?|xã|xa|x\.?)\s+", "", raw, flags=re.IGNORECASE)
     cleaned = cleaned.strip(" ,.")
-    return f"Phường {cleaned}" if cleaned else UNKNOWN
+    # Phần dư không mặc nhiên là tên phường: nó có thể chính là sentinel UNKNOWN
+    # (parse_address trả UNKNOWN, load.py nạp ngược vào đây) hoặc chỉ là tên thành phố.
+    # Gắn "Phường " vào là đẻ ra hạng mục giả mà WardResolver.resolve tưởng là phường
+    # thật: hạng mục đó đi vào one-hot, vào khoá chặn dedup, và làm unmapped_rate()
+    # luôn xấp xỉ 0 đúng lúc cần nó nhất.
+    flat_cleaned = deaccent(cleaned)
+    if not cleaned or flat_cleaned == deaccent(UNKNOWN):
+        return UNKNOWN
+    if re.fullmatch(r"tp\.?\s*hcm|ho chi minh|viet nam", flat_cleaned):
+        return UNKNOWN
+    return f"Phường {cleaned}"
 
 
 @dataclass(frozen=True)
@@ -139,7 +149,12 @@ def parse_address(text: str | None) -> Address:
             if found != UNKNOWN:
                 district = found
                 continue
-        if ward == UNKNOWN and re.match(r"^(?:phuong|p\.?\s|xa|x\.?\s)", flat):
+        # "Xã" và "Xa" (Xa lộ) giống hệt nhau sau khi bỏ dấu, nên nhánh xã phải soi chuỗi
+        # gốc CÒN dấu; nhánh p/phường soi chuỗi đã bỏ dấu và phải nhận cả "P.13"/"P13".
+        if ward == UNKNOWN and (
+            re.match(r"^(?:phuong|p\.?\s*\d|p\.?\s)", flat)
+            or re.match(r"^(?:xã|x\.?\s)", unicodedata.normalize("NFC", part).lower())
+        ):
             ward = normalise_ward(part)
             continue
         if street == UNKNOWN and not re.search(r"\b(?:tphcm|tp\.?\s*hcm|ho chi minh|viet nam)\b", flat):

@@ -157,9 +157,11 @@ _GROUND = re.compile(r"\b(?:1\s*)?(?:tret|trẹt|ham|ban\s*ham)\b")
 _MEZZANINE = re.compile(r"\blung\b")
 # "lầu / tấm / mê" đếm tầng TRÊN mặt đất, "tầng" đếm TỔNG. Gộp hai nhóm này là lỗi
 # tốn kém nhất của bộ luật: "nhà 2 tầng" bị cộng thêm trệt thành 3.
-_UPPER = re.compile(r"(\d{1,2})\s*(?:lau|tam\b|me\b)")
-_UPPER_WORD = re.compile(r"\b(mot|hai|ba|bon|nam|sau|bay|tam|chin)\s*(?:lau|tam\b|me\b)")
-_UPPER_BARE = re.compile(r"\b(?:lau|tam|me)\b")
+_UPPER = re.compile(r"(\d{1,2})\s*(?:lau|tam\b|me\b(?!\s*con))")
+_UPPER_WORD = re.compile(r"\b(mot|hai|ba|bon|nam|sau|bay|tam|chin)\s*(?:lau|tam\b)")
+# Đứng một mình thì chỉ "lầu" mới đếm được: "tấm"/"mê" trần trùng với "phòng tắm" và
+# "ba mẹ / cây me", còn "lâu dài" (sử dụng lâu dài) và "lâu năm" không phải là tầng.
+_UPPER_BARE = re.compile(r"\blau\b(?!\s*(?:dai|nam))")
 _TOTAL_FLOORS = re.compile(r"(\d{1,2})\s*tang\b")
 _LEVEL_4 = re.compile(r"\bcap\s*4\b")
 

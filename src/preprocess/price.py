@@ -43,11 +43,21 @@ def _strip_accents(text: str) -> str:
     return "".join(c for c in decomposed if unicodedata.category(c) != "Mn").lower()
 
 
-def _to_float(token: str) -> float | None:
-    """"6.79" → 6.79 · "5,2" → 5.2 · "5.200" → 5200 · "1.234,5" → 1234.5."""
+def _to_float(token: str, unit_is_billion: bool = False) -> float | None:
+    """"6.79" → 6.79 · "5,2" → 5.2 · "5.200" → 5200 · "1.234,5" → 1234.5.
+
+    *unit_is_billion* áp luật phân định ở docstring đầu file cho các nhánh lấy số ngay
+    trước đơn vị "tỷ": dấu ngăn duy nhất ở đó là dấu THẬP PHÂN chứ không phải dấu nghìn.
+    """
     token = token.strip().replace(" ", "")
     if not token:
         return None
+
+    if unit_is_billion and re.fullmatch(r"\d+[.,]\d{3}", token):
+        # "5.850 tỷ" là 5,85 tỷ. Đọc đuôi 3 chữ số thành hàng nghìn ra 5.850 NGHÌN tỷ,
+        # vượt trần VALID_TOTAL_PRICE_VND nên apply_hard_rules loại dòng đó ÂM THẦM và
+        # funnel ghi nhầm lý do thành "giá ngoài khoảng".
+        return float(token.replace(",", "."))
 
     if "," in token and "." in token:
         # Dấu xuất hiện sau cùng là dấu thập phân, dấu kia là dấu nghìn.
@@ -136,7 +146,7 @@ def parse_price(text: str | None, area_m2: float | None = None) -> ParsedPrice:
 
     match = _RE_PER_M2_BILLION.search(text)
     if match:
-        unit = _to_float(match.group(1))
+        unit = _to_float(match.group(1), unit_is_billion=True)
         if unit is not None:
             unit_vnd = unit * TY
             total = unit_vnd * area_m2 if area_m2 else None
@@ -144,13 +154,14 @@ def parse_price(text: str | None, area_m2: float | None = None) -> ParsedPrice:
 
     match = _RE_BILLION_MILLION.search(text)
     if match:
-        billions, millions = _to_float(match.group(1)), _to_float(match.group(2))
+        billions = _to_float(match.group(1), unit_is_billion=True)
+        millions = _to_float(match.group(2))
         if billions is not None and millions is not None:
             return ParsedPrice(billions * TY + millions * TRIEU, None, "billion_million")
 
     match = _RE_BILLION_TAIL.search(text)
     if match:
-        billions, tail = _to_float(match.group(1)), match.group(2)
+        billions, tail = _to_float(match.group(1), unit_is_billion=True), match.group(2)
         if billions is not None and billions == int(billions):
             # "5 tỷ 2" = 5,2 tỷ · "5 tỷ 25" = 5,25 tỷ
             fraction = int(tail) / (10 ** len(tail))
@@ -158,7 +169,7 @@ def parse_price(text: str | None, area_m2: float | None = None) -> ParsedPrice:
 
     match = _RE_BILLION.search(text)
     if match:
-        billions = _to_float(match.group(1))
+        billions = _to_float(match.group(1), unit_is_billion=True)
         if billions is not None:
             return ParsedPrice(billions * TY, None, "billion")
 
