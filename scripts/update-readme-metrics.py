@@ -57,10 +57,16 @@ def build_block() -> str:
             f"{_vi(model['cv_mean']['R²'], 3)} |"
         )
 
-    gap = baseline["cv_mean"]["MdAPE (%)"] - best["cv_mean"]["MdAPE (%)"]
+    # Con số cũ là khoảng cách của RIÊNG mô hình tốt nhất, nhưng câu văn nói "nhóm dẫn
+    # đầu": đọc lên thành cả nhóm đều hơn baseline đúng ngần ấy. Ghi khoảng của cả nhóm.
+    gaps = [baseline["cv_mean"]["MdAPE (%)"] - m["cv_mean"]["MdAPE (%)"] for m in leaders]
+    if len(gaps) == 1:
+        gap_text = f"{_vi(gaps[0])} điểm phần trăm MdAPE"
+    else:
+        gap_text = f"{_vi(min(gaps))}–{_vi(max(gaps))} điểm phần trăm MdAPE"
     lines += [
         "",
-        f"Nhóm dẫn đầu hơn baseline kiểu môi giới {_vi(gap)} điểm phần trăm MdAPE. Các mô",
+        f"Nhóm dẫn đầu hơn baseline kiểu môi giới {gap_text}. Các mô",
         "hình in đậm cách nhau chưa tới một độ lệch chuẩn giữa các fold, nên bảng không",
         "chọn ra một mô hình thắng.",
     ]

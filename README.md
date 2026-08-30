@@ -23,7 +23,7 @@ Trên 2.326 tin Chợ Tốt, 5-fold, cùng bộ fold và cùng ngân sách tinh 
 | Trung vị giá/m² theo nhóm | 20,53 ± 1,39 | 3,80 | 0,706 |
 | Dummy (trung vị) | 34,65 ± 2,09 | 7,25 | -0,053 |
 
-Nhóm dẫn đầu hơn baseline kiểu môi giới 6,66 điểm phần trăm MdAPE. Các mô
+Nhóm dẫn đầu hơn baseline kiểu môi giới 6,32–6,66 điểm phần trăm MdAPE. Các mô
 hình in đậm cách nhau chưa tới một độ lệch chuẩn giữa các fold, nên bảng không
 chọn ra một mô hình thắng.
 

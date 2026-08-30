@@ -24,8 +24,8 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - [x] C6 `address.py:107-109` — `normalise_ward` không có đường thất bại → "Phường không rõ"
 - [x] C7 `dedup.py:74` — ô > 400 dòng bị bỏ im lặng, không vào funnel
 - [x] C8 `run_pipeline.py:111` — IQR + impute chạy trước khi chia tập (trái quy tắc 3 của báo cáo)
-- [ ] C9 `run_experiments.py:112` — `run_e2` nhận `search_iterations` rồi bỏ không dùng
-- [ ] C10 `run_experiments.py:253` — E3 fit champion bằng tham số mặc định, không dùng `best_params`
+- [x] C9 `run_experiments.py:112` — `run_e2` nhận `search_iterations` rồi bỏ không dùng
+- [x] C10 `run_experiments.py:253` — E3 fit champion bằng tham số mặc định, không dùng `best_params`
 - [x] C11 `splits.py:33` — fingerprint băm id đã sort nên bất biến với thứ tự dòng
 - [x] C12 `render_tables.py:459-477` — kết luận learning curve thiếu nhánh "xấu đi"
 - [x] C13 `demo/app.py:83` — demo thiếu lượt `strip_price_mentions` sau `pretokenize`
@@ -35,7 +35,7 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 
 ## Suggestion (1)
 
-- [ ] C17 `runner.py:123` — `Pipeline(memory=...)` + `n_jobs` cho search (giảm ~120 lần fit transformer)
+- [x] C17 `runner.py:123` — `Pipeline(memory=...)` + `n_jobs` cho search (giảm ~120 lần fit transformer)
 
 ## Ghi chú thêm (20 mục trong review)
 
@@ -44,18 +44,18 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - [x] N3 `store.py:99-110` — checkpoint ghi không atomic
 - [x] N4 `mogi.py:207,209` — resume bỏ trang 1, `seen_before` đóng băng; `chotot.py:123` đếm sai `max_ads`
 - [x] N5 `fetch_hf_dataset.py:89,126-152` — `unlink` không xoá blob HF; `--max-shards` mặc định 3 cắt timeline
-- [ ] N6 `runner.py:117-133` — tuning không nested (cột CV lạc quan một chiều)
-- [ ] N7 `registry.py:17` — "ngân sách tinh chỉnh giống nhau" thực ra là min(40, |grid|)
-- [ ] N8 `run_experiments.py:84-87` — artifact `--fast` bị tái dùng âm thầm cho champion/ablation
+- [x] N6 `runner.py:117-133` — tuning không nested (cột CV lạc quan một chiều)
+- [x] N7 `registry.py:17` — "ngân sách tinh chỉnh giống nhau" thực ra là min(40, |grid|)
+- [x] N8 `run_experiments.py:84-87` — artifact `--fast` bị tái dùng âm thầm cho champion/ablation
 - [x] N9 `dedup.py:81-86` — TF-IDF fit riêng từng ô làm ngưỡng 0,85 đổi nghĩa theo mật độ
 - [~] N10 `clean.py:102-115,73-77` + `price.py:77` — band toàn thành phố cho quận nhỏ; funnel đếm đúp
 - [ ] N11 `extract.py:60,113,127,221-222` — "m" trần thành diện tích; "phòng" thành phòng ngủ; hẻm
 - [x] N12 `pii.py:126-131,51` — homoglyph chỉ chạy một lượt; danh sách ký tự vô hình hardcode
 - [ ] N13 `scripts/assemble-submission.py:46,51,180,194-203` — mù với docx/pptx/xlsx, không thể fail
 - [x] N14 `demo/app.py:166-173` — ba quy ước thập phân trong một panel
-- [ ] N15 `scripts/update-readme-metrics.py:60-66` + `render_tables.py:136-145` — 6,66 là của riêng LightGBM
+- [x] N15 `scripts/update-readme-metrics.py:60-66` + `render_tables.py:136-145` — 6,66 là của riêng LightGBM
 - [ ] N16 `address.py:169-181,91` — `majority_share`/`unmapped_rate` ghi ra nhưng không ai đọc; Quận 2/9
-- [ ] N17 `render_tables.py:88-90` — mô tả split đọc từ config sống thay vì payload của run
+- [x] N17 `render_tables.py:88-90` — mô tả split đọc từ config sống thay vì payload của run
 - [ ] N18 `features/text.py:117` + `leakage.py:37-41` — `ban_gap` khớp "gặp"; checker yếu hơn stripper
 - [x] N19 `dedup.py:150` — `duplicate_group` đã có nhưng splits chưa group-aware
 - [x] N20 `tests/` — đã thêm test_extract, test_address, test_crawl_store (121 test)
@@ -74,3 +74,6 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - C8: `listings.parquet` KHÔNG còn bị lọc IQR và KHÔNG còn điền trung vị sẵn; hai bước đó
   chạy trong luồng huấn luyện. Funnel, mọi metric E1/E2/E3 và model card sẽ đổi.
 - N19: split giờ group-aware → phân hoạch khác lần chạy trước ngay cả với cùng dữ liệu.
+- C9/C10: E2 và E3 giờ chạy trên mô hình ĐÃ tinh chỉnh → cả hai bảng đổi số (E2 bớt bị
+  thổi phồng mức trôi, E3 bớt bị thổi phồng cái giá của khu vực chưa thấy).
+- N15: README + bảng E1 đã sinh lại, giờ ghi khoảng 6,32–6,66 của cả nhóm dẫn đầu.

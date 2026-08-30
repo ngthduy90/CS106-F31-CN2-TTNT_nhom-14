@@ -14,9 +14,12 @@ kết quả tự kể được một câu chuyện thay vì chỉ là một đ�
 - **Tầng 3 (mở rộng)**: KNN (trực giác "so nhà tương tự"), cây quyết định đơn (vẽ được
   luật định giá), MLP (đại diện mạng nơ-ron).
 
-Ngân sách tinh chỉnh GIỐNG NHAU cho mọi mô hình (`config.SEARCH_ITERATIONS` cấu hình,
-RandomizedSearch, cùng seed). Cho mô hình này 200 cấu hình còn mô hình kia 10 thì bảng
-so sánh đo ngân sách chứ không đo mô hình.
+Ngân sách tinh chỉnh là `config.SEARCH_ITERATIONS` lượt RandomizedSearch, cùng seed cho
+mọi mô hình — nhưng lượt rút thật sự là **min(ngân sách, kích thước lưới)**: lưới rời rạc
+nhỏ hơn ngân sách thì search không thể rút quá số cấu hình đang có (MLP 9, KNN 10, cây
+quyết định 20, so với 40 của RF/LightGBM/CatBoost). Nói "ngân sách giống nhau" mà không
+nói điều này là để bảng so sánh ngầm hiểu sai. `ModelSpec.grid_size` ghi lại con số thật
+cho từng mô hình để báo cáo trích được đúng thứ đã chạy.
 """
 
 from __future__ import annotations
@@ -87,6 +90,25 @@ class ModelSpec:
     param_distributions: dict = field(default_factory=dict)
     needs_raw_frame: bool = False
     notes: str = ""
+    # Estimator đơn luồng thì song song hoá duy nhất còn lại là ở vòng search; estimator
+    # đã tự dùng hết lõi (RF/LightGBM/CatBoost/XGBoost) thì để 1 để khỏi tranh lõi.
+    search_n_jobs: int = 1
+
+    @property
+    def grid_size(self) -> int | None:
+        """Số cấu hình RỜI RẠC của lưới, hoặc None khi lưới là phân phối liên tục."""
+        total = 1
+        for values in self.param_distributions.values():
+            try:
+                total *= len(values)
+            except TypeError:
+                return None
+        return total if self.param_distributions else 0
+
+    def search_budget(self, requested: int) -> int:
+        """Số lượt rút THẬT: search không rút quá số cấu hình đang có."""
+        grid = self.grid_size
+        return requested if grid is None else min(requested, grid)
 
 
 def build_registry(fast: bool = False) -> list[ModelSpec]:
@@ -221,6 +243,13 @@ def build_registry(fast: bool = False) -> list[ModelSpec]:
             notes="dao động theo seed, báo mean±std",
         )
     )
+
+    # Estimator đơn luồng: vòng RandomizedSearch là chỗ song song hoá duy nhất còn lại.
+    # Các mô hình cây đã tự chiếm hết lõi nên để n_jobs=1 cho search, tránh tranh lõi.
+    single_threaded = {"Linear", "Ridge", "Lasso", "K láng giềng", "Cây quyết định", "MLP"}
+    for spec in specs:
+        if spec.name in single_threaded:
+            spec.search_n_jobs = -1
 
     if fast:
         keep = {"Dummy (trung vị)", "Trung vị giá/m² theo nhóm", "Ridge", "Random Forest", "LightGBM"}

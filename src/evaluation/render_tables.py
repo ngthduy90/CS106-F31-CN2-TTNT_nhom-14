@@ -84,14 +84,26 @@ def render_e1(payload: dict) -> str:
     lines = [
         f"# E1: {_no_dash(payload['label'])}",
         "",
+        # Mô tả phép chia đọc từ PAYLOAD của lần chạy, không đọc config đang sống: đổi
+        # config rồi `make report` mà chưa `make train` thì bảng mô tả sai phép đo.
         f"{payload['n_rows']:,} dòng".replace(",", ".")
-        + f", chia hold-out {int((1 - config.HOLDOUT_TEST_SIZE) * 100)}/"
-        + f"{int(config.HOLDOUT_TEST_SIZE * 100)}"
-        + f", {config.CV_FOLDS}-fold trên phần train, seed {payload['seed']}.",
-        f"Ngân sách tinh chỉnh: RandomizedSearch {payload['search_iterations']} cấu hình, "
-        "giống nhau cho mọi mô hình.",
+        + f", chia hold-out {int((1 - payload.get('holdout_test_size', config.HOLDOUT_TEST_SIZE)) * 100)}/"
+        + f"{int(payload.get('holdout_test_size', config.HOLDOUT_TEST_SIZE) * 100)}"
+        + f", {payload.get('cv_folds', config.CV_FOLDS)}-fold trên phần train, "
+        + f"seed {payload['seed']}.",
+        f"Ngân sách tinh chỉnh: RandomizedSearch tối đa {payload['search_iterations']} cấu "
+        "hình cho mọi mô hình. Số lượt rút THẬT là min(ngân sách, kích thước lưới): lưới "
+        "rời rạc nhỏ hơn ngân sách thì search không thể rút quá số cấu hình đang có."
+        + _budget_note(payload),
         "",
-        "Mỗi ô là trung bình ± độ lệch chuẩn qua 5 fold. **In đậm** là tốt nhất mỗi cột.",
+        "Mỗi ô là trung bình ± độ lệch chuẩn qua "
+        + f"{payload.get('cv_folds', config.CV_FOLDS)} fold. **In đậm** là tốt nhất mỗi cột.",
+        "",
+        # N6: cột CV nghiêng lạc quan một chiều, phải nói ra ngay dưới bảng.
+        "Lưu ý cách đọc: tinh chỉnh chạy MỘT LẦN trên toàn phần train rồi dùng lại cho "
+        + f"cả {payload.get('cv_folds', config.CV_FOLDS)} fold ngoài (không nested), nên "
+        "cột CV nghiêng lạc quan một chiều. Cột hold-out không dính điều này và là con "
+        "số nên trích khi cần một chỉ số duy nhất.",
         "",
         "| Tầng | Mô hình | " + " | ".join(METRIC_ORDER) + " |",
         "|---|---|" + "---:|" * len(METRIC_ORDER),
@@ -134,14 +146,27 @@ def render_e1(payload: dict) -> str:
         (m for m in models if m["name"] == "Trung vị giá/m² theo nhóm"), None
     )
     if learned and baseline_row:
-        champion = min(learned, key=lambda m: m["cv_mean"]["MdAPE (%)"])
-        gap = baseline_row["cv_mean"]["MdAPE (%)"] - champion["cv_mean"]["MdAPE (%)"]
+        # Đi qua CÙNG một định nghĩa nhóm dẫn đầu như slide và README: gọi tên một mô
+        # hình "tốt nhất" ở đây trong khi hai tài liệu kia từ chối tuyên bố hơn kém là
+        # để ba tài liệu cùng một dữ liệu cãi nhau.
+        leaders = sorted(_leaders(payload), key=lambda m: m["cv_mean"]["MdAPE (%)"])
+        gaps = [
+            baseline_row["cv_mean"]["MdAPE (%)"] - m["cv_mean"]["MdAPE (%)"] for m in leaders
+        ]
+        names = ", ".join(m["name"] for m in leaders)
+        if len(leaders) == 1:
+            gap_text = f"**{_vi(gaps[0], 2)} điểm phần trăm MdAPE**"
+        else:
+            gap_text = (
+                f"**{_vi(min(gaps), 2)}–{_vi(max(gaps), 2)} điểm phần trăm MdAPE** "
+                "(khoảng của cả nhóm dẫn đầu)"
+            )
         lines += [
             "",
-            f"Mô hình tốt nhất ({champion['name']}) hơn baseline kiểu môi giới "
-            f"**{_vi(gap, 2)} điểm phần trăm MdAPE**. Đây mới là phần giá trị mà học máy",
-            "tạo ra so với cách định giá thủ công; khoảng cách so với Dummy chỉ nói rằng dữ",
-            "liệu có tín hiệu.",
+            f"Nhóm dẫn đầu ({names}) hơn baseline kiểu môi giới {gap_text}. Các mô hình",
+            "trong nhóm cách nhau chưa tới một độ lệch chuẩn giữa các fold nên bảng không",
+            "chọn ra một mô hình thắng. Đây mới là phần giá trị mà học máy tạo ra so với",
+            "cách định giá thủ công; khoảng cách so với Dummy chỉ nói rằng dữ liệu có tín hiệu.",
         ]
 
     # Mô hình nào sinh ra dự báo vô cực thì phải nêu đích danh: chỉ số của nó tính trên
@@ -507,6 +532,22 @@ SLIDE_MODELS = [
     "LightGBM",
     "XGBoost",
 ]
+
+
+def _budget_note(payload: dict) -> str:
+    """Kể tên mô hình có lưới nhỏ hơn ngân sách, khi lần chạy có ghi lại con số đó.
+
+    Payload cũ (chạy trước khi `search_budget` được ghi) thì im lặng thay vì đoán.
+    """
+    shortfalls = [
+        (model["name"], model["search_budget"])
+        for model in payload["models"]
+        if model.get("search_budget") and model["search_budget"] < payload["search_iterations"]
+    ]
+    if not shortfalls:
+        return ""
+    listed = ", ".join(f"{name} {budget}" for name, budget in sorted(shortfalls, key=lambda x: x[1]))
+    return f" Lượt rút thật thấp hơn ngân sách ở: {listed}."
 
 
 def _leaders(payload: dict) -> list[dict]:

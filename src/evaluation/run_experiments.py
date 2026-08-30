@@ -16,15 +16,19 @@ import json
 
 import pandas as pd
 
+from sklearn.model_selection import RandomizedSearchCV
+
 from src import config
 from src.evaluation.metrics import compute_metrics
 from src.evaluation.runner import (
     RESULTS_DIR,
+    _coerce,
     assert_no_leakage,
     build_estimator,
     evaluate_model,
     results_to_payload,
     save_results,
+    scope_iqr,
 )
 from src.evaluation.splits import make_splits
 from src.features.build import build_feature_frame
@@ -83,8 +87,22 @@ def run_e1(frame: pd.DataFrame, specs, logger, search_iterations: int,
 
         target = RESULTS_DIR / f"e1_{source}.json"
         if target.exists() and not force:
-            logger.info("đã có %s, bỏ qua (dùng --force để chạy lại)", target.name)
-            continue
+            # Artifact của một lần chạy --fast (5 mô hình) từng được tái dùng ÂM THẦM
+            # cho champion/ablation/analysis ở lần chạy full sau đó, tức bảng E1 và mô
+            # hình vô địch nói về hai danh mục khác nhau. Chỉ dùng lại khi nó phủ đúng
+            # danh mục đang chạy.
+            saved = json.loads(target.read_text(encoding="utf-8"))
+            saved_names = {model["name"] for model in saved.get("models", [])}
+            missing = [spec.name for spec in specs if spec.name not in saved_names]
+            if missing:
+                logger.warning(
+                    "%s thiếu %d mô hình của danh mục hiện tại (%s) → chạy lại thay vì "
+                    "dùng lại artifact cũ",
+                    target.name, len(missing), ", ".join(missing[:3]),
+                )
+            else:
+                logger.info("đã có %s, bỏ qua (dùng --force để chạy lại)", target.name)
+                continue
 
         logger.info("=== E1 · %s · %d dòng ===", label, len(subset))
         checklist = assert_no_leakage(build_feature_frame(subset))
@@ -105,6 +123,12 @@ def run_e1(frame: pd.DataFrame, specs, logger, search_iterations: int,
                 leakage_checklist=checklist,
                 search_iterations=search_iterations,
                 seed=config.SEED,
+                cv_folds=config.CV_FOLDS,
+                holdout_test_size=config.HOLDOUT_TEST_SIZE,
+                # Cột CV nghiêng lạc quan MỘT CHIỀU: search fit một lần trên toàn phần
+                # train rồi tái dùng cho cả 5 fold ngoài (không nested). Hold-out thì
+                # sạch, nên đó mới là số headline. Ghi vào payload để bảng nói ra được.
+                tuning_scheme="một lần trên toàn phần train, tái dùng cho 5 fold ngoài",
             ),
         )
 
@@ -142,8 +166,27 @@ def run_e2(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None:
     train_target = train_frame["total_price_vnd"].to_numpy(dtype="float64")
     test_target = test_frame["total_price_vnd"].to_numpy(dtype="float64")
 
+    tuned = _best_params_from_e1("hf", logger)
+
     rows = []
     for spec in specs:
+        params = tuned.get(spec.name) or {}
+        if not params and spec.param_distributions and not spec.needs_raw_frame:
+            # Không có bảng E1 để mượn cấu hình thì tinh chỉnh tại chỗ trên PHÍA TRAIN
+            # với đúng ngân sách được truyền vào — tham số này trước đây nhận rồi bỏ đó.
+            search = RandomizedSearchCV(
+                build_estimator(spec),
+                spec.param_distributions,
+                n_iter=search_iterations,
+                cv=3,
+                random_state=config.SEED,
+                scoring="neg_mean_absolute_error",
+                n_jobs=spec.search_n_jobs,
+                error_score="raise",
+            )
+            search.fit(train_features, train_target)
+            params = {k: str(v) for k, v in search.best_params_.items()}
+            logger.info("E2 tinh chỉnh tại chỗ %-24s → %s", spec.name, params)
         if spec.needs_raw_frame:
             estimator = build_estimator(spec)
             estimator.fit(
@@ -154,6 +197,10 @@ def run_e2(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None:
             )
         else:
             estimator = build_estimator(spec)
+            if params:
+                # Cùng cấu hình đã tinh chỉnh của E1 nguồn HF: chênh lệch E1-E2 khi đó
+                # chỉ còn trôi giá theo thời gian, không lẫn tuned-vs-default nữa.
+                estimator.set_params(**{k: _coerce(v) for k, v in params.items()})
             estimator.fit(train_features, train_target)
             prediction = estimator.predict(test_features)
 
@@ -170,9 +217,27 @@ def run_e2(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None:
             "test_rows": len(test_frame),
             "cutoff": config.HF_CUTOFF,
             "test_source": "chotot",
+            "params_source": "e1_hf.json best_params" if tuned else "mặc định",
             "models": rows,
         },
     )
+
+
+def _best_params_from_e1(source: str, logger) -> dict[str, dict]:
+    """`best_params` của từng mô hình trong bảng E1 của một nguồn.
+
+    E2 nhận `search_iterations` rồi không dùng: mọi mô hình được fit với tham số MẶC
+    ĐỊNH trong khi bảng E1 đặt cạnh nó đo trên mô hình đã tinh chỉnh. Chênh lệch E1-E2
+    vì thế trộn trôi giá theo thời gian với khoảng cách tuned-vs-default, và mô hình có
+    default yếu (MLP, Lasso, KNN) thổi phồng mức trôi một lượng không định lượng được.
+    """
+    path = RESULTS_DIR / f"e1_{source}.json"
+    if not path.exists():
+        logger.warning("chưa có %s → E2 chạy tham số mặc định, chênh lệch sẽ lẫn "
+                       "khoảng cách tuned-vs-default", path.name)
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return {model["name"]: model.get("best_params") or {} for model in payload["models"]}
 
 
 def _champion_from_e1(specs, source: str, logger):
@@ -180,14 +245,17 @@ def _champion_from_e1(specs, source: str, logger):
     path = RESULTS_DIR / f"e1_{source}.json"
     if not path.exists():
         logger.warning("chưa có %s, ablation lùi về Random Forest", path.name)
-        return next((s for s in specs if s.name == "Random Forest"), None)
+        return next((s for s in specs if s.name == "Random Forest"), None), {}
 
     payload = json.loads(path.read_text(encoding="utf-8"))
     candidates = [m for m in payload["models"] if not m["tier"].startswith("0")]
     best = min(candidates, key=lambda m: m["cv_mean"]["MdAPE (%)"])
     logger.info("ablation dùng mô hình vô địch E1: %s (MdAPE %.2f%%)",
                 best["name"], best["cv_mean"]["MdAPE (%)"])
-    return next((s for s in specs if s.name == best["name"]), None)
+    # Trả kèm best_params: fit lại mô hình vô địch bằng THAM SỐ MẶC ĐỊNH thì E3 và
+    # ablation đang đo một mô hình khác hẳn mô hình mà báo cáo gọi là vô địch, và mức
+    # suy giảm theo phường bị thổi phồng.
+    return next((s for s in specs if s.name == best["name"]), None), best.get("best_params") or {}
 
 
 def run_ablation(frame: pd.DataFrame, specs, logger, search_iterations: int) -> None:
@@ -204,7 +272,9 @@ def run_ablation(frame: pd.DataFrame, specs, logger, search_iterations: int) -> 
     # Ablation phải chạy trên ĐÚNG mô hình tốt nhất của E1, không phải trên một mô hình
     # chọn sẵn theo thứ tự khai báo. Nếu không, bảng ablation đo đóng góp của văn bản
     # với một mô hình khác mô hình mà báo cáo kết luận, và hai chỗ không khớp nhau.
-    champion = _champion_from_e1(specs, "chotot", logger)
+    # Ablation tự chạy search trong evaluate_model cho từng cấu hình, nên không cần
+    # best_params của E1 ở đây; E3 thì cần (nó fit thẳng, không qua evaluate_model).
+    champion, _champion_params = _champion_from_e1(specs, "chotot", logger)
     if champion is None:
         return
 
@@ -237,7 +307,7 @@ def run_e3(frame: pd.DataFrame, specs, logger) -> None:
     đến mức nào.
     """
     subset = frame[frame["source"] == "chotot"].reset_index(drop=True)
-    champion = _champion_from_e1(specs, "chotot", logger)
+    champion, champion_params = _champion_from_e1(specs, "chotot", logger)
     if champion is None or len(subset) < 500:
         return
 
@@ -251,12 +321,19 @@ def run_e3(frame: pd.DataFrame, specs, logger) -> None:
         if held_out.sum() < 20 or (~held_out).sum() < 200:
             continue
         estimator = build_estimator(champion)
+        if champion_params:
+            estimator.set_params(**{k: _coerce(v) for k, v in champion_params.items()})
         estimator.fit(features[~held_out], target[~held_out.to_numpy()])
         metrics = compute_metrics(target[held_out.to_numpy()], estimator.predict(features[held_out]))
         rows.append({"ward": ward, "n_test": int(held_out.sum()), "metrics": metrics})
         logger.info("E3 giữ %-24s n=%3d → MdAPE %.1f%%", ward, int(held_out.sum()), metrics["MdAPE (%)"])
 
-    save_results("e3", {"experiment": "E3", "model": champion.name, "rows": rows})
+    save_results("e3", {
+        "experiment": "E3",
+        "model": champion.name,
+        "params_source": "e1_chotot.json best_params" if champion_params else "mặc định",
+        "rows": rows,
+    })
 
 
 def main() -> None:

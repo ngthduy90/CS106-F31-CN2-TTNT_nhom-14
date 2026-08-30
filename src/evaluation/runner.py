@@ -58,6 +58,9 @@ def build_estimator(spec: ModelSpec, use_text: bool = True, use_flags: bool = Tr
     if spec.needs_raw_frame:
         return spec.estimator
 
+    # memory=<cachedir>: không tham số search nào chạm nhánh đặc trưng, nên cả 40 ứng
+    # viên của một fold dùng chung đúng một trạng thái transformer. Cache lại thì số lần
+    # fit TF-IDF + SVD cho mỗi mô hình rơi từ ~120 về 3 — đây là chi phí lặp lớn nhất.
     return Pipeline(
         [
             # Điền thiếu theo (loại nhà × quận) nằm TRONG pipeline nên fit theo fold.
@@ -69,7 +72,8 @@ def build_estimator(spec: ModelSpec, use_text: bool = True, use_flags: bool = Tr
                     regressor=spec.estimator, func=np.log, inverse_func=np.exp
                 ),
             ),
-        ]
+        ],
+        memory=str(config.CACHE / "pipeline"),
     )
 
 
@@ -99,6 +103,9 @@ class ModelResult:
     best_params: dict[str, Any] = field(default_factory=dict)
     fit_seconds: float = 0.0
     notes: str = ""
+    # Ngân sách rút THẬT (min(ngân sách yêu cầu, kích thước lưới)) — "ngân sách giống
+    # nhau" chỉ đúng với mô hình có lưới lớn hơn ngân sách.
+    search_budget: int = 0
 
 
 def _prepare(frame: pd.DataFrame, spec: ModelSpec) -> pd.DataFrame:
@@ -150,7 +157,7 @@ def evaluate_model(
             cv=3,
             random_state=config.SEED,
             scoring="neg_mean_absolute_error",
-            n_jobs=1,
+            n_jobs=spec.search_n_jobs,
             error_score="raise",
         )
         tuning_rows, _ = scope_iqr(frame, train_idx, train_idx)
@@ -186,6 +193,7 @@ def evaluate_model(
         best_params=best_params,
         fit_seconds=round(time.time() - started, 1),
         notes=spec.notes,
+        search_budget=spec.search_budget(search_iterations) if spec.param_distributions else 0,
     )
     if logger:
         logger.info(

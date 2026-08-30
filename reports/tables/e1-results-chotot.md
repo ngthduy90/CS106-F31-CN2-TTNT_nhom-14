@@ -1,9 +1,11 @@
 # E1: Nguồn B · Chợ Tốt 2026
 
 2.326 dòng, chia hold-out 80/20, 5-fold trên phần train, seed 42.
-Ngân sách tinh chỉnh: RandomizedSearch 20 cấu hình, giống nhau cho mọi mô hình.
+Ngân sách tinh chỉnh: RandomizedSearch tối đa 20 cấu hình cho mọi mô hình. Số lượt rút THẬT là min(ngân sách, kích thước lưới): lưới rời rạc nhỏ hơn ngân sách thì search không thể rút quá số cấu hình đang có.
 
 Mỗi ô là trung bình ± độ lệch chuẩn qua 5 fold. **In đậm** là tốt nhất mỗi cột.
+
+Lưu ý cách đọc: tinh chỉnh chạy MỘT LẦN trên toàn phần train rồi dùng lại cho cả 5 fold ngoài (không nested), nên cột CV nghiêng lạc quan một chiều. Cột hold-out không dính điều này và là con số nên trích khi cần một chỉ số duy nhất.
 
 | Tầng | Mô hình | RMSE (tỷ) | MAE (tỷ) | MdAPE (%) | R² |
 |---|---|---:|---:|---:|---:|
@@ -37,9 +39,10 @@ Mỗi ô là trung bình ± độ lệch chuẩn qua 5 fold. **In đậm** là t
 | K láng giềng | 3,931 | 2,123 | 21,7 | 0,630 |
 | MLP | 3,837 | 1,865 | 17,3 | 0,647 |
 
-Mô hình tốt nhất (LightGBM) hơn baseline kiểu môi giới **6,66 điểm phần trăm MdAPE**. Đây mới là phần giá trị mà học máy
-tạo ra so với cách định giá thủ công; khoảng cách so với Dummy chỉ nói rằng dữ
-liệu có tín hiệu.
+Nhóm dẫn đầu (LightGBM, XGBoost, CatBoost) hơn baseline kiểu môi giới **6,32–6,66 điểm phần trăm MdAPE** (khoảng của cả nhóm dẫn đầu). Các mô hình
+trong nhóm cách nhau chưa tới một độ lệch chuẩn giữa các fold nên bảng không
+chọn ra một mô hình thắng. Đây mới là phần giá trị mà học máy tạo ra so với
+cách định giá thủ công; khoảng cách so với Dummy chỉ nói rằng dữ liệu có tín hiệu.
 
 **Chú ý khi đọc**: Hồi quy tuyến tính, Lasso, MLP có độ lệch chuẩn của RMSE lớn
 so với chính trung bình của nó. Nguyên nhân là mô hình huấn luyện trên log(giá)
