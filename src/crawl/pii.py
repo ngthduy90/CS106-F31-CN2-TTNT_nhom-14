@@ -47,8 +47,16 @@ PII_FIELDS = frozenset(
 
 # --- bảng quy đổi -------------------------------------------------------------
 
-# Ký tự vô hình: người rao chèn vào giữa dãy số để cắt regex.
+# Ký tự vô hình: người rao chèn vào giữa dãy số để cắt regex. Danh sách liệt kê luôn
+# thiếu (VS15, U+0336, U+2063...), nên phân loại theo Unicode category: Cf (format),
+# Mn/Me (dấu kết hợp, bao gồm cả variation selector và dấu bao quanh).
 _ZERO_WIDTH = frozenset("​‌‍‎‏⁠﻿­")
+_INVISIBLE_CATEGORIES = frozenset({"Cf", "Mn", "Me"})
+
+
+def _is_invisible(ch: str) -> bool:
+    """Ký tự không hiển thị, có thể nằm chen giữa các chữ số của một số điện thoại."""
+    return ch in _ZERO_WIDTH or unicodedata.category(ch) in _INVISIBLE_CATEGORIES
 
 # Chữ cái được dùng thay chữ số. Chỉ quy đổi khi ký tự NẰM SÁT một chữ số thật,
 # nếu không thì "O" trong "NHÀ O TÂN BÌNH" sẽ bị hiểu nhầm.
@@ -86,8 +94,10 @@ _WORD_DIGIT_RE = re.compile(
 # Dấu ngăn cách được chấp nhận giữa hai chữ số của cùng một số điện thoại.
 _SEP = r"[\s.,\-–—_*+()\[\]{}/\\|·•~#:;'\"]"
 
-# Dãy 8–15 chữ số nối nhau qua tối đa 3 ký tự ngăn cách.
-_DIGIT_RUN = re.compile(rf"\d(?:{_SEP}{{0,3}}\d){{7,14}}")
+# Dãy từ 8 chữ số trở lên nối nhau qua tối đa 3 ký tự ngăn cách. CỐ Ý không có trần:
+# cap 15 cũ cắt ngang "0901234567 0987654321" và bỏ luôn phần đuôi. Việc kiểm hình dạng
+# được làm trên từng CỬA SỔ CON bên trong run (xem _phone_windows), không phải trên cả run.
+_DIGIT_RUN = re.compile(rf"\d(?:{_SEP}{{0,3}}\d){{7,}}")
 
 # Từ khoá báo hiệu "đoạn sau là số liên hệ". Có nó thì hạ ngưỡng nghi ngờ.
 #
@@ -114,9 +124,11 @@ def _looks_like_vn_phone(digits: str, has_hint: bool) -> bool:
         return True
     if has_hint and 8 <= len(digits) <= 15:
         return True
-    # Số di động viết thiếu số 0 đầu: 9 chữ số, đầu số hợp lệ.
-    if len(digits) == 9 and digits[0] in "35789":
-        return True
+    # Số di động viết thiếu số 0 đầu (9 chữ số, đầu số 3/5/7/8/9) chỉ nhận khi câu văn
+    # có từ khoá liên hệ — nhánh has_hint bên trên đã phủ đúng ca đó. Không có từ khoá
+    # thì dãy 9 chữ số hầu hết là giá viết đủ ("850.000.000" → 850000000, đầu số 8 vẫn
+    # "hợp lệ") hoặc mã tin ("573829145"): xoá chúng là xoá mất chính phần giá và ngữ
+    # cảnh mà mô hình cần, nên ở đây không nhận nữa.
     return False
 
 
@@ -126,7 +138,7 @@ def _looks_like_vn_phone(digits: str, has_hint: bool) -> bool:
 def _neighbour_is_digit(text: str, index: int, step: int) -> bool:
     """Ký tự sát bên (bỏ qua ký tự vô hình) có phải chữ số không."""
     i = index + step
-    while 0 <= i < len(text) and text[i] in _ZERO_WIDTH:
+    while 0 <= i < len(text) and _is_invisible(text[i]):
         i += step
     return 0 <= i < len(text) and text[i].isdigit()
 
@@ -147,7 +159,7 @@ def _normalise(text: str) -> tuple[str, list[tuple[int, int]]]:
     while i < n:
         ch = text[i]
 
-        if ch in _ZERO_WIDTH:
+        if _is_invisible(ch):
             i += 1
             continue
 
@@ -177,8 +189,13 @@ def _normalise(text: str) -> tuple[str, list[tuple[int, int]]]:
                 i = match.end()
                 continue
 
+        # Bên trái soi chuỗi ĐANG dựng chứ không soi chuỗi gốc: "09OOO23456" có chữ O
+        # thứ hai và thứ ba chỉ đứng cạnh chữ O khác trong bản gốc, nên đối chiếu một
+        # lượt trên bản gốc bỏ sót cả cụm. Nhìn ký tự vừa phát ra thì cả chuỗi đổ theo.
         if ch in _HOMOGLYPHS and (
-            _neighbour_is_digit(text, i, -1) or _neighbour_is_digit(text, i, 1)
+            (out and out[-1].isdigit())
+            or _neighbour_is_digit(text, i, -1)
+            or _neighbour_is_digit(text, i, 1)
         ):
             out.append(_HOMOGLYPHS[ch])
             spans.append((i, i + 1))
@@ -192,6 +209,65 @@ def _normalise(text: str) -> tuple[str, list[tuple[int, int]]]:
     return "".join(out), spans
 
 
+def _at_group_edge(normalised: str, index: int, step: int) -> bool:
+    """Chữ số ở *index* có nằm ở rìa một cụm số không (bên cạnh không phải chữ số)."""
+    neighbour = index + step
+    if neighbour < 0 or neighbour >= len(normalised):
+        return True
+    return not normalised[neighbour].isdigit()
+
+
+def _phone_windows(
+    normalised: str, digit_positions: list[int], has_hint: bool
+) -> list[tuple[int, int]]:
+    """Các cửa sổ con hình dạng SĐT bên trong MỘT dãy số dài.
+
+    Kiểm hình dạng một lần cho cả dãy là chỗ hổng: "Bán đất 5x20 0901234567" gộp thành
+    run 12 chữ số không khớp nhánh nào và lọt nguyên số, còn "090... 098..." thì bị cap
+    15 chữ số cắt ngang. Ở đây mỗi cửa sổ ứng viên phải bắt đầu VÀ kết thúc ở rìa một
+    cụm số (số điện thoại luôn được viết thành cụm riêng), nên số nằm cạnh số khác vẫn
+    được tách đúng và hai số liền nhau ra hai lần xoá.
+    """
+    digits = "".join(normalised[i] for i in digit_positions)
+    hits: list[tuple[int, int]] = []
+    i, n = 0, len(digits)
+
+    while i < n:
+        if not _at_group_edge(normalised, digit_positions[i], -1):
+            i += 1
+            continue
+
+        length = None
+        # Hình dạng chặt (0 + 9/10 số, 84 + 9/10 số) không cần từ khoá liên hệ.
+        for size in (12, 11, 10):
+            if i + size > n:
+                continue
+            if not _at_group_edge(normalised, digit_positions[i + size - 1], 1):
+                continue
+            if _looks_like_vn_phone(digits[i : i + size], False):
+                length = size
+                break
+        # Có từ khoá liên hệ thì hạ ngưỡng: mọi dãy 8–15 số đều bị coi là số liên hệ.
+        if length is None and has_hint:
+            for size in range(15, 7, -1):
+                if i + size > n:
+                    continue
+                if not _at_group_edge(normalised, digit_positions[i + size - 1], 1):
+                    continue
+                if _looks_like_vn_phone(digits[i : i + size], True):
+                    length = size
+                    break
+
+        if length is None:
+            i += 1
+            continue
+
+        hits.append((digit_positions[i], digit_positions[i + length - 1]))
+        i += length
+
+    return hits
+
+
 def find_phone_spans(text: str) -> list[tuple[int, int]]:
     """Khoảng [start, end) trong chuỗi GỐC được coi là số điện thoại."""
     if not text:
@@ -201,14 +277,13 @@ def find_phone_spans(text: str) -> list[tuple[int, int]]:
     hits: list[tuple[int, int]] = []
 
     for match in _DIGIT_RUN.finditer(normalised):
-        digits = re.sub(r"\D", "", match.group(0))
+        digit_positions = [
+            i for i in range(match.start(), match.end()) if normalised[i].isdigit()
+        ]
         left = normalised[max(0, match.start() - _CONTEXT_WINDOW) : match.start()]
         has_hint = bool(_CONTACT_HINT.search(left))
-        if not _looks_like_vn_phone(digits, has_hint):
-            continue
-        start = spans[match.start()][0]
-        end = spans[match.end() - 1][1]
-        hits.append((start, end))
+        for first, last in _phone_windows(normalised, digit_positions, has_hint):
+            hits.append((spans[first][0], spans[last][1]))
 
     return _merge(hits)
 

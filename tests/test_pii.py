@@ -31,10 +31,21 @@ OBFUSCATIONS = [
     ("chữ số Unicode", "lien he ٠٩٠١٢٣٤٥٦٧"),
     ("emoji keycap", "gọi 0️⃣9️⃣0️⃣1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣ nhé"),
     ("viết bằng chữ", "liên hệ không chín không một hai ba bốn năm sáu bảy"),
+    # Ba ca dưới đây từng lọt: dò hình dạng làm một lần cho cả dãy số dài, và đối chiếu
+    # chữ-cái-thay-số chỉ chạy một lượt trên văn bản gốc.
+    ("số đứng cạnh kích thước", "Bán đất 5x20 0901234567"),
+    ("số đứng cạnh số nhà", "Nhà 1/23 0908123456"),
+    ("chuỗi chữ O liên tiếp", "LH 09OOO23456 xem nhà"),
+    ("ký tự vô hình ngoài danh sách cũ", "Liên hệ 09\u03361234567"),
 ]
 
 NEGATIVES = [
     "Nhà 2 tầng, diện tích 4x15 = 60m2, giá 5,2 tỷ",
+    # Giá trăm triệu viết đủ số là 9 chữ số bắt đầu bằng 8 — đúng hình dạng "số di động
+    # thiếu số 0 đầu", nên nhánh 9-chữ-số-không-từ-khoá từng xoá mất chính cột giá.
+    "Giá 850.000.000 đồng, bao sang tên",
+    "Giá 950.000.000, sổ hồng riêng",
+    "Mã tin 573829145, đăng hôm nay",
     "Giá 3.500.000.000 đồng, thương lượng",
     "Đăng ngày 01.02.2026, sổ hồng riêng",
     "Hẻm 6m thông, cách chợ 300m, xây năm 2018",
@@ -99,3 +110,30 @@ def test_bo_truong_ca_nhan_long_nhau():
 def test_contains_phone_quet_ca_bang_ghi():
     assert contains_phone({"a": ["x", {"b": "lh 0901234567"}]})
     assert not contains_phone({"a": ["x", {"b": "giá 5,2 tỷ"}]})
+
+
+def test_hai_so_lien_nhau_khong_bi_cat_ngang():
+    """Cap 15 chữ số cũ cắt giữa dãy: số thứ hai lọt nguyên hoặc lộ đuôi."""
+    clean, count = scrub_text("0901234567 0987654321")
+    assert count == 2
+    assert clean == f"{REDACTION} {REDACTION}"
+    assert not contains_phone(clean)
+
+    clean, count = scrub_text("LH: 0901234567 - 0987654321")
+    assert count == 2
+    assert not contains_phone(clean)
+
+
+def test_so_canh_so_khac_van_bi_bat_nhung_khong_an_lan():
+    """Số điện thoại đứng ngay sau một cụm số khác: xoá đúng số, chừa cụm kia."""
+    clean, count = scrub_text("Bán đất 5x20 0901234567")
+    assert count == 1
+    assert clean == f"Bán đất 5x20 {REDACTION}"
+
+
+def test_gia_tram_trieu_viet_du_so_khong_bi_xoa():
+    """Ca hồi quy của C1: 850000000 là giá, không phải số di động thiếu số 0."""
+    assert find_phones("Giá 850.000.000 đồng") == []
+    assert find_phones("Bán nhà giá 750000000") == []
+    # Có từ khoá liên hệ thì dãy 9 chữ số vẫn bị coi là số liên hệ, như trước.
+    assert find_phones("LH 901234567") == ["901234567"]
