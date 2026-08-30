@@ -44,9 +44,9 @@ def find_duplicate_groups(
     frame: pd.DataFrame,
     text_threshold: float = config.DUPLICATE_TEXT_COSINE,
     price_tolerance: float = config.DUPLICATE_PRICE_TOLERANCE,
-    max_block_size: int = 400,
-) -> tuple[list[list[int]], list[dict]]:
-    """Các nhóm dòng được coi là cùng một bất động sản, kèm mẫu cặp để rà tay."""
+    max_block_size: int = config.DUPLICATE_MAX_BLOCK_SIZE,
+) -> tuple[list[list[int]], list[dict], dict]:
+    """Các nhóm dòng được coi là cùng một bất động sản, kèm mẫu cặp và thống kê ô."""
     blocks: dict[tuple, list[int]] = defaultdict(list)
     for position, (_, row) in enumerate(frame.iterrows()):
         blocks[_block_key(row)].append(position)
@@ -68,17 +68,41 @@ def find_duplicate_groups(
     prices = frame["total_price_vnd"].to_numpy(dtype="float64")
     samples: list[dict] = []
 
-    for members in blocks.values():
-        # Ô quá lớn (phường đông tin, diện tích phổ biến) thì bỏ qua để tránh nổ bộ nhớ;
-        # số cặp trong ô tăng theo bình phương.
-        if not 2 <= len(members) <= max_block_size:
-            continue
+    block_stats = {"ô đã chia nhỏ": 0, "dòng trong ô đã chia nhỏ": 0}
 
+    # Ô quá lớn (phường đông tin, diện tích phổ biến) trước đây bị BỎ QUA nguyên khối,
+    # không đếm, không log — mà đó lại đúng là nơi trùng lặp tập trung, nên mọi cặp bên
+    # trong sống sót vào bảng rồi bị splits chia hai phía. Giờ chia nhỏ theo thập phân
+    # vị giá (khoá phụ rẻ, cặp trùng gần như luôn cùng bậc giá) thay vì bỏ.
+    work: list[list[int]] = []
+    for members in blocks.values():
+        if len(members) < 2:
+            continue
+        if len(members) <= max_block_size:
+            work.append(members)
+            continue
+        block_stats["ô đã chia nhỏ"] += 1
+        block_stats["dòng trong ô đã chia nhỏ"] += len(members)
+        ranked = sorted(members, key=lambda i: (prices[i] if np.isfinite(prices[i]) else -1.0))
+        chunks = max(2, -(-len(ranked) // max_block_size))
+        size = -(-len(ranked) // chunks)
+        for start in range(0, len(ranked), size):
+            piece = ranked[start : start + size]
+            if len(piece) >= 2:
+                work.append(piece)
+
+    for members in work:
         block_texts = [texts[i] for i in members]
         if not any(len(t.strip()) > 30 for t in block_texts):
             continue
 
-        vectoriser = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5), min_df=1)
+        # use_idf=False: IDF được tính RIÊNG trong từng ô nên cùng một ngưỡng cosine
+        # mang nghĩa khác nhau tuỳ mật độ ô (IDF của cụm từ rao phổ biến lệch nhiều lần
+        # giữa ô 2 tin và ô 300 tin). Bỏ IDF thì ngưỡng 0,85 có một nghĩa duy nhất trên
+        # toàn bộ dữ liệu, và còn rẻ hơn hiện tại.
+        vectoriser = TfidfVectorizer(
+            analyzer="char_wb", ngram_range=(3, 5), min_df=1, use_idf=False
+        )
         try:
             matrix = vectoriser.fit_transform(block_texts)
         except ValueError:
@@ -110,7 +134,7 @@ def find_duplicate_groups(
     groups: dict[int, list[int]] = defaultdict(list)
     for position in range(len(frame)):
         groups[find(position)].append(position)
-    return [members for members in groups.values() if len(members) > 1], samples
+    return [members for members in groups.values() if len(members) > 1], samples, block_stats
 
 
 def deduplicate(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
@@ -120,7 +144,7 @@ def deduplicate(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     hẳn bản trùng thì đã có sẵn khoá nhóm, không phải tính lại.
     """
     frame = frame.reset_index(drop=True)
-    groups, samples = find_duplicate_groups(frame)
+    groups, samples, block_stats = find_duplicate_groups(frame)
 
     published = pd.to_datetime(frame["published_at"], errors="coerce", utc=True)
     length = frame["description"].fillna("").str.len()
@@ -145,6 +169,9 @@ def deduplicate(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     stats = {
         "nhóm trùng": len(groups),
         "dòng bị loại": len(drop),
+        # Funnel phải nói thật về phần dữ liệu được xử lý khác thường, nếu không thì
+        # "đã quét mọi ô" là một câu không ai kiểm được.
+        **block_stats,
         "mẫu cặp để rà tay": samples,
     }
     kept["duplicate_group"] = group_id.drop(index=drop).reset_index(drop=True)

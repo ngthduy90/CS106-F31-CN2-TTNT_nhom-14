@@ -98,6 +98,10 @@ SEARCH_ITERATIONS = 40               # RandomizedSearch budget, identical per mo
 PRICE_BINS_VND = [0, 2e9, 5e9, 10e9, float("inf")]  # error analysis slices
 
 # Columns that must never reach the feature matrix: they are the label in disguise.
+# Ô chặn lớn hơn ngần này được CHIA NHỎ theo thập phân vị giá chứ không bị bỏ qua:
+# bỏ nguyên ô là để lọt đúng những cặp trùng tập trung ở phường đông tin.
+DUPLICATE_MAX_BLOCK_SIZE = 400
+
 LEAKAGE_BLOCKLIST = [
     "price_per_m2",
     "price_million_per_m2",

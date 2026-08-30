@@ -25,8 +25,9 @@ from sklearn.pipeline import Pipeline
 
 from src import config
 from src.evaluation.metrics import compute_metrics
-from src.features.build import BANNED, build_feature_frame, build_pipeline
+from src.features.build import BANNED, GroupMedianImputer, build_feature_frame, build_pipeline
 from src.models.registry import ModelSpec
+from src.preprocess.clean import fit_iqr_bounds, iqr_mask
 from src.preprocess.leakage import count_money_tokens
 
 RESULTS_DIR = config.REPORTS / "results"
@@ -59,6 +60,8 @@ def build_estimator(spec: ModelSpec, use_text: bool = True, use_flags: bool = Tr
 
     return Pipeline(
         [
+            # Điền thiếu theo (loại nhà × quận) nằm TRONG pipeline nên fit theo fold.
+            ("group_impute", GroupMedianImputer()),
             ("features", build_pipeline(use_text=use_text, use_flags=use_flags)),
             (
                 "model",
@@ -68,6 +71,22 @@ def build_estimator(spec: ModelSpec, use_text: bool = True, use_flags: bool = Tr
             ),
         ]
     )
+
+
+def scope_iqr(frame: pd.DataFrame, train_rows, eval_rows) -> tuple[np.ndarray, np.ndarray]:
+    """Ngưỡng IQR học từ PHẦN TRAIN rồi áp cho cả hai phía.
+
+    Chạy IQR trên toàn bảng trước khi chia tập (cách cũ, ở run_pipeline) nghĩa là tập
+    kiểm được lọc inlier bằng ngưỡng mà chính nhãn của nó góp phần đặt, nên số công bố
+    lạc quan hơn dữ liệu triển khai thật. Học ngưỡng trên train rồi áp cho cả hai phía
+    giữ được tính so sánh được của tập kiểm mà không còn nhìn trộm nhãn.
+    """
+    train_rows = np.asarray(train_rows)
+    eval_rows = np.asarray(eval_rows)
+    fitted = fit_iqr_bounds(frame.iloc[train_rows])
+    return train_rows[iqr_mask(frame.iloc[train_rows], fitted)], eval_rows[
+        iqr_mask(frame.iloc[eval_rows], fitted)
+    ]
 
 
 @dataclass
@@ -91,6 +110,10 @@ def _prepare(frame: pd.DataFrame, spec: ModelSpec) -> pd.DataFrame:
 
 def fit_final_model(spec: ModelSpec, frame: pd.DataFrame, best_params: dict, use_text=True, use_flags=True):
     """Fit lại mô hình vô địch trên toàn bộ dữ liệu, dùng cho xuất artefact và demo."""
+    # Artefact cuối cùng: fit trên toàn bộ bảng được giao, ngưỡng IQR học từ chính nó
+    # (không có tập kiểm nào ở đây nên không có gì để nhìn trộm).
+    rows, _ = scope_iqr(frame, np.arange(len(frame)), np.arange(len(frame)))
+    frame = frame.iloc[rows].reset_index(drop=True)
     features = _prepare(frame, spec)
     target = frame["total_price_vnd"].to_numpy(dtype="float64")
     estimator = build_estimator(spec, use_text, use_flags)
@@ -130,7 +153,8 @@ def evaluate_model(
             n_jobs=1,
             error_score="raise",
         )
-        search.fit(features.iloc[train_idx], target[train_idx])
+        tuning_rows, _ = scope_iqr(frame, train_idx, train_idx)
+        search.fit(features.iloc[tuning_rows], target[tuning_rows])
         best_params = {k: str(v) for k, v in search.best_params_.items()}
 
     def make_fitted():
@@ -141,15 +165,17 @@ def evaluate_model(
 
     fold_metrics: list[dict[str, float]] = []
     for fold in split["folds"]:
-        fitted = make_fitted().fit(features.iloc[fold["train"]], target[fold["train"]])
-        prediction = fitted.predict(features.iloc[fold["valid"]])
-        fold_metrics.append(compute_metrics(target[fold["valid"]], prediction))
+        fold_train, fold_valid = scope_iqr(frame, fold["train"], fold["valid"])
+        fitted = make_fitted().fit(features.iloc[fold_train], target[fold_train])
+        prediction = fitted.predict(features.iloc[fold_valid])
+        fold_metrics.append(compute_metrics(target[fold_valid], prediction))
 
     table = pd.DataFrame(fold_metrics)
 
     # Mô hình cuối: fit lại trên toàn bộ phần train, đo trên hold-out chưa từng chạm.
-    final = make_fitted().fit(features.iloc[train_idx], target[train_idx])
-    holdout = compute_metrics(target[test_idx], final.predict(features.iloc[test_idx]))
+    final_train, final_test = scope_iqr(frame, train_idx, test_idx)
+    final = make_fitted().fit(features.iloc[final_train], target[final_train])
+    holdout = compute_metrics(target[final_test], final.predict(features.iloc[final_test]))
 
     result = ModelResult(
         name=spec.name,

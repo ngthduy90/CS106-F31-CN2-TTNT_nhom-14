@@ -20,7 +20,7 @@ import json
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import StratifiedKFold, train_test_split
+from sklearn.model_selection import StratifiedGroupKFold, train_test_split
 
 from src import config
 
@@ -39,6 +39,22 @@ def _fingerprint(frame: pd.DataFrame) -> str:
     """
     joined = "|".join(frame["listing_id"].astype(str))
     return hashlib.sha256(joined.encode()).hexdigest()[:16]
+
+
+def group_labels(frame: pd.DataFrame) -> np.ndarray:
+    """Khoá nhóm để cả một nhóm tin trùng luôn nằm về CÙNG một phía của phép chia.
+
+    `duplicate_group` được dedup tính và lưu từ đầu nhưng chưa ai tiêu thụ. Nối nó vào
+    đây đóng hẳn lớp rủi ro twin-listing (mô hình xem trước đáp án qua một bản đăng lại)
+    thay vì chỉ giảm nó bằng cách loại bớt bản trùng. Dòng không thuộc nhóm nào đứng
+    riêng thành nhóm một phần tử, nên hành vi không đổi khi cột này vắng mặt.
+    """
+    if "duplicate_group" in frame.columns:
+        groups = frame["duplicate_group"].astype("object")
+    else:
+        groups = pd.Series(pd.NA, index=frame.index, dtype="object")
+    fallback = "single:" + frame["listing_id"].astype(str)
+    return groups.where(groups.notna(), fallback).astype(str).to_numpy()
 
 
 def stratum_labels(frame: pd.DataFrame) -> pd.Series:
@@ -62,23 +78,36 @@ def make_splits(frame: pd.DataFrame, tag: str, force: bool = False) -> dict:
             return saved
 
     strata = stratum_labels(frame)
+    groups = group_labels(frame)
     indices = np.arange(len(frame))
-    train_idx, test_idx = train_test_split(
-        indices,
+
+    # Hold-out được cắt ở mức NHÓM: cắt ở mức dòng thì hai bản đăng lại của cùng một
+    # bất động sản rơi hai phía và mô hình được xem trước đáp án.
+    unique_groups, first_position = np.unique(groups, return_index=True)
+    group_strata = pd.Series(strata.to_numpy()[first_position])
+    lone = group_strata.value_counts()
+    group_strata = group_strata.where(~group_strata.isin(lone[lone < 2].index), "khác")
+
+    train_groups, _test_groups = train_test_split(
+        unique_groups,
         test_size=config.HOLDOUT_TEST_SIZE,
         random_state=config.SEED,
-        stratify=strata,
+        stratify=group_strata,
     )
+    in_train = np.isin(groups, train_groups)
+    train_idx, test_idx = indices[in_train], indices[~in_train]
 
     train_strata = strata.iloc[train_idx]
-    # Tầng còn quá ít sau khi cắt hold-out thì gộp lại, nếu không StratifiedKFold sẽ vỡ.
+    # Tầng còn quá ít sau khi cắt hold-out thì gộp lại, nếu không splitter sẽ vỡ.
     counts = train_strata.value_counts()
     thin = counts[counts < config.CV_FOLDS].index
     train_strata = train_strata.where(~train_strata.isin(thin), "khác")
 
     folds = []
-    splitter = StratifiedKFold(n_splits=config.CV_FOLDS, shuffle=True, random_state=config.SEED)
-    for fold_train, fold_valid in splitter.split(train_idx, train_strata):
+    splitter = StratifiedGroupKFold(
+        n_splits=config.CV_FOLDS, shuffle=True, random_state=config.SEED
+    )
+    for fold_train, fold_valid in splitter.split(train_idx, train_strata, groups[train_idx]):
         folds.append(
             {
                 "train": train_idx[fold_train].tolist(),
@@ -93,6 +122,8 @@ def make_splits(frame: pd.DataFrame, tag: str, force: bool = False) -> dict:
         "seed": config.SEED,
         "test_size": config.HOLDOUT_TEST_SIZE,
         "n_folds": config.CV_FOLDS,
+        "n_groups": int(len(unique_groups)),
+        "group_aware": True,
         "train": train_idx.tolist(),
         "test": test_idx.tolist(),
         "folds": folds,

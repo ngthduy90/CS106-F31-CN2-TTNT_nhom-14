@@ -108,18 +108,26 @@ def main() -> None:
             f"{dedup_stats['nhóm trùng']} nhóm, loại {dedup_stats['dòng bị loại']} dòng",
         )
 
-        frame, iqr_stats = clean.apply_iqr_by_district(frame)
+        # IQR và điền trung vị KHÔNG còn chạy ở đây. Cả hai fit trên toàn bảng, tức
+        # trên cả những dòng sau này nằm trong tập kiểm: ngưỡng IQR tính trên log(giá/m²)
+        # — một đại lượng dẫn xuất từ nhãn — và trung vị điền thiếu tính cả trên test.
+        # Quy tắc chống rò rỉ số 3 của báo cáo hứa mọi phép biến đổi chỉ fit trên phần
+        # train của từng fold, nên hai bước này đã chuyển vào luồng huấn luyện:
+        # `runner.scope_iqr` (ngưỡng học từ phần train) và `GroupMedianImputer` (nằm
+        # trong Pipeline). Bảng ngưỡng dưới đây chỉ để BÁO CÁO, không loại dòng nào.
+        iqr_stats = {"ngưỡng theo quận": clean.fit_iqr_bounds(frame)["info"]}
         funnel.record(
             "IQR log(giá/m²) theo từng quận",
             frame,
-            f"loại {iqr_stats['đã loại']} dòng",
+            "đã chuyển vào fit theo fold (xem runner.scope_iqr) — không loại ở bước này",
         )
 
-        frame, impute_stats = clean.impute(frame)
+        frame, missing_stats = clean.mark_missing(frame)
         funnel.record(
-            "Điền trung vị theo (loại nhà × quận) + cột chỉ báo",
+            "Cột chỉ báo thiếu + điền hạng mục mặc định",
             frame,
-            ", ".join(f"{k}: {v}" for k, v in impute_stats.items()),
+            ", ".join(f"{k}: {v}" for k, v in missing_stats.items())
+            + " · điền số theo (loại nhà × quận) nằm trong pipeline, fit theo fold",
         )
 
         # Văn bản dùng cho mô hình là bản ĐÃ XOÁ GIÁ; bản gốc giữ lại để tra cứu.

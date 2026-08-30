@@ -27,12 +27,14 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from src import config
 from src.features.text import TEXT_FLAGS, analyzer, extract_flags, pretokenize
+from src.preprocess.clean import IMPUTE_COLUMNS
 
 class AdaptiveSVD(TruncatedSVD):
     """TruncatedSVD tự hạ số chiều khi từ vựng nhỏ hơn số chiều yêu cầu.
@@ -115,6 +117,45 @@ def build_feature_frame(frame: pd.DataFrame) -> pd.DataFrame:
 
     out[TEXT_FEATURE] = out[TEXT_FEATURE].fillna("")
     return out[columns]
+
+
+class GroupMedianImputer(BaseEstimator, TransformerMixin):
+    """Điền trung vị theo (loại nhà × quận), HỌC TRONG TỪNG LẦN FIT.
+
+    Trước đây bước này chạy một lần trên toàn bảng ở tiền xử lý, nên trung vị được tính
+    trên cả những dòng sau đó nằm trong tập kiểm, và `SimpleImputer` trong pipeline gần
+    như chỉ còn hình thức với 5 cột này. Nằm trong pipeline thì nó fit trên đúng phần
+    train của fold đang chạy, khớp với quy tắc chống rò rỉ số 3 của báo cáo.
+    """
+
+    def __init__(self, columns=tuple(IMPUTE_COLUMNS), group_columns=("property_type", "district")):
+        self.columns = columns
+        self.group_columns = group_columns
+
+    def fit(self, X, y=None):
+        columns = [c for c in self.columns if c in X.columns]
+        groups = [c for c in self.group_columns if c in X.columns]
+        self.medians_ = {
+            column: X.groupby(groups)[column].median() if groups else pd.Series(dtype="float64")
+            for column in columns
+        }
+        self.fallback_ = {column: X[column].median() for column in columns}
+        self.group_columns_ = groups
+        return self
+
+    def transform(self, X):
+        out = X.copy()
+        for column, medians in self.medians_.items():
+            if column not in out:
+                continue
+            if self.group_columns_ and len(medians):
+                keys = pd.MultiIndex.from_frame(out[self.group_columns_]) if len(
+                    self.group_columns_
+                ) > 1 else pd.Index(out[self.group_columns_[0]])
+                by_group = pd.Series(medians.reindex(keys).to_numpy(), index=out.index)
+                out[column] = out[column].fillna(by_group)
+            out[column] = out[column].fillna(self.fallback_[column])
+        return out
 
 
 def build_pipeline(use_text: bool = True, use_flags: bool = True, svd_components: int = SVD_COMPONENTS):

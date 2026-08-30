@@ -41,8 +41,13 @@ def drop_missing_labels(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     }
 
 
-def impute(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    """Điền trung vị theo (loại nhà × quận), thêm cột `<tên>_missing` cho mỗi trường."""
+def mark_missing(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+    """Cột chỉ báo `<tên>_missing` + điền hạng mục mặc định. KHÔNG tính trung vị.
+
+    Hai việc này thuần theo DÒNG nên không rò rỉ gì và ở lại tiền xử lý. Phần điền số
+    theo trung vị (loại nhà × quận) đã chuyển vào pipeline (`GroupMedianImputer`) để fit
+    theo từng fold, đúng như quy tắc chống rò rỉ số 3 của báo cáo.
+    """
     frame = frame.copy()
     stats = {}
 
@@ -53,14 +58,27 @@ def impute(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         frame[f"{column}_missing"] = missing.astype(int)
         stats[column] = int(missing.sum())
 
+    for column, default in CATEGORICAL_FILL.items():
+        if column in frame:
+            frame[column] = frame[column].fillna(default).replace("", default)
+
+    return frame, stats
+
+
+def impute(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+    """Điền trung vị theo (loại nhà × quận) trên CẢ bảng — chỉ dùng cho EDA.
+
+    Luồng huấn luyện KHÔNG gọi hàm này: trung vị tính trên cả phần test là rò rỉ.
+    """
+    frame, stats = mark_missing(frame)
+
+    for column in IMPUTE_COLUMNS:
+        if column not in frame:
+            continue
         by_group = frame.groupby(["property_type", "district"])[column].transform("median")
         filled = frame[column].fillna(by_group)
         # Nhóm nào không có lấy nổi một giá trị thì lùi về trung vị toàn bộ.
         frame[column] = filled.fillna(frame[column].median())
-
-    for column, default in CATEGORICAL_FILL.items():
-        if column in frame:
-            frame[column] = frame[column].fillna(default).replace("", default)
 
     return frame, stats
 
@@ -85,34 +103,76 @@ def apply_hard_rules(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     return frame[~remove].copy(), stats
 
 
-def apply_iqr_by_district(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    """Tầng 2: IQR trên log(giá/m²) theo từng quận, lùi về toàn thành khi quận quá ít tin."""
-    frame = frame.copy()
-    frame["_log_unit_price"] = np.log(frame["total_price_vnd"] / frame["area_m2"])
+# Quận rơi về band toàn thành phố mà giữ lại dưới ngần này thì band đó SAI với quận đó
+# (quận rẻ bị cắt mất phần dưới), và phải nói ra thay vì lặng lẽ loại tin.
+MIN_DISTRICT_KEEP_SHARE = 0.80
+
+
+def fit_iqr_bounds(frame: pd.DataFrame) -> dict:
+    """Học ngưỡng IQR trên log(giá/m²) theo từng quận. CHỈ nhìn dữ liệu được truyền vào.
+
+    Tách khỏi phần áp dụng để ngưỡng có thể học từ phần TRAIN của từng fold rồi áp cho
+    cả hai phía: quy tắc chống rò rỉ số 3 của báo cáo hứa đúng điều đó, còn chạy trên
+    toàn bảng trước khi chia tập thì tập test được lọc bằng ngưỡng mà nhãn của chính nó
+    góp phần đặt.
+    """
+    log_unit = np.log(frame["total_price_vnd"] / frame["area_m2"])
 
     def bounds(series: pd.Series) -> tuple[float, float]:
         q1, q3 = series.quantile(0.25), series.quantile(0.75)
         spread = q3 - q1
         return q1 - IQR_MULTIPLIER * spread, q3 + IQR_MULTIPLIER * spread
 
-    city_low, city_high = bounds(frame["_log_unit_price"])
-    thresholds = {}
-    keep = pd.Series(True, index=frame.index)
+    city = bounds(log_unit)
+    per_district: dict[str, tuple[float, float]] = {}
+    info: dict[str, dict] = {}
 
-    for district, group in frame.groupby("district"):
+    for district, positions in frame.groupby("district").groups.items():
+        group = log_unit.loc[positions]
         if len(group) >= MIN_ROWS_PER_DISTRICT:
-            low, high = bounds(group["_log_unit_price"])
+            low, high = bounds(group)
             basis = "theo quận"
         else:
-            low, high = city_low, city_high
+            low, high = city
             basis = "toàn thành phố"
-        thresholds[district] = {
+        per_district[district] = (float(low), float(high))
+        keep_share = float(group.between(low, high).mean()) if len(group) else 1.0
+        entry = {
             "cơ sở": basis,
-            "n": len(group),
+            "n": int(len(group)),
+            "tỷ lệ giữ lại": round(keep_share, 3),
             "giá/m² thấp nhất giữ lại": round(float(np.exp(low)) / 1e6, 2),
             "giá/m² cao nhất giữ lại": round(float(np.exp(high)) / 1e6, 2),
         }
-        keep.loc[group.index] = group["_log_unit_price"].between(low, high)
+        if basis == "toàn thành phố" and keep_share < MIN_DISTRICT_KEEP_SHARE:
+            entry["cảnh báo"] = (
+                f"band toàn thành phố loại {1 - keep_share:.0%} tin của quận này — "
+                "nhiều khả năng đây là quận rẻ chứ không phải quận nhiều tin lỗi"
+            )
+        info[district] = entry
 
-    kept = frame[keep].drop(columns="_log_unit_price")
-    return kept, {"đã loại": int((~keep).sum()), "ngưỡng theo quận": thresholds}
+    return {"city": city, "per_district": per_district, "info": info}
+
+
+def iqr_mask(frame: pd.DataFrame, fitted: dict) -> np.ndarray:
+    """Mặt nạ giữ lại theo ngưỡng ĐÃ HỌC (mảng numpy, so theo vị trí dòng)."""
+    log_unit = np.log(frame["total_price_vnd"] / frame["area_m2"]).to_numpy(dtype="float64")
+    city_low, city_high = fitted["city"]
+    per_district = fitted["per_district"]
+    lows = frame["district"].map(lambda d: per_district.get(d, (city_low, city_high))[0])
+    highs = frame["district"].map(lambda d: per_district.get(d, (city_low, city_high))[1])
+    return (log_unit >= lows.to_numpy(dtype="float64")) & (
+        log_unit <= highs.to_numpy(dtype="float64")
+    )
+
+
+def apply_iqr_by_district(frame: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+    """Fit + áp ngưỡng trên CÙNG một bảng.
+
+    Dùng cho EDA và cho bảng ngưỡng trong báo cáo. KHÔNG dùng trong luồng huấn luyện:
+    ở đó ngưỡng phải học từ phần train của từng fold (xem `fit_iqr_bounds`).
+    """
+    fitted = fit_iqr_bounds(frame)
+    keep = iqr_mask(frame, fitted)
+    kept = frame[keep].copy()
+    return kept, {"đã loại": int((~keep).sum()), "ngưỡng theo quận": fitted["info"]}

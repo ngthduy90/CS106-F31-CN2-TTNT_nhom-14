@@ -22,8 +22,8 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 
 - [x] C5 `address.py:142` — `P.13`/`P13` bị loại; "Xa lộ" bị nhận thành phường
 - [x] C6 `address.py:107-109` — `normalise_ward` không có đường thất bại → "Phường không rõ"
-- [ ] C7 `dedup.py:74` — ô > 400 dòng bị bỏ im lặng, không vào funnel
-- [ ] C8 `run_pipeline.py:111` — IQR + impute chạy trước khi chia tập (trái quy tắc 3 của báo cáo)
+- [x] C7 `dedup.py:74` — ô > 400 dòng bị bỏ im lặng, không vào funnel
+- [x] C8 `run_pipeline.py:111` — IQR + impute chạy trước khi chia tập (trái quy tắc 3 của báo cáo)
 - [ ] C9 `run_experiments.py:112` — `run_e2` nhận `search_iterations` rồi bỏ không dùng
 - [ ] C10 `run_experiments.py:253` — E3 fit champion bằng tham số mặc định, không dùng `best_params`
 - [x] C11 `splits.py:33` — fingerprint băm id đã sort nên bất biến với thứ tự dòng
@@ -47,8 +47,8 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - [ ] N6 `runner.py:117-133` — tuning không nested (cột CV lạc quan một chiều)
 - [ ] N7 `registry.py:17` — "ngân sách tinh chỉnh giống nhau" thực ra là min(40, |grid|)
 - [ ] N8 `run_experiments.py:84-87` — artifact `--fast` bị tái dùng âm thầm cho champion/ablation
-- [ ] N9 `dedup.py:81-86` — TF-IDF fit riêng từng ô làm ngưỡng 0,85 đổi nghĩa theo mật độ
-- [ ] N10 `clean.py:102-115,73-77` + `price.py:77` — band toàn thành phố cho quận nhỏ; funnel đếm đúp
+- [x] N9 `dedup.py:81-86` — TF-IDF fit riêng từng ô làm ngưỡng 0,85 đổi nghĩa theo mật độ
+- [~] N10 `clean.py:102-115,73-77` + `price.py:77` — band toàn thành phố cho quận nhỏ; funnel đếm đúp
 - [ ] N11 `extract.py:60,113,127,221-222` — "m" trần thành diện tích; "phòng" thành phòng ngủ; hẻm
 - [x] N12 `pii.py:126-131,51` — homoglyph chỉ chạy một lượt; danh sách ký tự vô hình hardcode
 - [ ] N13 `scripts/assemble-submission.py:46,51,180,194-203` — mù với docx/pptx/xlsx, không thể fail
@@ -57,7 +57,7 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - [ ] N16 `address.py:169-181,91` — `majority_share`/`unmapped_rate` ghi ra nhưng không ai đọc; Quận 2/9
 - [ ] N17 `render_tables.py:88-90` — mô tả split đọc từ config sống thay vì payload của run
 - [ ] N18 `features/text.py:117` + `leakage.py:37-41` — `ban_gap` khớp "gặp"; checker yếu hơn stripper
-- [ ] N19 `dedup.py:150` — `duplicate_group` đã có nhưng splits chưa group-aware
+- [x] N19 `dedup.py:150` — `duplicate_group` đã có nhưng splits chưa group-aware
 - [x] N20 `tests/` — đã thêm test_extract, test_address, test_crawl_store (121 test)
 
 ## Mục làm số trong reports/ lệch (cần quyết định chạy lại)
@@ -69,3 +69,8 @@ Chủ nhân yêu cầu: thực hiện luôn các sửa đổi.
 - C12: `reports/tables/learning-curve.md` ĐÃ sinh lại (kết luận đổi sang nhánh "xấu đi");
   báo cáo Word/slide include bảng này nên cần `make report` để build lại tài liệu.
 - C16: `rows_target_districts` trong manifest HF sẽ tăng (Quận 12 trước đây đếm thiếu).
+- C7/N9: dedup bắt được nhiều cặp hơn (ô lớn không còn bị bỏ) và ngưỡng cosine đổi nghĩa
+  (bỏ IDF) → số dòng sau dedup đổi.
+- C8: `listings.parquet` KHÔNG còn bị lọc IQR và KHÔNG còn điền trung vị sẵn; hai bước đó
+  chạy trong luồng huấn luyện. Funnel, mọi metric E1/E2/E3 và model card sẽ đổi.
+- N19: split giờ group-aware → phân hoạch khác lần chạy trước ngay cả với cùng dữ liệu.
