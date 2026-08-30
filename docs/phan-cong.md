@@ -2,14 +2,19 @@
 
 Nhóm 14, đồ án CS106.F31.CN2 đề tài 5.
 
-Phần lập trình đã xong và chạy được đầu-cuối. Sáu gói việc dưới đây là phần **bắt buộc
+Phần lập trình đã xong và chạy được đầu-cuối. Bảy gói việc dưới đây là phần **bắt buộc
 phải có người kiểm bằng tay**, không phải việc bày ra cho đủ đầu người. Lý do nằm trong
 chính runbook của nhóm: runbook 04 §3 ghi *"người phụ trách rà lại từng dòng, không nộp
 bản sinh tự động chưa kiểm"*, và runbook 02 yêu cầu duyệt nhãn vàng cùng rà tay các cặp
 trùng lặp. Hiện chưa ai làm những việc đó.
 
-Sáu gói độc lập nhau, làm song song được. Ai nhận gói nào thì ghi tên vào bảng cuối file
-và tick vào ô khi xong.
+Ai nhận gói nào thì ghi tên vào bảng dưới và tick vào ô khi xong.
+
+**Cập nhật 31/08/2026.** Đợt vá theo bản review PR #1 đã sửa 37 chỗ trong mã nguồn, trong
+đó có những chỗ làm đổi cách tính số. Vì vậy file này có thêm **gói G** (chạy lại pipeline)
+và ba gói cũ đổi điều kiện: gói C không rà được trên mẫu cũ nữa, gói B phải chờ dữ liệu
+mới, gói D đổi số lượng mục phải đọc. Chi tiết ghi ngay trong từng gói. Gói A đến F vẫn
+độc lập với nhau, chỉ có G chặn trước B, C và E.
 
 ## Bảng phân công
 
@@ -18,10 +23,12 @@ và tick vào ô khi xong.
 | A | Thu thập bù dữ liệu | | chưa nhận |
 | B | Rà bộ nhãn vàng 200 tin | | chưa nhận |
 | C | Rà 50 cặp trùng lặp | | chưa nhận |
-| D | Rà bảng mô tả 164 hàm | | chưa nhận |
+| D | Rà bảng mô tả hàm | | chưa nhận |
 | E | Kiểm trích dẫn và chuẩn bị hỏi đáp | | chưa nhận |
 | F | Geocoding (tuỳ chọn) | | chưa nhận |
+| G | Chạy lại pipeline sau đợt vá review | | chưa nhận |
 | | Toàn bộ phần lập trình | Nguyễn Thanh Duy | xong |
+| | Vá 37 phát hiện của review PR #1 | Nguyễn Thanh Duy | xong |
 
 Ước lượng công sức:
 
@@ -33,6 +40,7 @@ và tick vào ô khi xong.
 | D | Có, mức đọc hiểu | 3 tới 4 giờ |
 | E | Không | 2 giờ |
 | F | Có, mức viết được | 1 ngày |
+| G | Không, chỉ chạy lệnh và đọc kết quả | 30 phút thao tác cộng 4 tới 6 giờ máy chạy |
 
 ---
 
@@ -60,7 +68,15 @@ make prep
 ```
 
 Checkpoint và khử trùng theo mã tin đã có sẵn, nên chạy lại chỉ bổ sung phần còn thiếu,
-không tải trùng và không hỏng dữ liệu đã có. Đừng sửa `REQUEST_DELAY_SECONDS` trong
+không tải trùng và không hỏng dữ liệu đã có.
+
+**Đọc kỹ nếu ai đó đã từng thử gói này và thấy không thêm được bao nhiêu tin.** Đến ngày
+30/08 crawler có hai lỗi khiến câu trên không đúng: con trỏ resume của Chợ Tốt lưu vị trí
+cuối cùng đã quét, nên quận nào đã quét cạn thì lần chạy sau bắt đầu đúng chỗ hết tin và
+ghi **0 tin mới vĩnh viễn**; còn mogi resume theo số trang nên bỏ qua trang 1, đúng nơi
+tin mới xuất hiện. Cả hai đã sửa: giờ luôn quét từ đầu và dừng khi gặp một chuỗi tin đã
+có trong kho, `--no-resume` thì xoá hẳn checkpoint. Nếu trước đây có ai chạy và thấy kết
+quả nghèo nàn thì chạy lại, lần này sẽ khác. Đừng sửa `REQUEST_DELAY_SECONDS` trong
 `src/config.py` xuống thấp hơn: một request mỗi 1,5 giây là ranh giới nhóm tự đặt và đã
 ghi vào phần đạo đức của báo cáo.
 
@@ -76,6 +92,7 @@ Nếu chạy hết mà vẫn chưa đủ 8.000 thì có hai hướng, chọn m�
 - [ ] Commit lại `reports/tables/qa-gate.md` và `reports/tables/data-funnel.md`
 - [ ] Commit lại ảnh chụp robots.txt trong `docs/robots-snapshots/` với ngày mới
 - [ ] Chạy lại `make train` và `make report` để số liệu trong báo cáo khớp dữ liệu mới
+- [ ] Báo cho người nhận gói G: nếu A xong sau G thì G phải chạy lại lần nữa
 
 Lưu ý: chạy lại `make train` sẽ đổi mọi con số trong báo cáo và slide. Đó là chuyện bình
 thường vì tất cả sinh tự động, nhưng phải chạy `make report` sau đó để bảng biểu cập nhật
@@ -89,6 +106,12 @@ nêu rõ có thể nhờ công cụ gán trước nhưng **người phải duy�
 
 Bảng F1 trong báo cáo dựa hoàn toàn vào bộ nhãn này. Nếu nhãn sai thì con số F1 sai theo,
 và đó là bảng thầy dễ hỏi sâu.
+
+**Làm sau gói G.** Bộ trích xuất vừa được sửa ở đúng bốn trường mà gói này rà: số tầng
+(trước đây "phòng tắm", "sử dụng lâu dài", "2 mẹ con" đều bị đếm thành tầng), diện tích
+("cách chợ 500m" từng thành 500 m²), số phòng ngủ ("1 phòng khách, 2 phòng ngủ" từng ra 1)
+và bề rộng hẻm. Rà trước khi chạy lại pipeline là rà trên bảng số cũ, và F1 đo được sẽ
+khác con số cuối cùng của báo cáo.
 
 **Cách làm.** Mở `data/interim/gold_200.jsonl`, mỗi dòng một tin gồm văn bản và bốn nhãn.
 Với từng tin, đọc phần mô tả rồi đối chiếu bốn trường: diện tích, số phòng ngủ, số nhà
@@ -119,6 +142,14 @@ cặp"*. Ngưỡng cosine 0,85 hiện đang dùng là con số lấy từ runboo
 dữ liệu thật. Khử trùng lặp chạy trước khi chia tập, nên ngưỡng sai sẽ ảnh hưởng thẳng
 tới mọi con số trong bảng kết quả.
 
+**Làm sau gói G, và đây là gói đổi nhiều nhất.** File mẫu hiện có sinh từ lần chạy
+19/08, còn thuật toán đã đổi hai chỗ làm điểm cosine mang nghĩa khác: TF-IDF trước đây fit
+riêng trong từng ô chặn nên cùng một ngưỡng 0,85 nghiêm khắc khác nhau tuỳ ô đông hay
+thưa, nay bỏ IDF nên ngưỡng có một nghĩa duy nhất; và ô trên 400 dòng trước đây bị bỏ qua
+nguyên khối, nay được chia nhỏ theo bậc giá nên có thêm cặp được đem ra so. Rà 50 cặp
+trong file cũ rồi kết luận về ngưỡng là kết luận cho một thuật toán không còn chạy nữa.
+Chạy `make prep` trước, file mẫu sẽ được sinh lại.
+
 **Cách làm.** Mở `data/interim/duplicate_pairs_sample.json`, có sẵn 50 cặp kèm điểm
 cosine, giá và tiêu đề hai bên. Với từng cặp, quyết định đây là hai bản đăng của cùng một
 bất động sản hay hai bất động sản khác nhau.
@@ -133,13 +164,21 @@ oan thì ngưỡng đang quá lỏng.
 - [ ] Kết luận rõ ràng: giữ ngưỡng 0,85, hay nới lên, hay siết xuống, kèm lý do
 - [ ] Nếu đổi ngưỡng thì sửa `DUPLICATE_TEXT_COSINE` trong `src/config.py`, chạy lại
       `make prep` và `make train`
+- [ ] Nếu thấy nhiều cặp lọt vì ô chặn quá lớn thì cân nhắc `DUPLICATE_MAX_BLOCK_SIZE`
+      (mới thêm vào `src/config.py`, mặc định 400)
 - [ ] Viết vài câu cho chương 2 phần khử trùng lặp, nêu số cặp đã kiểm và kết luận
 
-## Gói D. Rà bảng mô tả 164 hàm
+## Gói D. Rà bảng mô tả hàm
 
 **Vì sao cần.** Đề bài yêu cầu một technical report riêng mô tả hoạt động của từng hàm.
-Bảng hiện có 164 mục trong 32 tệp, sinh tự động từ docstring. Runbook 04 §3 ghi rõ không
-nộp bản sinh tự động chưa kiểm.
+Bảng sinh tự động từ docstring, và runbook 04 §3 ghi rõ không nộp bản sinh tự động chưa
+kiểm.
+
+**Con số 164 mục trong bản trước đã cũ.** Đợt vá review thêm nhiều hàm mới (`fit_iqr_bounds`,
+`iqr_mask`, `mark_missing`, `GroupMedianImputer`, `scope_iqr`, `group_labels`,
+`_phone_windows`, `_best_params_from_e1`, `quality_report`, `_read_searchable_text`) và
+viết lại vài chục docstring cũ để giải thích vì sao luật hiện tại như vậy. Chạy lại script
+sinh bảng trước, đếm lại số mục, rồi mới ước lượng thời gian và chia việc.
 
 **Cách làm.** Mở `reports/technical-report/02-bang-mo-ta-ham.md`, đọc song song với mã
 nguồn trong `src/`. Với mỗi mục, kiểm hai điều: mô tả có đúng việc hàm đang làm không, và
@@ -156,7 +195,7 @@ bash scripts/build-technical-report.sh     # dựng lại bản Word
 
 **Xong khi.**
 
-- [ ] Đã đọc hết 164 mục
+- [ ] Đã đọc hết số mục mà script sinh ra (đếm lại sau khi chạy, không dùng con số cũ)
 - [ ] Docstring nào mô tả sai đã sửa trong `src/`
 - [ ] Chạy lại script, commit cả docstring lẫn file markdown sinh ra
 - [ ] Ghi lại số mục đã phải sửa, để nêu trong phần bàn giao
@@ -185,6 +224,24 @@ Ba chỗ trong báo cáo thầy dễ hỏi sâu nhất, nên chuẩn bị kỹ:
 - Vì sao khử trùng lặp bắt buộc chạy trước khi chia tập
 - Bảng ablation nói lên điều gì, và vì sao mức cải thiện nhỏ hơn độ lệch chuẩn giữa các
   fold lại chỉ được coi là xu hướng chứ chưa phải kết luận chắc
+
+Bốn câu nữa sinh ra từ đợt vá review, đều là chỗ dễ bị hỏi vì báo cáo nói khác bản trước:
+
+- **Vì sao lọc ngoại lai IQR và điền thiếu chuyển vào fit theo từng fold?** Vì trước đó
+  chúng chạy trên toàn bảng trước khi chia tập, mà ngưỡng IQR tính trên log(giá/m²) là đại
+  lượng dẫn xuất từ nhãn, còn trung vị điền thiếu tính cả trên phần test. Quy tắc chống rò
+  rỉ số 3 của chương 3 hứa mọi phép biến đổi chỉ fit trên phần train, giờ mới đúng thật.
+- **Vì sao kết luận learning curve là "xấu đi" chứ không phải "đã phẳng"?** Vì bước cuối
+  đi từ 13,43% lên 14,20%, tức tăng 0,77 điểm. Bản cũ chỉ có hai nhánh nên xếp ca này vào
+  nhánh "phẳng" và in kết luận trái ngược với chính bảng số ngay bên trên. Câu trả lời
+  đúng là một bước đi lên cỡ này chưa tách được khỏi dao động giữa các lần lấy mẫu vì mỗi
+  tỷ lệ chỉ chạy một lần.
+- **Vì sao không gọi tên một mô hình thắng?** Vì LightGBM, XGBoost và CatBoost cách nhau
+  chưa tới một độ lệch chuẩn giữa các fold. Báo cáo ghi khoảng 6,32 tới 6,66 điểm cho cả
+  nhóm dẫn đầu thay vì 6,66 của riêng LightGBM như bản trước.
+- **Vì sao Quận 2 và Quận 9 không còn là hạng mục riêng?** Vì cả hai đã nhập vào TP Thủ
+  Đức từ 2021 (Nghị quyết 1111/NQ-UBTVQH14). Để riêng là tách một địa bàn thành ba cột
+  one-hot, và E2 chịu ảnh hưởng nặng nhất vì hai thời kỳ ghi tên khác nhau.
 
 **Xong khi.**
 
@@ -217,6 +274,49 @@ Sau khi có toạ độ, thêm hai cột dẫn xuất: khoảng cách tới ch�
 - [ ] Bảng ablation có thêm dòng có toạ độ so với không toạ độ
 - [ ] Thêm trích dẫn Nominatim và ODbL vào chương 6
 
+## Gói G. Chạy lại pipeline sau đợt vá review
+
+**Vì sao cần.** Đợt vá theo review PR #1 sửa 37 chỗ, trong đó bảy nhóm thay đổi làm số
+liệu dịch: lọc ngoại lai và điền thiếu chuyển sang fit theo fold, khử trùng lặp không còn
+bỏ qua ô lớn và ngưỡng cosine đổi nghĩa, phép chia tập giữ nguyên nhóm tin trùng về một
+phía, E2 và E3 chạy trên mô hình đã tinh chỉnh thay vì tham số mặc định, bộ trích xuất hết
+bịa số tầng và số phòng, giá viết dạng "5.850 tỷ" không còn bị loại âm thầm, Quận 2 và
+Quận 9 gộp về Thủ Đức. **Mã nguồn đã đúng, nhưng mọi con số trong `reports/` vẫn là của
+lần chạy cũ.** Nộp bài ở trạng thái này là nộp một báo cáo mô tả một pipeline khác với
+pipeline trong mã nguồn.
+
+**Cách làm.** Chạy đúng thứ tự, mỗi bước xong mới sang bước sau:
+
+```bash
+make prep      # dựng lại listings.parquet, funnel, mẫu 50 cặp trùng
+make train     # E1, E2, E3, ablation, SHAP, learning curve
+make report    # sinh lại bảng, hình, báo cáo Word, slide
+```
+
+`make train` là bước lâu nhất, tính bằng giờ. Chạy khi máy rảnh, đừng chạy ngay trước hạn.
+
+Sau khi chạy xong, đọc lại ba chỗ vì chúng có thể đổi kết luận chứ không chỉ đổi con số:
+
+1. `reports/tables/learning-curve.md`: câu kết luận cuối bảng có ba nhánh (còn giảm,
+   đứng yên, xấu đi). Xem nhánh nào được in ra với dữ liệu mới.
+2. `reports/tables/e1-results-chotot.md`: nhóm dẫn đầu gồm những mô hình nào, và khoảng
+   cách so với baseline môi giới là bao nhiêu. README lấy đúng con số này.
+3. `reports/tables/data-funnel.md`: số dòng còn lại sau mỗi bước sẽ khác vì bước IQR
+   không còn loại dòng ở tiền xử lý nữa.
+
+**Xong khi.**
+
+- [ ] Ba lệnh trên chạy hết, không lỗi
+- [ ] `python scripts/check-reproducibility.py` báo tái lập được
+- [ ] Đã đọc lại ba chỗ nêu trên và xác nhận câu chữ trong báo cáo còn khớp với số mới
+- [ ] Chụp lại ảnh demo trong `submission/Demo/`: ảnh `demo-02` và `demo-03` hiện tại chụp
+      đúng lỗi hiển thị ba quy ước thập phân trong một panel mà đợt vá vừa sửa
+- [ ] Chạy `python scripts/assemble-submission.py --check-only --strict-numbers` và rà 14
+      con số nó nêu (13 ở README, 1 ở model card): mỗi con số hoặc là làm tròn khác, hoặc
+      là mâu thuẫn thật cần sửa
+- [ ] Commit toàn bộ `reports/` và `README.md` sinh lại, kèm một câu ghi rõ đây là lần
+      chạy sau đợt vá review
+
 ---
 
 ## Việc chung, không ai được bỏ
@@ -230,14 +330,19 @@ trong 3 phút và trả lời câu hỏi của những người còn lại.
 
 ## Thứ tự ưu tiên
 
-Gói A nên làm trước, vì nếu số liệu đổi thì các gói B, C, E đều phải kiểm lại theo. Gói D
-và F độc lập hoàn toàn, làm lúc nào cũng được.
+Gói A nên làm trước, vì nếu số liệu đổi thì mọi gói phía sau phải kiểm lại theo. Gói G
+chặn trước B, C và E: cả ba đều rà trên dữ liệu hoặc bảng số mà G sinh ra. Gói D và F độc
+lập hoàn toàn, làm lúc nào cũng được.
 
 ```
-A (thu thập)  →  B, C  →  E (hỏi đáp)
+A (thu thập)  →  G (chạy lại pipeline)  →  B, C  →  E (hỏi đáp)
 D (mô tả hàm)     độc lập
 F (geocoding)     độc lập, tuỳ chọn
 ```
+
+Nếu không ai kịp làm gói A trước hạn thì vẫn phải chạy gói G, vì G không phụ thuộc dữ liệu
+mới: nó chỉ đưa các con số về khớp với mã nguồn hiện tại. Ngược lại, làm A sau G thì G
+phải chạy lại một lần nữa.
 
 ## Trước khi nộp
 
@@ -249,3 +354,14 @@ make submission    # ráp thư mục nộp, quét chéo môn, quét dữ liệu 
 ```
 
 Cả hai phép quét phải sạch, và thư mục nộp phải đủ 7 hạng mục theo runbook 04 §1.
+
+Ba điều kiện bổ sung sau đợt vá review:
+
+- **Gói G phải xong.** Nộp khi `reports/` còn là số của lần chạy cũ nghĩa là nộp một báo
+  cáo mô tả pipeline khác với mã nguồn đi kèm.
+- **Phép quét nộp bài giờ đọc được cả file Word, PowerPoint và Excel.** Trước đây nó chỉ
+  đọc file text nên mù với đúng bốn file thầy sẽ mở. Nếu nó báo có mã môn khác hoặc dữ
+  liệu lọt trong các file đó, đấy là phát hiện thật, không phải báo động giả.
+- **Chạy thêm `--strict-numbers` một lần.** Nó liệt kê những con số chỉ xuất hiện ở một
+  tài liệu mà không thấy trong báo cáo. Không bắt buộc phải sạch, nhưng phải có người đọc
+  qua danh sách đó và biết vì sao từng con số lệch.
