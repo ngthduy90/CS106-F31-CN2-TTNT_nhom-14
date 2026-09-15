@@ -1,8 +1,16 @@
 ---
-title: "Dự báo giá nhà TP.HCM từ dữ liệu rao vặt"
-subtitle: "CS106.F31.CN2 · Đồ án đề tài 5 · Nhóm 14"
-date: "2026"
-lang: vi
+Dự báo giá nhà TP.HCM từ dữ liệu rao vặt
+Môn: Trí tuệ nhân tạo
+Giảng viên: PGS.TS. Nguyễn Đình Hiển
+Lớp: CS106.F31.CN2 | Đồ án đề tài 5 | Nhóm 14
+Thành Viên:
+- Lê Phú Hiếu | 26410038 | LT.K2026.1.TTNT	 
+- Nguyễn Thanh Duy | 26410030 | LT.K2026.1.TTNT	 
+- Nguyễn Thanh Phong | 26410090 | LT.K2026.1.TTNT	 
+- Nguyễn Thị Mai Thi | 26410117 | LT.K2026.1.TTNT	 
+- Hồ Viết Trịnh | 26410140 | LT.K2026.1.TTNT	 
+- Nguyễn Ngọc Bích | 25730012 | CN1.K2025.1.TTNT	 
+- Nguyễn Anh Tài | 25730063 | CN1.K2025.1.TTNT
 ---
 
 # Bài toán
@@ -177,17 +185,3 @@ trên hold-out, không phải con số tự đặt.
 - Toạ độ và đặc trưng khoảng cách (đã thiết kế, hoãn theo cut-line)
 - Đối chiếu với dữ liệu giao dịch thật nếu tiếp cận được
 - Đường cong học cho biết crawl thêm còn đáng hay không
-
----
-
-# Phân công
-
-| Thành viên | Phần phụ trách |
-|---|---|
-| Nguyễn Thanh Duy | Toàn bộ phần lập trình |
-| _(cập nhật)_ | Thu thập bù dữ liệu, cổng chất lượng |
-| _(cập nhật)_ | Rà bộ nhãn vàng và các cặp trùng lặp |
-| _(cập nhật)_ | Rà bảng mô tả hàm, technical report |
-| _(cập nhật)_ | Trích dẫn và phần hỏi đáp |
-
-Chi tiết từng gói việc: `docs/phan-cong.md`
